@@ -1,7 +1,7 @@
 """
 tests/test_dirichlet_family.py
 
-Unit tests for DirichletFamily — 21 tests across 5 classes.
+Unit tests for DirichletFamily — 34 tests across 6 classes.
 """
 
 import numpy as np

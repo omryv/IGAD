@@ -165,9 +165,9 @@ def part2_hard_detection():
                     batch = rng.dirichlet(alpha_anom, size=BATCH_SIZE)
 
                 igad_scores.append(igad_score(batch, R_ref))
-                ref_b = rng.dirichlet(alpha_ref, size=BATCH_SIZE)
-                mmd_scores.append(mmd_rbf(batch, ref_b))
-                wass_scores.append(wasserstein_multi(batch, ref_b))
+                mmd_scores.append(mmd_rbf(batch, ref_pool))
+                wass_scores.append(wasserstein_multi(batch, ref_pool))
+                # Skewness baseline: first component (captures asymmetry in concentration)
                 skew_scores.append(abs(float(np.mean((batch[:, 0] - batch[:, 0].mean())**3 /
                                                       (batch[:, 0].std()**3 + 1e-12)))))
                 labels.append(lab)
