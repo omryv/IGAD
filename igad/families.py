@@ -97,6 +97,136 @@ class GammaFamily:
         return GammaFamily.to_natural(alpha, beta)
 
 
+def _inv_digamma(y: float) -> float:
+    """Numerical inverse of digamma via Newton's method (Minka 2000)."""
+    if y >= -2.22:
+        x = np.exp(y) + 0.5
+    else:
+        x = -1.0 / (y + digamma(1.0))
+    for _ in range(50):
+        x -= (digamma(x) - y) / polygamma(1, x)
+        if x <= 0:
+            x = 1e-8
+    return x
+
+
+class DirichletFamily:
+    """
+    Dirichlet(alpha_1, ..., alpha_k) in natural parameters theta_i = alpha_i - 1.
+
+    A(theta) = sum_i gammaln(theta_i + 1) - gammaln(sum_i (theta_i + 1))
+             = sum_i gammaln(alpha_i) - gammaln(alpha_0)
+
+    Domain: theta_i > -1  for all i  (i.e., alpha_i > 0).
+
+    This is a (k-1)-dimensional exponential family embedded in R^k.
+    The manifold has non-constant scalar curvature for k >= 3.
+
+    Key structural property: for k >= 3, mean + marginal variances do NOT
+    determine alpha uniquely. Pure concentration-profile shifts are detectable
+    via curvature even when lower-order moments match.
+
+    References:
+        - Minka, T. (2000). Estimating a Dirichlet distribution. Technical report.
+        - Amari & Nagaoka (2000). Methods of Information Geometry.
+    """
+
+    name = "Dirichlet"
+
+    @staticmethod
+    def log_partition(theta: np.ndarray) -> float:
+        theta = np.asarray(theta, dtype=np.float64)
+        alpha = theta + 1.0
+        return float(np.sum(gammaln(alpha)) - gammaln(np.sum(alpha)))
+
+    @staticmethod
+    def to_natural(alpha: np.ndarray) -> np.ndarray:
+        return np.asarray(alpha, dtype=np.float64) - 1.0
+
+    @staticmethod
+    def from_natural(theta: np.ndarray) -> np.ndarray:
+        return np.asarray(theta, dtype=np.float64) + 1.0
+
+    @staticmethod
+    def fisher_metric_analytical(theta: np.ndarray) -> np.ndarray:
+        alpha = np.asarray(theta, dtype=np.float64) + 1.0
+        alpha0 = alpha.sum()
+        k = len(alpha)
+        tri_alpha = polygamma(1, alpha)   # shape (k,)
+        tri_alpha0 = polygamma(1, alpha0) # scalar
+        g = -tri_alpha0 * np.ones((k, k))
+        np.fill_diagonal(g, tri_alpha - tri_alpha0)
+        return g
+
+    @staticmethod
+    def mle(data: np.ndarray, max_iter: int = 1000, tol: float = 1e-8) -> np.ndarray:
+        """
+        MLE for Dirichlet via fixed-point iteration (Minka 2000).
+
+        Parameters
+        ----------
+        data : array of shape (n, k), rows are simplex observations (sum to 1).
+        max_iter : maximum fixed-point iterations.
+        tol : convergence tolerance on alpha change.
+
+        Returns
+        -------
+        theta : natural parameters (alpha - 1), shape (k,).
+
+        Raises
+        ------
+        ConvergenceError
+            If the fitted alpha does not reproduce E[log x_k] within 1e-4.
+        """
+        from igad.exceptions import ConvergenceError
+
+        data = np.asarray(data, dtype=np.float64)
+        if data.ndim == 1:
+            data = data.reshape(1, -1)
+        n, k = data.shape
+
+        data = np.clip(data, 1e-15, 1.0)
+        mean_log_x = np.mean(np.log(data), axis=0)   # shape (k,) — sufficient stats
+
+        # Moment-matching initialization
+        mean_x = np.mean(data, axis=0)
+        var_x  = np.var(data, axis=0)
+        eps = 1e-10
+        denom = var_x[0] + eps
+        alpha0_mom = mean_x[0] * (1.0 - mean_x[0]) / denom - 1.0
+        alpha0_mom = max(alpha0_mom, 1.0)
+        alpha = mean_x * alpha0_mom
+        alpha = np.clip(alpha, 1e-3, None)
+
+        # Fixed-point iteration (Minka 2000)
+        for iteration in range(max_iter):
+            alpha_old = alpha.copy()
+            alpha0 = alpha.sum()
+            psi_alpha0 = digamma(alpha0)
+            for i in range(k):
+                target = psi_alpha0 + mean_log_x[i]
+                alpha[i] = _inv_digamma(target)
+            alpha = np.clip(alpha, 1e-8, None)
+            if np.max(np.abs(alpha - alpha_old)) < tol:
+                break
+
+        # ── Constraint 1: MLE Convergence Gate ──────────────────────────────
+        # Verify the fitted alpha reproduces the sufficient statistics E[log x_k].
+        # If not, raise ConvergenceError — a silent bad fit corrupts all downstream
+        # experiments.
+        alpha0_hat = alpha.sum()
+        expected_log = digamma(alpha) - digamma(alpha0_hat)
+        residual = np.abs(expected_log - mean_log_x)
+        if np.max(residual) > 1e-4:
+            raise ConvergenceError(
+                f"DirichletFamily MLE did not converge: "
+                f"max sufficient-statistic residual = {np.max(residual):.2e} "
+                f"(tolerance 1e-4). alpha_hat = {alpha}"
+            )
+
+        return DirichletFamily.to_natural(alpha)
+
+
 class PoissonFamily:
     """
     Poisson(lam) in natural parameter theta = log(lam).
