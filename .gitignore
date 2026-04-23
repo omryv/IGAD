@@ -38,3 +38,87 @@ Thumbs.db
 # Type checker / linter caches
 .mypy_cache/
 .ruff_cache/
+# Environment / secrets
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.crt
+credentials.json
+secrets.json
+
+# Python tooling
+.tox/
+.nox/
+.hypothesis/
+.pyre/
+.pytype/
+.dmypy.json
+dmypy.json
+
+# Packaging
+pip-wheel-metadata/
+wheels/
+*.whl
+
+# Coverage
+coverage.xml
+*.cover
+*.coverage
+.coverage.*
+
+# Build / cache
+.cache/
+*.log
+
+# Research outputs
+data/
+datasets/
+artifacts/
+outputs/
+results/
+tmp/
+temp/
+
+# Generated figures, only if reproducible
+# docs/figures/
+# *.png
+# *.pdf
+# *.svg
+# Python version / tooling
+.python-version
+
+# PEP 582 (local packages)
+__pypackages__/
+
+# C extensions / compiled artifacts
+*.so
+*.dylib
+*.dll
+
+# Notebook outputs (if you ever use notebooks)
+*.nbconvert.ipynb
+
+# pytest / test artifacts (rare but possible)
+junit.xml
+
+# Profiling / debugging
+*.prof
+*.lprof
+*.pyprof
+
+# Temporary files (editor/system edge cases)
+*.tmp
+*.swp
+*.swo
+*~
+
+# Mac extended attributes edge case
+._*
+
+# Lock files (decide policy — keep or ignore)
+# If you want strict reproducibility, DO NOT ignore
+# Otherwise uncomment:
+ poetry.lock
+ Pipfile.lock
