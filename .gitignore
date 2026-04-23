@@ -34,14 +34,7 @@ Thumbs.db
 # Editable install artifact
 *.editable*
 
-# Pytest cache
-.pytest_cache/
 
-# Egg info (editable install artifact)
-*.egg-info/
-__pycache__/
-*.pyc
-*.pyo
-.pytest_cache/
+# Type checker / linter caches
 .mypy_cache/
 .ruff_cache/
