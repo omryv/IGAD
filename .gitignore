@@ -39,3 +39,9 @@ Thumbs.db
 
 # Egg info (editable install artifact)
 *.egg-info/
+__pycache__/
+*.pyc
+*.pyo
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
