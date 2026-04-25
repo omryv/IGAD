@@ -101,8 +101,73 @@ across the parameter space — which is the case for Gamma but not Gaussian.
 | Dirichlet    | k-1 | Yes       | Promising        |
 | Neg-Binomial | 2   | Yes       | Untested         |
 
-### Next Step
+---
 
-Dirichlet(alpha_1, ..., alpha_k) with k>=3 is a d=k-1 family where
-R varies with parameters and mean+variance do not determine all parameters.
-This is the most promising direction for a strong d>=3 result.
+## 7. Closed-Form T_{ijk} for the Dirichlet Family
+
+### Setup
+
+The Dirichlet family in natural parameters theta_i = alpha_i - 1 has log-partition:
+
+    A(theta) = sum_i lgamma(alpha_i) - lgamma(alpha_0)
+
+where alpha_i = theta_i + 1 and alpha_0 = sum_i alpha_i.
+
+### Derivation
+
+The third cumulant tensor follows directly from the exponential-family identity
+(Amari & Nagaoka 2000, Ch. 2):
+
+    T_{ijk}(theta) = d^3 A / d theta_i d theta_j d theta_k
+
+**Step 1.** First partial with respect to theta_m (alpha_m' = 1):
+
+    dA/d theta_m = psi(alpha_m) - psi(alpha_0)
+
+where psi = digamma.
+
+**Step 2.** Second partial with respect to theta_n:
+
+    d^2 A / d theta_m d theta_n = psi'(alpha_m) * [m == n]  -  psi'(alpha_0)
+
+where psi' = polygamma(1, ·) = trigamma.  This recovers the Fisher metric
+g_{mn} = polygamma(1, alpha_m) * [m == n] - polygamma(1, alpha_0).
+
+**Step 3.** Third partial with respect to theta_p:
+
+Because alpha_0 depends on all theta_i, d/d theta_p of -psi'(alpha_0) = -psi''(alpha_0).
+The diagonal term psi'(alpha_m) * [m == n] contributes psi''(alpha_m) * [m == n == p].
+
+Therefore:
+
+    T_{ijk} = -polygamma(2, alpha_0)                        for all (i, j, k)
+    T_{i,i,i} += polygamma(2, alpha_i)                      (diagonal correction only)
+
+where polygamma(2, ·) = psi'' is the tetragamma function.
+
+### Vectorized Form
+
+    T = np.full((k, k, k), -polygamma(2, alpha_0))
+    T[range(k), range(k), range(k)] += polygamma(2, alpha)
+
+This is O(k^3) memory, O(1) arithmetic operations beyond the fill.
+
+### Properties
+
+- **Full symmetry**: T_{ijk} = T_{perm(i,j,k)} for all 6 permutations — manifest
+  from the definition as a mixed third derivative.
+- **Off-diagonal uniformity**: all non-pure-diagonal entries equal -polygamma(2, alpha_0).
+- **Discretization note**: finite-difference approximation of the diagonal entries
+  achieves only ~1e-3 relative accuracy at the optimal step size (5-point stencil,
+  truncation O(h^2) with h ~ 5e-3). The error grows with |polygamma(2, alpha_i)|
+  (e.g., ~17 at alpha_i=0.5), so absolute accuracy degrades for extreme parameter
+  values. The analytical formula is exact.
+
+### Attribution
+
+The derivation is mechanical application of the exponential-family identity
+T_{ijk} = d^3 A / d theta_i d theta_j d theta_k from Amari & Nagaoka (2000).
+No novelty is claimed for this calculation. The closed form for the Dirichlet
+was not available in the codebase prior to this work and is added here for
+numerical precision in the IGAD scoring path.
+
