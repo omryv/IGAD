@@ -236,8 +236,8 @@ class TestDirichletThirdCumulantAnalytical:
         max_asym = 0.0
         for i in range(k):
             for j in range(k):
-                for kk in range(k):
-                    vals = [T[a, b, c] for a, b, c in set(permutations([i, j, kk]))]
+                for k_idx in range(k):
+                    vals = [T[a, b, c] for a, b, c in set(permutations([i, j, k_idx]))]
                     max_asym = max(max_asym, max(vals) - min(vals))
 
         assert max_asym == 0.0, (

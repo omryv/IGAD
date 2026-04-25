@@ -10,7 +10,7 @@ import numpy as np
 from scipy.spatial import KDTree
 from typing import Optional
 
-from .curvature import scalar_curvature, fisher_metric
+from .curvature import scalar_curvature
 
 
 class IGADDetector:

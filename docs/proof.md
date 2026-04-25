@@ -158,8 +158,10 @@ This is O(k^3) memory, O(1) arithmetic operations beyond the fill.
   from the definition as a mixed third derivative.
 - **Off-diagonal uniformity**: all non-pure-diagonal entries equal -polygamma(2, alpha_0).
 - **Discretization note**: finite-difference approximation of the diagonal entries
-  achieves only ~1e-5 accuracy at the optimal step size (5-point stencil,
-  truncation O(h^2) with h ~ 5e-3). The analytical formula is exact.
+  achieves only ~1e-3 relative accuracy at the optimal step size (5-point stencil,
+  truncation O(h^2) with h ~ 5e-3). The error grows with |polygamma(2, alpha_i)|
+  (e.g., ~17 at alpha_i=0.5), so absolute accuracy degrades for extreme parameter
+  values. The analytical formula is exact.
 
 ### Attribution
 
