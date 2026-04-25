@@ -10,7 +10,7 @@ import numpy as np
 from scipy.spatial import KDTree
 from typing import Optional
 
-from .curvature import scalar_curvature
+from .curvature import scalar_curvature, fisher_metric
 
 
 class IGADDetector:
@@ -23,15 +23,27 @@ class IGADDetector:
         Exponential family with .log_partition(theta) and .mle(data).
     k_neighbors : int
         Number of neighbors for local parameter estimation.
+    use_analytical_T : bool
+        If True (default) and the family exposes ``third_cumulant_analytical``,
+        use it instead of the finite-difference ``third_cumulant_tensor``.
+        Set to False to force the finite-difference path (useful for testing).
     """
 
-    def __init__(self, family, k_neighbors: int = 30):
+    def __init__(self, family, k_neighbors: int = 30, use_analytical_T: bool = True):
         self.family = family
         self.k = k_neighbors
+        self.use_analytical_T = use_analytical_T
         self.theta_ref_ = None
         self.R_ref_ = None
         self.tree_ = None
         self.X_train_ = None
+
+    def _scalar_curvature(self, theta: np.ndarray) -> float:
+        """Compute scalar curvature, using analytical T if available and requested."""
+        T: Optional[np.ndarray] = None
+        if self.use_analytical_T and hasattr(self.family, "third_cumulant_analytical"):
+            T = self.family.third_cumulant_analytical(theta)
+        return scalar_curvature(self.family.log_partition, theta, T=T)
 
     def fit(self, X: np.ndarray) -> "IGADDetector":
         """Fit reference distribution from training data."""
@@ -40,9 +52,7 @@ class IGADDetector:
         self.tree_ = KDTree(X)
 
         self.theta_ref_ = self.family.mle(X)
-        self.R_ref_ = scalar_curvature(
-            self.family.log_partition, self.theta_ref_
-        )
+        self.R_ref_ = self._scalar_curvature(self.theta_ref_)
         return self
 
     def score_samples(self, X: np.ndarray) -> np.ndarray:
@@ -60,9 +70,7 @@ class IGADDetector:
 
             try:
                 theta_local = self.family.mle(neighbors)
-                R_local = scalar_curvature(
-                    self.family.log_partition, theta_local
-                )
+                R_local = self._scalar_curvature(theta_local)
                 scores[i] = self.R_ref_ - R_local
             except (np.linalg.LinAlgError, ValueError):
                 scores[i] = np.inf

@@ -184,6 +184,68 @@ class TestDirichletCurvature:
 
 
 # ─────────────────────────────────────────────────────────────────────────────
+# Class 3b — Third cumulant tensor (analytical)
+# ─────────────────────────────────────────────────────────────────────────────
+
+class TestDirichletThirdCumulantAnalytical:
+
+    @pytest.mark.parametrize("alpha", [
+        [2.0, 2.0, 2.0],
+        [5.0, 1.0, 1.0],
+        [0.5, 0.5, 0.5],
+        [10.0, 10.0, 10.0],
+    ])
+    def test_third_cumulant_analytical_matches_numerical(self, alpha):
+        """
+        Analytical T_{ijk} matches finite-difference third_cumulant_tensor (rtol=1e-3).
+
+        The tolerance rtol=1e-3 reflects the fundamental accuracy limit of the
+        5-point FD stencil for third derivatives across diverse parameter regimes.
+        The FD error scales as h^2 * |A^(5)|, which grows with |polygamma(2, alpha_i)|
+        (e.g., ~16 at alpha_i=0.5). Using rtol is consistent with the existing
+        Fisher metric test and accounts for this magnitude variation.
+        """
+        from igad.curvature import third_cumulant_tensor
+
+        alpha = np.array(alpha, dtype=np.float64)
+        theta = DirichletFamily.to_natural(alpha)
+
+        T_ana = DirichletFamily.third_cumulant_analytical(theta)
+        T_num = third_cumulant_tensor(DirichletFamily.log_partition, theta, eps=5e-3)
+
+        np.testing.assert_allclose(
+            T_ana, T_num, rtol=1e-3,
+            err_msg="T_{ijk} mismatch for alpha=%s" % alpha,
+        )
+
+    @pytest.mark.parametrize("alpha", [
+        [2.0, 2.0, 2.0],
+        [5.0, 1.0, 1.0],
+        [0.5, 0.5, 0.5],
+        [10.0, 10.0, 10.0],
+    ])
+    def test_third_cumulant_analytical_is_symmetric(self, alpha):
+        """T[i,j,k] == T[perm(i,j,k)] for all 6 permutations (exact, machine zero)."""
+        from itertools import permutations
+
+        alpha = np.array(alpha, dtype=np.float64)
+        theta = DirichletFamily.to_natural(alpha)
+        T = DirichletFamily.third_cumulant_analytical(theta)
+        k = T.shape[0]
+
+        max_asym = 0.0
+        for i in range(k):
+            for j in range(k):
+                for kk in range(k):
+                    vals = [T[a, b, c] for a, b, c in set(permutations([i, j, kk]))]
+                    max_asym = max(max_asym, max(vals) - min(vals))
+
+        assert max_asym == 0.0, (
+            "T is not fully symmetric for alpha=%s; max_asym=%.2e" % (alpha, max_asym)
+        )
+
+
+# ─────────────────────────────────────────────────────────────────────────────
 # Class 4 — MLE
 # ─────────────────────────────────────────────────────────────────────────────
 
