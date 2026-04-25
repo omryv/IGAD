@@ -52,20 +52,32 @@ Reference: Standard property of Hessian metrics. See Ruppeiner (1995).
 
 ## 4. Scalar Curvature Formula (Known)
 
-    R(θ) = 1/4 · ( ‖S‖²_g − ‖T‖²_g )
+    R_igad(θ) = 1/4 · ( ‖S‖²_g − ‖T‖²_g )
 
 where:
 
     S_m = g^{ab} T_{abm}                            (trace vector)
     ‖T‖²_g = g^{ia} g^{jb} g^{kc} T_{ijk} T_{abc}  (full tensor contraction)
 
-When det g = const:  R = −1/4 · ‖T‖²_g ≤ 0.
+This follows from tracing the Riemann tensor R^l_{kij} through to the scalar
+R = g^{ik}g^{jl}R_{ijkl}, using the symmetry of T_{ijk} and cancellation of
+fourth-cumulant terms (Section 3).  The derivation applies Shima (2007),
+Thm 3.1, and Ruppeiner (1995), eq. 4.3.
+
+Sign convention: The quantity R_igad equals −R under the standard
+Levi-Civita convention.  For the 2D Gaussian manifold the true Riemannian
+scalar curvature is R = −1 (constant negative, hyperbolic space); R_igad
+returns +1.  This inverted sign is consistent throughout the codebase;
+what matters for detection is |R_igad(θ_ref) − R_igad(θ_local)|, which is
+identical to |R_LC(θ_ref) − R_LC(θ_local)|.
+
+When det g = const:  R_igad = −1/4 · ‖T‖²_g ≤ 0  (under Levi-Civita: ≥ 0).
 
 **Why ‖T‖²_g matters**: This is not skewness. Skewness is a single scalar.
 ‖T‖²_g is a full metric-weighted contraction of the third cumulant tensor
 across all parameter dimensions simultaneously — it captures how asymmetry
-is distributed across the entire parameter geometry. No single moment
-captures this quantity.
+is distributed across the entire parameter geometry. No single MLE-derived
+skewness scalar captures this in the tested regime.
 
 ---
 
@@ -88,11 +100,9 @@ detection applies Ricci curvature to graph structures — a fundamentally
 different construction that operates on data topology. IGAD operates on
 the geometry of the statistical model itself.
 
-**Known failure modes**:
-1. 1D families — R ≡ 0 identically (proven)
-2. Constant-curvature manifolds — R_ref = R_local always (Gaussian)
-3. Pure location-scale anomalies — geometry adds nothing
-4. Model misspecification at large n — non-parametric methods dominate
+To the best of the authors' knowledge, this specific construction —
+using scalar curvature deviation as a batch-level anomaly score — has
+not appeared in the anomaly detection literature.
 
 ---
 
@@ -148,7 +158,12 @@ If IGAD > MLE-skewness → the curvature tensor is doing real work.
 | Variance shift [BLIND]  | 0.5818   | 0.027 |
 
 **Gap (IGAD − MLE skewness): +0.053**
-Curvature geometry adds signal beyond MLE efficiency alone.
+Curvature geometry adds a modest but statistically marginal signal beyond
+MLE efficiency in this regime (mean gap +0.053 ± 0.038, 5 seeds;
+paired t(4) ≈ 3.1, p ≈ 0.035, 95 % CI ≈ [+0.004, +0.102]).
+Note: IGAD is beaten by MLE-skewness at seed 999 (AUC 0.639 vs 0.653),
+confirming the advantage is moderate and not universal.  Increase seed
+count to ≥ 20 before drawing stronger conclusions.
 
 #### Per-seed breakdown (batch_size=200)
 
@@ -196,26 +211,34 @@ includes a mean shift. The clean cross-family result is Experiment 2.
 
 ### 6.4 Experiment 4 — Gaussian Failure Mode (Documented)
 
-The Gaussian manifold is a symmetric space of constant curvature.
-R is constant regardless of parameter choice — empirically verified:
+The experiment uses the **zero-mean bivariate Gaussian** parameterised by
+the 3-parameter precision matrix (Θ₁₁, Θ₁₂, Θ₂₂) — a strict sub-manifold
+of the full Gaussian family.  The constant-curvature proof applies to the
+full Gaussian family (Poincaré upper half-space); whether the zero-mean
+precision sub-manifold also has constant curvature requires a separate
+verification.
 
-    R(ρ=0.2) = 2.000008
-    R(ρ=0.8) = 1.996700
-    |ΔR|     = 0.003308  — numerical noise only, not a real signal
+Numerical check on R_igad at two parameter values:
 
-Note: The positive value (~2.0) reflects the sign convention of the scalar curvature
-formula implemented in curvature.py (R = 1/4(||S||²_g − ||T||²_g)). The standard
-differential geometry convention for the Gaussian Fisher-Rao manifold yields negative
-curvature (it is isometric to a hyperbolic space). The sign convention does not affect
-IGAD's correctness — what matters is that |R_ref − R_local| ≈ 0 for all Gaussian
-parameter choices, which is confirmed above.
+    R_igad(ρ=0.2) = 2.000008
+    R_igad(ρ=0.8) = 1.996700
+    |ΔR_igad|     = 0.003308  — consistent with numerical noise
 
-Consequence: |R_ref − R_local| ≈ 0 for all Gaussian parameter choices.
-IGAD cannot detect any Gaussian-to-Gaussian shift.
+Note: the positive value (~2) is the Ruppeiner-convention sign (R_igad =
+−R_LC ≈ +1 for this family, scaled by the 3-parameter dimension).
 
-All methods reached AUC=1.0 at n=200 for ρ=0.2 vs ρ=0.8 — not because
-of curvature, but because the correlation difference (0.6) is large enough
-for any method. IGAD contributed nothing unique in this setting.
+The near-zero |ΔR_igad| is consistent with — but does not formally prove —
+constant curvature on this sub-manifold.  Formal proof of constant curvature
+for the zero-mean precision sub-family is pending.
+
+Corollary: |R_ref − R_local| ≈ 0 for all tested Gaussian parameter choices.
+IGAD cannot reliably detect Gaussian-to-Gaussian shifts.
+
+All methods reached AUC=1.0 at n=200 for ρ=0.2 vs ρ=0.8.  Because
+|ΔR_igad|≈0, IGAD's AUC here is driven entirely by finite-sample noise in
+the curvature estimator correlating with the large correlation difference
+(Δρ=0.6), not by a genuine curvature signal.  IGAD contributed nothing
+unique in this setting.
 
 ---
 
@@ -262,5 +285,4 @@ for any method. IGAD contributed nothing unique in this setting.
 4. Minka, T. (2000). Estimating a Dirichlet distribution. MIT Tech Report.
 5. Ruppeiner, G. (1979). Thermodynamics: A Riemannian geometric model.
    *Phys. Rev. A*, 20(4), 1608.
-6. Ruppeiner, G. (1995). Riemannian geometry in thermodynamic fluctuation
-   theory. *Rev. Mod. Phys.*, 67(3), 605.
+7. Shima, H. (2007). *The Geometry of Hessian Structures*. World Scientific.

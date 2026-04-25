@@ -3,16 +3,27 @@ Scalar curvature of Fisher-Rao manifolds for exponential families.
 
 Background identity (known in Hessian geometry; restated for completeness):
 
-    R(theta) = 1/4 * ( ||grad log det g||^2_g  -  ||T||^2_g )
+    R_igad(theta) = 1/4 * ( ||S||^2_g  -  ||T||^2_g )
 
 where:
     g_{ij}(theta)   = d^2 A / d theta_i d theta_j          (Fisher metric)
     T_{ijk}(theta)  = d^3 A / d theta_i d theta_j d theta_k (third cumulant tensor)
     S_m             = g^{ab} T_{abm}                        (trace vector)
 
+Sign convention note:
+    The quantity computed here equals -R under the standard Levi-Civita /
+    differential-geometry convention (positive ~2 for a 2D Gaussian manifold,
+    rather than the correct Riemannian value of -1).  This follows the
+    Ruppeiner / thermodynamic sign convention (Ruppeiner 1995, eq. 4.3).
+    The sign is consistent throughout the codebase; what matters for the
+    IGAD score is |R_igad(theta_ref) - R_igad(theta_local)|, which is
+    sign-invariant.
+
 References:
     - Amari & Nagaoka, Methods of Information Geometry (2000)
-    - Ruppeiner, Riemannian geometry in thermodynamic fluctuation theory (1995)
+    - Ruppeiner, Riemannian geometry in thermodynamic fluctuation theory
+      (Rev. Mod. Phys. 67, 605, 1995) — sign convention follows eq. 4.3
+    - Shima, The Geometry of Hessian Structures (2007), Theorem 3.1
 """
 
 import numpy as np
@@ -55,7 +66,6 @@ def third_cumulant_tensor(
     log_partition: Callable[[np.ndarray], float],
     theta: np.ndarray,
     eps: float = 1e-3,
-    **kwargs,
 ) -> np.ndarray:
     """
     Compute T_{ijk} = d^3 A / d theta_i d theta_j d theta_k directly
@@ -81,20 +91,20 @@ def third_cumulant_tensor(
 
                 elif i == j:
                     # d^3 A / d theta_i^2 d theta_k  (i==j != k)
-                    def g_ii(t):
-                        tp = t.copy(); tp[i] += h
-                        tm = t.copy(); tm[i] -= h
-                        return (A(tp) - 2.0*A(t) + A(tm)) / (h**2)
+                    def g_ii(t, _i=i, _h=h):
+                        tp = t.copy(); tp[_i] += _h
+                        tm = t.copy(); tm[_i] -= _h
+                        return (A(tp) - 2.0*A(t) + A(tm)) / (_h**2)
                     tkp = theta.copy(); tkp[k] += h
                     tkm = theta.copy(); tkm[k] -= h
                     val = (g_ii(tkp) - g_ii(tkm)) / (2.0 * h)
 
                 elif j == k:
                     # d^3 A / d theta_i d theta_j^2  (i != j==k)
-                    def g_jj(t):
-                        tp = t.copy(); tp[j] += h
-                        tm = t.copy(); tm[j] -= h
-                        return (A(tp) - 2.0*A(t) + A(tm)) / (h**2)
+                    def g_jj(t, _j=j, _h=h):
+                        tp = t.copy(); tp[_j] += _h
+                        tm = t.copy(); tm[_j] -= _h
+                        return (A(tp) - 2.0*A(t) + A(tm)) / (_h**2)
                     tip = theta.copy(); tip[i] += h
                     tim = theta.copy(); tim[i] -= h
                     val = (g_jj(tip) - g_jj(tim)) / (2.0 * h)
@@ -127,11 +137,14 @@ def scalar_curvature(
     T: Optional[np.ndarray] = None,
 ) -> float:
     """
-    Compute scalar curvature R(theta) of the Fisher-Rao manifold.
+    Compute scalar curvature R_igad(theta) of the Fisher-Rao manifold.
 
-        R = 1/4 * ( ||S||^2_g - ||T||^2_g )
+        R_igad = 1/4 * ( ||S||^2_g - ||T||^2_g )
 
     where S_m = g^{ab} T_{abm}.
+
+    Note: This quantity equals -R under the standard Levi-Civita convention.
+    See module docstring for the sign convention discussion.
     """
     theta = np.asarray(theta, dtype=np.float64)
 

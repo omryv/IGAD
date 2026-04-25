@@ -5,18 +5,16 @@
 ### Condition 1: Correct exponential family, k >= 3 parameters, small-to-moderate n
 
 When the reference distribution belongs to a correctly-specified exponential family with
-at least three parameters, IGAD exploits scalar curvature variation to detect concentration
+at least three parameters, IGAD exploits scalar curvature variation to detect shape
 shifts that cannot be resolved by mean or variance alone.
 
-**Evidence:** Dirichlet(4,4,4) vs Dirichlet(1.5,4,6.5) — same α₀=12, same mean direction
-for the symmetric case, only the concentration profile shifts. IGAD AUC > 0.65 at n=200.
+**Evidence (cross-family):** Gamma(8,2) vs LogNormal with matched mean AND variance.
+IGAD beats the MLE-skewness control by +0.053 AUC mean over 5 seeds (n=200).
 
-The curvature advantage is most pronounced at small-to-moderate n (20–200 samples per batch)
-where non-parametric methods have insufficient power. At n > 500, MMD and Wasserstein
-catch up as their estimators reach their asymptotic regime.
-
-**Sample complexity:** IGAD achieves AUC > 0.7 at n ≈ 50–100 for the Dirichlet
-concentration shift; MMD requires n ≈ 200–300 for equivalent power.
+**Note on the Dirichlet experiment:** The pair Dirichlet(4,4,4) vs Dirichlet(1.5,4,6.5)
+has unequal marginal means, so MMD and Wasserstein dominate by detecting the mean shift.
+A clean concentration-shift test (matched marginal means) has not yet been run;
+the Dirichlet results do not support a sample-efficiency claim over MMD.
 
 ### Condition 2: Cross-family detection (misspecified model, small n)
 
@@ -85,18 +83,16 @@ prefer ensemble approaches combining IGAD (for small n) with MMD or Wasserstein
    Gamma vs LogNormal with matched mean+variance). Verified in `experiments/demo_hard.py`
    and `experiments/demo_hard_extended.py`.
 
-2. **IGAD AUC > 0.65 at n=200** for Dirichlet k=3 concentration shift
-   (Dirichlet(4,4,4) vs Dirichlet(1.5,4,6.5), seed=42, 100 normal + 50 anomaly batches).
+2. **IGAD AUC > 0.65 at n=200** for Dirichlet k=3 (Dirichlet(4,4,4) vs
+   Dirichlet(1.5,4,6.5), seed=42, 100 normal + 50 anomaly batches).
+   Note: this pair has a marginal mean shift; the result does not isolate
+   curvature from mean-shift detection.
    Verified in `tests/test_dirichlet_family.py::TestIGADSampleEfficiency`.
 
-3. **IGAD AUC > MMD at n <= 100** for Dirichlet k=3 concentration shift
-   (sample efficiency regime). Verified empirically in `experiments/demo_dirichlet.py`
-   Part 3.
-
-4. **R(Gaussian) is constant regardless of correlation parameter** (proven, not empirical).
+3. **R(Gaussian) is constant regardless of correlation parameter** (proven, not empirical).
    Verified in `tests/test_dirichlet_family.py::TestFailureModes::test_gaussian_constant_curvature`.
 
-5. **R(Poisson) ≡ 0** (proven, verified in tests).
+4. **R(Poisson) ≡ 0** (proven, verified in tests).
    Verified in `tests/test_curvature.py::TestPoissonFlat` and
    `tests/test_dirichlet_family.py::TestFailureModes::test_poisson_flat`.
 
@@ -106,21 +102,24 @@ prefer ensemble approaches combining IGAD (for small n) with MMD or Wasserstein
 
 For a correctly-specified k-dimensional exponential family:
 
-- **IGAD** requires O(n^{1/2}) samples to achieve AUC > 0.7 in the concentration-shift
-  regime. The curvature estimator converges at the rate of the MLE (Fisher-efficient),
-  and the signal (|ΔR|) is a fixed constant for a fixed Δα.
+- **IGAD** leverages parametric structure (Fisher-efficient MLE) to estimate
+  curvature with lower variance than non-parametric density estimators at
+  small-to-moderate n.  The curvature estimator converges at the MLE rate
+  (O(1/√n) asymptotically).
 
-- **Non-parametric methods** (MMD, Wasserstein) require O(n) samples for equivalent
-  power, because their test statistics converge at the slower rate of the
-  empirical distribution (no parametric structure exploited).
+- **Non-parametric methods** (MMD, Wasserstein) share the same asymptotic
+  O(1/√n) convergence rate; the distinction is in the finite-sample
+  variance (prefactor), not in the rate.  Empirically, IGAD's parametric
+  structure provides a practical advantage in the n=50–200 regime.
 
-- The advantage is O(n^{1/2}) — a sub-linear sample-efficiency gain from parametric
-  structure.
+Note: an earlier version of this document incorrectly stated that
+non-parametric methods require O(n) samples vs IGAD's O(√n).  Both
+behave as O(1/√n) asymptotically; the practical gap is in constants,
+not rates.
 
-(The O(n^{1/2}) claim is empirically derived from the sweep in Experiment 4,
-`experiments/demo_dirichlet.py` Part 3. A formal proof requires analysis of the
-Fisher information matrix eigenspectrum and the curvature functional's gradient
-with respect to the natural parameters.)
+(A formal prefactor analysis — comparing the Fisher information matrix
+eigenspectrum against the curvature functional's gradient variance —
+remains future work.)
 
 ---
 

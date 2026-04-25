@@ -20,7 +20,7 @@ def _log_partition(theta):
     t0, t1, t2 = theta
     det = t0 * t2 - t1 ** 2
     if det <= 0:
-        return np.inf
+        raise ValueError(f"Precision matrix is not positive definite: det={det:.6e}")
     return -0.5 * np.log(det) + np.log(2 * np.pi)
 
 

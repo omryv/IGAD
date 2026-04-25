@@ -64,7 +64,8 @@ def _scores_one_seed(seed, batch_size, n_normal=100, n_anomaly=50):
                 batch = rng.gamma(ALPHA_REF, 1.0 / BETA_REF, size=batch_size)
             else:
                 batch = rng.lognormal(MU_LN, SIG_LN, size=batch_size)
-                batch = batch[batch > 0]   # safety filter
+                # lognormal is always positive; the filter below is a no-op guard
+                batch = batch[batch > 0]
 
             # ── IGAD ──────────────────────────────────────────────────────
             theta_local = GammaFamily.mle(batch)
@@ -191,6 +192,7 @@ def run_hard_demo():
                 b = rng_plot.gamma(ALPHA_REF, 1.0/BETA_REF, size=200)
             else:
                 b = rng_plot.lognormal(MU_LN, SIG_LN, size=200)
+                # lognormal is always positive; the filter below is a no-op guard
                 b = b[b > 0]
             theta_l  = GammaFamily.mle(b)
             R_l      = scalar_curvature(GammaFamily.log_partition, theta_l)

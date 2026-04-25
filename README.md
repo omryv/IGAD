@@ -62,7 +62,8 @@ at the natural parameter point `theta`.
 ### What Is New
 
 The **construction**: using scalar curvature deviation as a batch-level anomaly 
-score. This use has not been found in the anomaly detection literature.
+score. To the best of the authors' knowledge, this specific construction has
+not appeared in the anomaly detection literature.
 
 The closest known related work in anomaly detection applies Ricci curvature 
 to graph structures — a fundamentally different construction. Ricci curvature 
@@ -76,7 +77,8 @@ metric-weighted contraction of the third cumulant tensor across all parameter
 dimensions simultaneously. This is not skewness. Skewness is a single number. 
 `||T||²_g` is a tensor contraction that weights each direction by the inverse 
 Fisher metric — it captures how asymmetry is distributed across the entire 
-parameter geometry. No scalar moment captures this.
+parameter geometry. No single MLE-derived skewness scalar captures this in
+the tested regime.
 
 The **proof**: a control experiment with identical MLE fit but no curvature 
 tensor confirms the geometry adds +0.053 AUC independently of MLE efficiency.
@@ -92,11 +94,15 @@ For an exponential family with log-partition function `A(theta)`:
 ```
 Fisher metric:         g_{ij}(theta) = d²A / dtheta_i dtheta_j
 Third cumulant tensor: T_{ijk}(theta) = d³A / dtheta_i dtheta_j dtheta_k
-Scalar curvature:      R(theta) = 1/4 * ( ||S||²_g - ||T||²_g )
+Scalar curvature:      R_igad(theta) = 1/4 * ( ||S||_g² - ||T||_g² )
 
 where S_m = g^{ab} T_{abm}  (trace vector)
-      ||T||²_g = g^{ia} g^{jb} g^{kc} T_{ijk} T_{abc}
+      ||T||_g² = g^{ia} g^{jb} g^{kc} T_{ijk} T_{abc}
 ```
+
+Sign convention: R_igad = −R under the standard Levi-Civita convention
+(Ruppeiner 1995, eq. 4.3).  IGAD uses |R_igad(θ_ref) − R_igad(θ_local)|,
+which is sign-invariant.
 
 Full derivation with attribution: `docs/proof.md`
 
@@ -187,7 +193,9 @@ Gamma(8,2) vs LogNormal · mean=4.0, var=2.0 **identical** for both
 | Variance shift [BLIND]  | 0.5818   | 0.027 |
 
 **Gap (IGAD − MLE skewness): +0.053**  
-Curvature geometry adds signal **beyond** MLE efficiency alone.
+Curvature geometry adds a modest but statistically marginal signal **beyond** MLE
+efficiency alone (paired t(4)≈3.1, p≈0.035, 95% CI ≈ [+0.004, +0.102], n=5 seeds).
+Note: IGAD is beaten by MLE-skewness at seed 999 (AUC 0.639 vs 0.653).
 
 **Sample-efficiency sweep — IGAD vs MMD vs Wasserstein (fixed signal)**
 

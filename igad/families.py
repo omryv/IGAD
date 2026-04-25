@@ -80,6 +80,11 @@ class GammaFamily:
         """MLE for Gamma from positive data via Newton iteration."""
         x = np.asarray(data).ravel()
         x = x[x > 0]
+        if len(x) < 2:
+            raise ValueError(
+                "GammaFamily.mle requires at least 2 positive observations; "
+                f"got {len(x)} valid values."
+            )
         mean_x = np.mean(x)
         mean_log_x = np.mean(np.log(x))
         s = np.log(mean_x) - mean_log_x
@@ -103,10 +108,20 @@ def _inv_digamma(y: float) -> float:
         x = np.exp(y) + 0.5
     else:
         x = -1.0 / (y + digamma(1.0))
-    for _ in range(50):
+    for iteration in range(50):
+        prev = x
         x -= (digamma(x) - y) / polygamma(1, x)
         if x <= 0:
             x = 1e-8
+        if abs(x - prev) < 1e-12:
+            break
+    else:
+        import warnings
+        warnings.warn(
+            f"_inv_digamma did not converge for y={y:.4f}; last x={x:.4f}",
+            RuntimeWarning,
+            stacklevel=2,
+        )
     return x
 
 
@@ -123,8 +138,9 @@ class DirichletFamily:
     The manifold has non-constant scalar curvature for k >= 3.
 
     Key structural property: for k >= 3, mean + marginal variances do NOT
-    determine alpha uniquely. Pure concentration-profile shifts are detectable
-    via curvature even when lower-order moments match.
+    determine alpha uniquely. Concentration-profile shifts may be detectable
+    via curvature even when lower-order moments match; empirical validation
+    with matched marginal means is pending.
 
     References:
         - Minka, T. (2000). Estimating a Dirichlet distribution. Technical report.
@@ -185,6 +201,11 @@ class DirichletFamily:
             data = data.reshape(1, -1)
         n, k = data.shape
 
+        if np.any(data > 1.0 + 1e-9):
+            raise ValueError(
+                "DirichletFamily.mle: data contains values > 1. "
+                "Dirichlet observations must lie in the open unit simplex."
+            )
         data = np.clip(data, 1e-15, 1.0)
         mean_log_x = np.mean(np.log(data), axis=0)   # shape (k,) — sufficient stats
 

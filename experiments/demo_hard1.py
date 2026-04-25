@@ -67,10 +67,7 @@ def run_hard_demo(seed=42):
     scores_skew_test = []
     labels = []
 
-    rng1 = np.random.default_rng(seed)
-    rng2 = np.random.default_rng(seed)
-    rng3 = np.random.default_rng(seed)
-    rng4 = np.random.default_rng(seed)
+    rng = np.random.default_rng(seed)  # single RNG; all baselines draw from same stream
 
     print("\nComputing %d normal + %d anomalous batches..." % (n_normal, n_anomaly))
     for phase in ["normal", "anomaly"]:
@@ -78,15 +75,15 @@ def run_hard_demo(seed=42):
         lab = 0 if phase == "normal" else 1
         for b in range(count):
             if phase == "normal":
-                b1 = rng1.gamma(alpha_ref, 1.0 / beta_ref, size=batch_size)
-                b2 = rng2.gamma(alpha_ref, 1.0 / beta_ref, size=batch_size)
-                b3 = rng3.gamma(alpha_ref, 1.0 / beta_ref, size=batch_size)
-                b4 = rng4.gamma(alpha_ref, 1.0 / beta_ref, size=batch_size)
+                b1 = rng.gamma(alpha_ref, 1.0 / beta_ref, size=batch_size)
+                b2 = rng.gamma(alpha_ref, 1.0 / beta_ref, size=batch_size)
+                b3 = rng.gamma(alpha_ref, 1.0 / beta_ref, size=batch_size)
+                b4 = rng.gamma(alpha_ref, 1.0 / beta_ref, size=batch_size)
             else:
-                b1 = rng1.lognormal(mu_ln, sig_ln, size=batch_size)
-                b2 = rng2.lognormal(mu_ln, sig_ln, size=batch_size)
-                b3 = rng3.lognormal(mu_ln, sig_ln, size=batch_size)
-                b4 = rng4.lognormal(mu_ln, sig_ln, size=batch_size)
+                b1 = rng.lognormal(mu_ln, sig_ln, size=batch_size)
+                b2 = rng.lognormal(mu_ln, sig_ln, size=batch_size)
+                b3 = rng.lognormal(mu_ln, sig_ln, size=batch_size)
+                b4 = rng.lognormal(mu_ln, sig_ln, size=batch_size)
 
             # IGAD: fit Gamma MLE, compute curvature
             b1_pos = b1[b1 > 0]
