@@ -159,6 +159,30 @@ class DirichletFamily:
         return g
 
     @staticmethod
+    def third_cumulant_analytical(theta: np.ndarray) -> np.ndarray:
+        """
+        Closed-form third cumulant tensor for the Dirichlet family.
+
+        Derived from A(theta) = sum_i lgamma(alpha_i) - lgamma(alpha_0)
+        via the exponential-family identity T_{ijk} = d^3 A / d theta_i d theta_j d theta_k
+        (Amari & Nagaoka 2000):
+
+            T[i, j, k] = -polygamma(2, alpha_0)              for all (i, j, k)
+            T[i, i, i] += polygamma(2, alpha_i)              (diagonal correction)
+
+        Returns
+        -------
+        T : ndarray of shape (k, k, k), dtype float64
+        """
+        alpha = np.asarray(theta, dtype=np.float64) + 1.0
+        alpha0 = float(alpha.sum())
+        k = len(alpha)
+        T = np.full((k, k, k), -polygamma(2, alpha0), dtype=np.float64)
+        idx = np.arange(k)
+        T[idx, idx, idx] += polygamma(2, alpha)
+        return T
+
+    @staticmethod
     def mle(data: np.ndarray, max_iter: int = 1000, tol: float = 1e-8) -> np.ndarray:
         """
         MLE for Dirichlet via fixed-point iteration (Minka 2000).
