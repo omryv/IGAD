@@ -12,4 +12,11 @@ setup(
         "scipy>=1.10",
         "scikit-learn>=1.2",
     ],
+    extras_require={
+        "dev": [
+            "pytest>=7",
+            "pytest-html",
+            "pytest-json-report",
+        ],
+    },
 )
