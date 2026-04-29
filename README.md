@@ -333,4 +333,4 @@ Every documented limitation is **enforced by a test** that would fail if the lim
 
 ## License
 
-MIT - see [LICENSE](LICENSE)   https://github.com/Visigence/IGAD/edit/main/README.md#:~:text=LICENSE
+MIT - see [LICENSE](LICENSE) 
