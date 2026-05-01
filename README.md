@@ -1,9 +1,15 @@
 
 # IGAD: Information-Geometric Anomaly Detection
 
-![Tests](https://github.com/Visigence/IGAD/actions/workflows/test.yml/badge.svg?branch=main)
-![Python](https://img.shields.io/badge/python-3.10%20%7C%203.11%20%7C%203.12-blue)
-![License](https://img.shields.io/github/license/Visigence/IGAD)
+<a href="https://github.com/Visigence/IGAD/blob/main/LICENSE">
+  <img src="https://img.shields.io/badge/license-MIT-blue" alt="License: MIT">
+</a>
+<a href="https://github.com/Visigence/IGAD/actions/workflows/test.yml">
+  <img src="https://github.com/Visigence/IGAD/actions/workflows/test.yml/badge.svg" alt="Tests">
+</a>
+<a href="https://github.com/Visigence/IGAD/blob/main/setup.py">
+  <img src="https://img.shields.io/badge/python-3.10%20%7C%203.11%20%7C%203.12-blue" alt="Python versions">
+</a>
 
 > _The anomaly is not only where the distribution lives - it is what shape it becomes._
 >
