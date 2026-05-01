@@ -1,0 +1,45 @@
+[build-system]
+requires = ["setuptools>=77", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "igad"
+version = "1.0.0"
+description = "Information-Geometric Anomaly Detection via Fisher–Rao Scalar Curvature"
+readme = "README.md"
+requires-python = ">=3.10,<3.13"
+license = "MIT"
+authors = [
+  { name = "Omry Damari", email = "omryv@pm.me" }
+]
+dependencies = [
+  "numpy>=1.24,<3",
+  "scipy>=1.10,<2",
+  "scikit-learn>=1.2,<2",
+  "matplotlib>=3.7,<4",
+]
+classifiers = [
+  "Development Status :: 5 - Production/Stable",
+  "Intended Audience :: Science/Research",
+  "Operating System :: OS Independent",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Topic :: Scientific/Engineering",
+  "Topic :: Scientific/Engineering :: Artificial Intelligence",
+]
+
+[project.optional-dependencies]
+dev = [
+  "pytest>=9.0.3,<10",
+  "pytest-html>=4.1,<5",
+  "pytest-json-report>=1.5,<2",
+  "pip-audit>=2.10,<3",
+]
+
+[project.urls]
+Source = "https://github.com/Visigence/IGAD"
+
+[tool.setuptools.packages.find]
+exclude = ["tests", "tests.*", "experiments", "experiments.*"]
