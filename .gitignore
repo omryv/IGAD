@@ -9,16 +9,20 @@ dist/
 build/
 .eggs/
 *.egg
+*.editable*
 
 # Virtual environments
 .venv/
 venv/
 env/
 
-# Pytest
+# Pytest / coverage
 .pytest_cache/
 .coverage
 htmlcov/
+
+# Generated reports
+test_results.html
 
 # Jupyter
 .ipynb_checkpoints/
@@ -30,15 +34,3 @@ Thumbs.db
 # IDE
 .vscode/
 .idea/
-
-# Editable install artifact
-*.editable*
-
-# Pytest cache
-.pytest_cache/
-
-# Egg info (editable install artifact)
-*.egg-info/
-
-# generated test reports
-test_results.html
