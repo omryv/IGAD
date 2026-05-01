@@ -6,7 +6,9 @@
 Instead of comparing only mean, variance, or skewness, IGAD contracts the full third cumulant tensor against the Fisher–Rao metric. The result is a geometric anomaly score that can expose shape differences not captured by a single moment.
 
 ---
+This release is the verified baseline for IGAD-Ver1.0.0.
 
+It should be cited by commit hash and release tag. Later repository changes do not modify the verified result unless accompanied by a new pinned commit, release tag, and GitHub Actions validation run.
 <p align="center">
   <a href="https://github.com/Visigence/IGAD/actions/workflows/test.yml">
     <img src="https://github.com/Visigence/IGAD/actions/workflows/test.yml/badge.svg"
