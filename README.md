@@ -23,7 +23,16 @@
 > Omry Damari
 
 ---
+## Repository Status
 
+IGAD is currently a verified research artifact.
+
+The implementation baseline is pinned to commit
+[`81dd1eb4540643083854232d9645f6add4150512`](https://github.com/Visigence/IGAD/commit/81dd1eb4540643083854232d9645f6add4150512)
+and release `IGAD-Ver1.0.0`.
+
+This repository is public for reproducibility, verification, and independent review.  
+Future changes should be treated as new research iterations and must be validated by a new GitHub Actions run.
 IGAD detects distributional shape shifts using scalar curvature deviation on the Fisher–Rao statistical manifold.
 
 ```math
@@ -32,7 +41,7 @@ IGAD(batch) = |R(\theta_{ref}) - R(\theta_{local})|
 
 ---
 
-## Release v1.0.0
+## Release ver1.0.0
 
 IGAD is packaged as `igad` version `1.0.0`.
 
