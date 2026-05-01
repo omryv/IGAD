@@ -4,19 +4,20 @@
 
 <p align="center">
   <a href="https://github.com/Visigence/IGAD/actions/workflows/test.yml">
-    <img src="https://github.com/Visigence/IGAD/actions/workflows/test.yml/badge.svg" alt="CI Status">
+    <img src="https://github.com/Visigence/IGAD/actions/workflows/test.yml/badge.svg?branch=main"
+         alt="Current CI status on main">
   </a>
-  <a href="https://github.com/Visigence/IGAD/commit/70ed446">
-    <img src="https://img.shields.io/badge/release-v1.0.0-blue?logo=git&logoColor=white" alt="Release v1.0.0">
-  </a>
-  <img src="https://img.shields.io/badge/python-3.10%20%7C%203.11%20%7C%203.12-3776ab?logo=python&logoColor=white" alt="Python 3.10 | 3.11 | 3.12">
-  <a href="https://github.com/Visigence/IGAD/blob/main/LICENSE">
-    <img src="https://img.shields.io/badge/license-MIT-blue" alt="License: MIT">
-  </a>
-  <img src="https://img.shields.io/badge/tests-54%20passed-brightgreen" alt="54 Tests">
-</p>
 
-<br>
+  <a href="PASTE_EXACT_SUCCESSFUL_ACTIONS_RUN_URL_HERE">
+    <img src="https://img.shields.io/badge/verified%20run-54%2F54%20passed-brightgreen?logo=github&logoColor=white"
+         alt="Verified GitHub Actions run: 54/54 tests passed">
+  </a>
+
+  <a href="https://github.com/Visigence/IGAD/commit/81dd1eb4540643083854232d9645f6add4150512">
+    <img src="https://img.shields.io/badge/verified%20commit-81dd1eb-6e40c9?logo=github&logoColor=white"
+         alt="Verified commit 81dd1eb">
+  </a>
+</p>
 
 > *The anomaly is not only where the distribution lives — it is what shape it becomes.*
 >
