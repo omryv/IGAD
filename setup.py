@@ -1,4 +1,9 @@
+from pathlib import Path
+
 from setuptools import find_packages, setup
+
+ROOT = Path(__file__).parent
+README = ROOT / "README.md"
 
 INSTALL_REQUIRES = [
     "numpy>=1.24,<3",
@@ -17,11 +22,11 @@ setup(
     name="igad",
     version="0.1.0",
     description="Information-Geometric Anomaly Detection via Fisher-Rao Scalar Curvature",
-    long_description=open("README.md", encoding="utf-8").read(),
+    long_description=README.read_text(encoding="utf-8"),
     long_description_content_type="text/markdown",
     author="Omry Damari",
     packages=find_packages(exclude=("tests", "tests.*")),
-    python_requires=">=3.9",
+    python_requires=">=3.10",
     install_requires=INSTALL_REQUIRES,
     extras_require={
         "dev": DEV_REQUIRES,
@@ -32,7 +37,6 @@ setup(
         "License :: OSI Approved :: MIT License",
         "Operating System :: OS Independent",
         "Programming Language :: Python :: 3",
-        "Programming Language :: Python :: 3.9",
         "Programming Language :: Python :: 3.10",
         "Programming Language :: Python :: 3.11",
         "Programming Language :: Python :: 3.12",
