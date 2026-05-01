@@ -39,3 +39,6 @@ Thumbs.db
 
 # Egg info (editable install artifact)
 *.egg-info/
+
+# generated test reports
+test_results.html
