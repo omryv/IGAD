@@ -49,3 +49,12 @@ exclude = ["tests", "tests.*", "experiments", "experiments.*"]
 
 [tool.setuptools.package-data]
 igad = ["py.typed"]
+
+[project.optional-dependencies]
+dev = [
+  "build>=1.2,<2",
+  "pytest>=9.0.3,<10",
+  "pytest-html>=4.1,<5",
+  "pytest-json-report>=1.5,<2",
+  "pip-audit>=2.10,<3",
+]
