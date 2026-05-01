@@ -1,38 +1,37 @@
+# IGAD — Information-Geometric Anomaly Detection
 
-# IGAD: Information-Geometric Anomaly Detection
-
-<a href="https://github.com/Visigence/IGAD/blob/main/LICENSE">
-  <img src="https://img.shields.io/badge/license-MIT-blue" alt="License: MIT">
-</a>
 <a href="https://github.com/Visigence/IGAD/actions/workflows/test.yml">
   <img src="https://github.com/Visigence/IGAD/actions/workflows/test.yml/badge.svg" alt="Tests">
 </a>
+<a href="https://github.com/Visigence/IGAD/blob/main/.github/workflows/test.yml">
+  <img src="https://img.shields.io/badge/CI-SHA%20pinned-brightgreen?logo=githubactions&logoColor=white" alt="CI: SHA Pinned">
+</a>
 <a href="https://github.com/Visigence/IGAD/blob/main/setup.py">
-  <img src="https://img.shields.io/badge/python-3.10%20%7C%203.11%20%7C%203.12-blue" alt="Python versions">
+  <img src="https://img.shields.io/badge/python-3.10%20%7C%203.11%20%7C%203.12-3776ab?logo=python&logoColor=white" alt="Python Versions">
+</a>
+<a href="https://github.com/Visigence/IGAD/blob/main/LICENSE">
+  <img src="https://img.shields.io/badge/license-MIT-blue" alt="License: MIT">
 </a>
 
-> _The anomaly is not only where the distribution lives - it is what shape it becomes._
+> *The anomaly is not only where the distribution lives — it is what shape it becomes.*
 >
-> _Omry Damari_
+> Omry Damari
 
 ---
 
 IGAD detects distributional shape shifts using scalar curvature deviation on the Fisher–Rao statistical manifold.
 
-```text
-IGAD(batch) = |R(theta_ref) - R(theta_local)|
-````
+```math
+IGAD(batch) = |R(θ_ref) − R(θ_local)|
+```
+
 ---
 
 ## Core Claim
 
 > **The anomaly is not where the distribution is. It is what shape it has.**
 
-```text
-IGAD(batch) = | R(θ_ref) − R(θ_local) |
-```
-
-where `R(θ)` is the **scalar curvature** of the Fisher-Rao statistical manifold at the natural parameter point `θ`.
+where `R(θ)` is the **scalar curvature** of the Fisher–Rao statistical manifold at the natural parameter point `θ`.
 
 ---
 
@@ -66,7 +65,7 @@ Every mathematical identity used here is an established result:
 
 | Component | Source |
 |---|---|
-| Fisher-Rao metric | Rao (1945) |
+| Fisher–Rao metric | Rao (1945) |
 | Differential geometry of exponential families | Amari (1985) |
 | Scalar curvature formula for Hessian metrics | Amari & Nagaoka (2000) |
 | Fourth-cumulant cancellation in Riemann tensor | Standard Hessian geometry |
@@ -80,7 +79,7 @@ Every mathematical identity used here is an established result:
 | **Insight** | Scalar curvature, governed by the full contraction `‖T‖²_g`, is structurally sensitive to shape shifts — a natural detector for anomalies invisible to location-scale methods |
 | **Validation** | A control experiment isolating geometry from MLE efficiency confirms the curvature tensor itself is responsible for the advantage |
 
-Full derivation with attribution: `docs/proof.md`
+Full derivation with attribution: [`docs/proof.md`](docs/proof.md)
 
 ---
 
@@ -143,14 +142,14 @@ detector.fit(reference_data)
 
 test_batch = np.random.lognormal(1.327, 0.343, size=200)
 score = detector.score_batch(test_batch)
-print(f"Curvision score: {score:.6f}")  # Higher = more anomalous
+print(f"IGAD score: {score:.6f}")  # Higher = more anomalous
 ```
 
 ### Running Tests
 
 ```bash
 pip install -e ".[dev]"
-python -m pytest tests/ -v
+pytest tests/ -v
 # 54 passed
 ```
 
@@ -165,13 +164,13 @@ python -m pytest tests/ -v
 ```text
 Method                 AUC-ROC
 ------------------------------
-Curvision (curvature)   1.0000
+IGAD (curvature)        1.0000
 Variance shift          1.0000
 Skewness shift          0.9834
 Mean shift              0.8150
 ```
 
-Curvision achieves perfect separation. Variance baseline also reaches 1.0 because variance differs by 6×. Experiment 2 is the key result.
+IGAD achieves perfect separation. Variance baseline also reaches 1.0 because variance differs by 6×. Experiment 2 is the key result.
 
 ---
 
@@ -185,7 +184,7 @@ Anomaly   : LogNormal(μ=1.327,       mean=4.000  var=2.000  skew=1.105
             σ=0.343)
 ```
 
-A control baseline was constructed using the **identical MLE fit** as Curvision but discarding the curvature tensor:
+A control baseline was constructed using the **identical MLE fit** as IGAD but discarding the curvature tensor:
 
 ```text
 skew_MLE(batch) = 2 / √α_MLE
@@ -197,31 +196,31 @@ score = | skew_MLE − skew_ref |
 ```text
 Method                        Mean AUC   ± Std
 ----------------------------------------------
-Curvision (curvature)          0.6542    0.047
+IGAD (curvature)               0.6542    0.047
 MLE skewness  [CONTROL]        0.6016    0.038
 Raw skewness                   0.6794    0.072
 Mean shift    [BLIND]          0.5240    0.062
 Variance shift [BLIND]         0.5818    0.027
 ```
 
-**Gap (Curvision − MLE skewness): +0.053** → Curvature geometry adds signal beyond MLE efficiency alone.
+**Gap (IGAD − MLE skewness): +0.053** → Curvature geometry adds signal beyond MLE efficiency alone.
 
 #### Scaling with batch size
 
 ```text
-n        Curvision   MLE-skew   Raw-skew   Gap (Curv − MLE)
------------------------------------------------------------
-100      0.5704      0.5764     0.5908     −0.006
-200      0.6838      0.6098     0.6514     +0.074
-500      0.6748      0.5846     0.9194     +0.090
-1000     0.7892      0.8214     0.9686     −0.032
+n        IGAD      MLE-skew   Raw-skew   Gap (IGAD − MLE)
+----------------------------------------------------------
+100      0.5704    0.5764     0.5908     −0.006
+200      0.6838    0.6098     0.6514     +0.074
+500      0.6748    0.5846     0.9194     +0.090
+1000     0.7892    0.8214     0.9686     −0.032
 ```
 
-Curvision beats the MLE-control at n = 200 and n = 500. At n = 1000, model misspecification degrades the curvature signal — model-free methods dominate at large n when the parametric model is wrong.
+IGAD beats the MLE-control at n = 200 and n = 500. At n = 1000, model misspecification degrades the curvature signal — model-free methods dominate at large n when the parametric model is wrong.
 
 ---
 
-### Experiment 3 — Gaussian Failure Mode (Honest Limitation)
+### Experiment 3 — Gaussian Failure Mode (Documented Limitation)
 
 Bivariate Gaussian, ρ_ref = 0.2 vs ρ_anom = 0.8. Mean and marginal variances identical.
 
@@ -230,25 +229,25 @@ Bivariate Gaussian, ρ_ref = 0.2 vs ρ_anom = 0.8. Mean and marginal variances i
 ρ_ref=0.50, ρ_anom=0.55   →   |ΔR| = 0.000049
 ```
 
-All methods reached **AUC = 1.0** — not because of curvature, but because the correlation difference is large enough for any method to detect. **Curvision added nothing unique here.**
+All methods reached **AUC = 1.0** — not because of curvature, but because the correlation difference is large enough for any method to detect. **IGAD added nothing unique here.**
 
-**Reason:** the Gaussian manifold has **constant scalar curvature** (isometric to hyperbolic space). Curvision is not applicable to Gaussian families.
+**Reason:** the Gaussian manifold has **constant scalar curvature** (isometric to hyperbolic space). IGAD is not applicable to Gaussian families.
 
 ---
 
 ### Experiment 4 — Dirichlet Family
 
-Extended Curvision to **Dirichlet(α₁, …, αₖ)** with `k ≥ 3`, where pure shape variation is possible with fixed lower-order moments.
+Extended IGAD to **Dirichlet(α₁, …, αₖ)** with `k ≥ 3`, where pure shape variation is possible with fixed lower-order moments.
 
 - Fisher metric matches numerical Hessian (symmetric, positive-definite) ✓
 - Third cumulant tensor analytical form agrees with numerical derivatives ✓
 - Scalar curvature varies meaningfully with concentration and asymmetry ✓
-- Curvision detects Dirichlet shape shifts at n = 200 and beats random at n = 50 ✓
+- IGAD detects Dirichlet shape shifts at n = 200 and beats random at n = 50 ✓
 - AUC monotonically increases with n on well-specified data ✓
 
 ---
 
-## Summary Table
+## Summary
 
 ```text
 ╔══════════════════╦═══════════════╦═════════════╦═══════════════════╗
@@ -258,13 +257,13 @@ Extended Curvision to **Dirichlet(α₁, …, αₖ)** with `k ≥ 3`, where pur
 ║ Mahalanobis      ║      ✓        ║      ✗      ║        ~          ║
 ║ Isolation Forest ║      ✓        ║      ✗      ║        ✗          ║
 ║ Skewness Test    ║      ✗        ║      ~      ║        ✗          ║
-║ Curvision (this) ║      ~        ║      ✓      ║        ✓          ║
+║ IGAD (this)      ║      ~        ║      ✓      ║        ✓          ║
 ╚══════════════════╩═══════════════╩═════════════╩═══════════════════╝
 ```
 
 ---
 
-## When to Use Curvision
+## When to Use IGAD
 
 - The correct parametric family is known or approximately known
 - Batch sizes are moderate (50 – 300 observations)
@@ -277,13 +276,13 @@ Extended Curvision to **Dirichlet(α₁, …, αₖ)** with `k ≥ 3`, where pur
 - Medical signal analysis — ECG waveform geometry changes in early arrhythmia
 - Cybersecurity — packet-size distribution shifts in low-and-slow exfiltration
 
-## When NOT to Use Curvision
+## When NOT to Use IGAD
 
 - Anomalies are simple outliers far from center → use Isolation Forest
 - No parametric model is appropriate → use model-free tests
 - Large batch sizes (n > 500) and model is approximate → use raw skewness
 - 1D parameter families (Poisson, Exponential, Bernoulli) → R ≡ 0
-- Gaussian families → R is constant, Curvision adds nothing
+- Gaussian families → R is constant, IGAD adds nothing
 
 ---
 
@@ -299,7 +298,7 @@ Extended Curvision to **Dirichlet(α₁, …, αₖ)** with `k ≥ 3`, where pur
 
 ---
 
-## Validation: 54 Automated Tests
+## Validation — 54 Automated Tests
 
 ```text
 ======================== 54 passed in 316.74s ========================
@@ -334,4 +333,4 @@ Every documented limitation is **enforced by a test** that would fail if the lim
 
 ## License
 
-MIT - see [LICENSE](LICENSE) 
+MIT - see [LICENSE](LICENSE)
