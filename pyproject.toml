@@ -7,8 +7,9 @@ name = "igad"
 version = "1.0.0"
 description = "Information-Geometric Anomaly Detection via Fisher–Rao Scalar Curvature"
 readme = "README.md"
-requires-python = ">=3.10,<3.13"
+requires-python = ">=3.10"
 license = "MIT"
+keywords = ["anomaly detection", "information geometry", "Fisher-Rao", "machine learning"]
 authors = [
   { name = "Omry Damari", email = "omryv@pm.me" }
 ]
@@ -19,8 +20,9 @@ dependencies = [
   "matplotlib>=3.7,<4",
 ]
 classifiers = [
-  "Development Status :: 5 - Production/Stable",
+  "Development Status :: 4 - Beta",
   "Intended Audience :: Science/Research",
+  "License :: OSI Approved :: MIT License",
   "Operating System :: OS Independent",
   "Programming Language :: Python :: 3",
   "Programming Language :: Python :: 3.10",
@@ -40,6 +42,10 @@ dev = [
 
 [project.urls]
 Source = "https://github.com/Visigence/IGAD"
+"Bug Tracker" = "https://github.com/Visigence/IGAD/issues"
 
 [tool.setuptools.packages.find]
 exclude = ["tests", "tests.*", "experiments", "experiments.*"]
+
+[tool.setuptools.package-data]
+igad = ["py.typed"]
