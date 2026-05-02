@@ -9,14 +9,7 @@ description = "Information-Geometric Anomaly Detection via Fisher–Rao Scalar C
 readme = "README.md"
 requires-python = ">=3.10"
 license = "MIT"
-keywords = [
-  "anomaly detection",
-  "information geometry",
-  "Fisher-Rao",
-  "statistical manifolds",
-  "machine learning",
-  "scientific computing",
-]
+keywords = ["anomaly detection", "information geometry", "Fisher-Rao", "machine learning"]
 authors = [
   { name = "Omry Damari", email = "omryv@pm.me" }
 ]
@@ -24,11 +17,11 @@ dependencies = [
   "numpy>=1.24,<3",
   "scipy>=1.10,<2",
   "scikit-learn>=1.2,<2",
+  "matplotlib>=3.7,<4",
 ]
 classifiers = [
   "Development Status :: 4 - Beta",
   "Intended Audience :: Science/Research",
-  "License :: OSI Approved :: MIT License",
   "Operating System :: OS Independent",
   "Programming Language :: Python :: 3",
   "Programming Language :: Python :: 3.10",
@@ -36,38 +29,23 @@ classifiers = [
   "Programming Language :: Python :: 3.12",
   "Topic :: Scientific/Engineering",
   "Topic :: Scientific/Engineering :: Artificial Intelligence",
-  "Topic :: Scientific/Engineering :: Mathematics",
 ]
 
 [project.optional-dependencies]
 dev = [
   "build>=1.2,<2",
-  "pytest>=8,<10",
+  "pytest>=9.0.3,<10",
   "pytest-html>=4.1,<5",
   "pytest-json-report>=1.5,<2",
   "pip-audit>=2.10,<3",
 ]
 
-experiments = [
-  "matplotlib>=3.7,<4",
-]
-
 [project.urls]
-Homepage = "https://github.com/Visigence/IGAD"
-Repository = "https://github.com/Visigence/IGAD"
 Source = "https://github.com/Visigence/IGAD"
-"Verified Commit" = "https://github.com/Visigence/IGAD/commit/81dd1eb4540643083854232d9645f6add4150512"
-"Validation Run" = "https://github.com/Visigence/IGAD/actions/runs/25236042528"
+"Bug Tracker" = "https://github.com/Visigence/IGAD/issues"
 
 [tool.setuptools.packages.find]
-exclude = [
-  "tests",
-  "tests.*",
-  "experiments",
-  "experiments.*",
-  "docs",
-  "docs.*",
-]
+exclude = ["tests", "tests.*", "experiments", "experiments.*"]
 
 [tool.setuptools.package-data]
 igad = ["py.typed"]
