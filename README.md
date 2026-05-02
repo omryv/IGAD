@@ -1,26 +1,3 @@
-## Verified
-
-<p>
-  <a href="https://github.com/Visigence/IGAD/actions/runs/25236119831">
-    <img src="https://img.shields.io/badge/GitHub%20Actions-validated%2054%2F54-brightgreen?logo=github&logoColor=white"
-         alt="GitHub Actions validated: 54/54 tests passed">
-  </a>
-  <a href="https://github.com/Visigence/IGAD/commit/81dd1eb4540643083854232d9645f6add4150512">
-    <img src="https://img.shields.io/badge/validated%20commit-81dd1eb-6e40c9?logo=github&logoColor=white"
-         alt="Validated commit 81dd1eb">
-  </a>
-</p>
-
-IGAD-VER-1.0.0 was validated on GitHub Actions at commit
-[`81dd1eb4540643083854232d9645f6add4150512`](https://github.com/Visigence/IGAD/commit/81dd1eb4540643083854232d9645f6add4150512).
-The PyPI release was built from commit
-[`156160d59f288d11451895ecb8c234ff7ef9c895`](https://github.com/Visigence/IGAD/commit/156160d59f288d11451895ecb8c234ff7ef9c895).
-The validation run executed on GitHub-hosted Linux runners and completed successfully across Python 3.10, 3.11, and 3.12, producing separate test-report artifacts for each runtime.
-
-[View the exact GitHub Actions validation run](https://github.com/Visigence/IGAD/actions/runs/25236119831).
-
----
-
 ## What is IGAD?
 
 IGAD detects anomalies by measuring scalar curvature on the statistical manifold of an exponential family. Instead of comparing moments directly, it contracts the full third cumulant tensor against the Fisher–Rao metric, extracting shape information that no single moment captures.
