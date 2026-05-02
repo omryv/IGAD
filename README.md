@@ -37,14 +37,19 @@ pip install visigence-igad
 ```
 
 ```python
-import igad
+import numpy as np
+from igad import IGADDetector
 from igad.families import GammaFamily
 
-detector = igad.IGADDetector(family=GammaFamily())
-detector.fit(X_train)
+theta_ref = GammaFamily.to_natural(8.0, 2.0)
+detector = IGADDetector(family=GammaFamily()).fit(theta_ref=theta_ref)
 
-scores = detector.score_samples(X_test)
-labels = detector.predict(X_test, contamination=0.10)
+batch = np.random.lognormal(1.327, 0.343, size=200)
+score = detector.score_batch(batch)
+print(f"IGAD score: {score:.6f}")
+
+X_train = np.random.gamma(8.0, 0.5, size=5000)
+detector = IGADDetector(family=GammaFamily()).fit(X=X_train)
 ```
 
 Closed-form tensor support is included for Gamma and Dirichlet families, with the architecture designed to extend naturally to additional exponential families.

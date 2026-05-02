@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "visigence-igad"
-version = "1.0.1"
+version = "1.0.2"
 description = "Information-Geometric Anomaly Detection via Fisher–Rao Scalar Curvature"
 readme = "README.md"
 requires-python = ">=3.10"

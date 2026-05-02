@@ -34,3 +34,27 @@ Thumbs.db
 # IDE
 .vscode/
 .idea/
+
+# release artifacts
+.release_backup/
+*.bak
+omry.txt
+fix_igad.sh
+release_*.sh
+auc_check.py
+diagnose.py
+verify_igad.py
+verify_v2.py
+tests/auc.py
+
+.release_backup/
+*.bak
+omry.txt
+fix_igad.sh
+release_*.sh
+auc_check.py
+auc.py
+diagnose.py
+verify_igad.py
+verify_v2.py
+tests/auc.py
