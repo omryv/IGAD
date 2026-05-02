@@ -41,7 +41,6 @@ dev = [
 ]
 
 [project.urls]
-[project.urls]
 Source = "https://github.com/Visigence/IGAD"
 "Bug Tracker" = "https://github.com/Visigence/IGAD/issues"
 "Validation Run" = "https://github.com/Visigence/IGAD/commit/81dd1eb4540643083854232d9645f6add4150512"
