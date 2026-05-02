@@ -2,11 +2,6 @@
 
 **Information-Geometric Anomaly Detection**
 
-<p align="center">
-  <a href="https://github.com/Visigence/IGAD/actions/workflows/test.yml">
-    <img src="https://github.com/Visigence/IGAD/actions/workflows/test.yml/badge.svg?branch=main"
-         alt="Current CI status on main">
-  </a>
 
   <a href="PASTE_EXACT_SUCCESSFUL_ACTIONS_RUN_URL_HERE">
     <img src="https://img.shields.io/badge/verified%20run-54%2F54%20passed-brightgreen?logo=github&logoColor=white"
