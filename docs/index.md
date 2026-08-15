@@ -65,6 +65,10 @@ pip install igad
 * [Experimental Results](../RESULTS.md)
 * [Operational Envelope](operational_envelope.md)
 * [Mathematical Proof](proof.md)
+* [O(k) Dirichlet curvature](sherman_morrison.md) — Sherman–Morrison derivation and measured scaling
+* [Numerical reliability](numerical_reliability.md) — when `R(θ)` can be trusted, from a 120-digit reference
+* [Acquisition checklist](acquisition_checklist.md) — what the MoE-router / 3D-quality benchmark needs before it can run
+* [Validation report](validation_report.md) — router structure vs cheap diagnostics (synthetic scope)
 
 ---
 
@@ -131,7 +135,14 @@ IGAD is not a universal anomaly detector.
 * It requires a suitable exponential-family model.
 * One-dimensional flat families such as Poisson, Exponential, and Bernoulli have scalar curvature `R = 0`.
 * Under model misspecification, model-free methods can dominate.
-* The tensor contraction cost scales as `O(d³)` per evaluation.
+* Cost is `O(d⁶)` for a general family by literal contraction, `O(d⁴)` contracted
+  pairwise. For the **Dirichlet** family it is now `O(k)` in both time and memory
+  — the Fisher metric is diagonal-plus-rank-one, so Sherman–Morrison removes the
+  matrix inverse entirely. See [sherman_morrison.md](sherman_morrison.md).
+* `R(θ)` is an expression with internal cancellation. Roughly `16 − log₁₀ ρ`
+  significant digits survive in float64, where `ρ` is the cancellation ratio; the
+  O(k) route returns `ρ` alongside `R` so a caller can check.
+  See [numerical_reliability.md](numerical_reliability.md).
 
 ---
 

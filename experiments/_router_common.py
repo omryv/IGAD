@@ -32,34 +32,64 @@ import random
 # Special functions
 # ─────────────────────────────────────────────────────────────────────────────
 
+# The Euler-Maclaurin tails below are truncated after B_12 and the recurrence
+# lifts the argument past SHIFT before they are used. The first omitted term
+# then sits below 1e-19 relative for all three functions, i.e. under the
+# float64 unit roundoff, so these are correctly rounded to within a few ulp.
+#
+# The earlier SHIFT of 12 with three or four Bernoulli terms left a relative
+# error near 1e-12, which propagated into R(alpha) as an error near 1e-11 --
+# larger than anything the linear algebra contributes, and identical across
+# every curvature route because all of them share these inputs. See
+# `experiments/highprec_reliability.py` (section C2) for the measurement, and
+# `tests/test_highprec.py` for the pin against the 120-digit reference.
+SHIFT = 30.0
+
+
 def digamma(x):
+    """psi(x) = d/dx log Gamma(x), for x > 0."""
     r = 0.0
-    while x < 12.0:
+    while x < SHIFT:
         r -= 1.0 / x
         x += 1.0
     i = 1.0 / x
     i2 = i * i
-    return r + math.log(x) - 0.5 * i - i2 * (1/12. - i2 * (1/120. - i2 / 252.))
+    # log x - 1/(2x) - sum_{n>=1} B_{2n} / (2n x^{2n})
+    return r + math.log(x) - 0.5 * i - i2 * (
+        1/12. - i2 * (1/120. - i2 * (1/252. - i2 * (
+            1/240. - i2 * (1/132. - i2 * (691/32760.))))))
 
 
 def trigamma(x):
+    """psi'(x) = sum_{n>=0} 1/(x+n)^2, for x > 0."""
     r = 0.0
-    while x < 12.0:
+    while x < SHIFT:
         r += 1.0 / (x * x)
         x += 1.0
     i = 1.0 / x
     i2 = i * i
-    return r + i * (1 + i * (0.5 + i * (1/6. - i2 * (1/30. - i2 * (1/42. - i2/30.)))))
+    # 1/x + 1/(2x^2) + sum_{n>=1} B_{2n} x^{-(2n+1)}
+    return r + i * (1 + i * (0.5 + i * (
+        1/6. - i2 * (1/30. - i2 * (1/42. - i2 * (
+            1/30. - i2 * (5/66. - i2 * (691/2730.))))))))
 
 
 def tetragamma(x):
-    """psi''(x); the series is the term-by-term derivative of trigamma's."""
+    """psi''(x) = -2 sum_{n>=0} 1/(x+n)^3, for x > 0.
+
+    The series is the term-by-term derivative of trigamma's:
+    -1/x^2 - 1/x^3 - sum_{n>=1} (2n+1) B_{2n} x^{-(2n+2)}.
+    """
     r = 0.0
-    while x < 12.0:
+    while x < SHIFT:
         r -= 2.0 / (x ** 3)
         x += 1.0
     i = 1.0 / x
-    return r + (-i**2 - i**3 - 0.5*i**4 + (1/6.)*i**6 - (1/6.)*i**8 + 0.3*i**10)
+    i2 = i * i
+    tail = i2 * i2 * (
+        0.5 - i2 * (1/6. - i2 * (1/6. - i2 * (
+            0.3 - i2 * (5/6. - i2 * (691/210.))))))
+    return r - i2 - i2 * i - tail
 
 
 def inv_digamma(y):
@@ -209,10 +239,71 @@ def dir_cumulant_structure(alpha):
 
 
 def dir_scalar_curvature(alpha):
-    """Exact O(k^2) route; mirrors curvature.scalar_curvature_structured."""
-    k = len(alpha)
-    c, d = dir_cumulant_structure(alpha)
-    M = mat_inv(dir_fisher(alpha))
+    """Exact route via a generic inverse; mirrors scalar_curvature_structured.
+
+    The contraction is O(k^2) but `mat_inv` is O(k^3), so the *complete* path
+    is O(k^3). `dir_scalar_curvature_sm` removes that bottleneck.
+    """
+    return dir_curvature_dense_inverse(*dir_polygamma_inputs(alpha))
+
+
+def dir_scalar_curvature_sm(alpha):
+    """Exact O(k) route via Sherman-Morrison; no matrix is ever formed."""
+    return dir_curvature_sm_closed(*dir_polygamma_inputs(alpha))
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Dirichlet curvature, decomposed so the polygamma inputs can be supplied
+# ─────────────────────────────────────────────────────────────────────────────
+#
+# Every route below takes (tri, tri0, tet, tet0) rather than alpha. That split
+# is what lets `experiments/highprec_reliability.py` separate error introduced
+# by the special-function implementations from error introduced by the
+# arithmetic that follows them: feed the same inputs to every route and any
+# remaining disagreement is the arithmetic's.
+
+def dir_polygamma_inputs(alpha):
+    """(psi'(alpha_i), psi'(alpha_0), psi''(alpha_i), psi''(alpha_0))."""
+    a0 = sum(alpha)
+    return ([trigamma(a) for a in alpha], trigamma(a0),
+            [tetragamma(a) for a in alpha], tetragamma(a0))
+
+
+def dir_fisher_from(tri, tri0):
+    """g = D - tri0 * 1 1^T with D_ii = tri_i. O(k^2)."""
+    k = len(tri)
+    g = [[-tri0] * k for _ in range(k)]
+    for i in range(k):
+        g[i][i] = tri[i] - tri0
+    return g
+
+
+def dir_fisher_inverse_sm(tri, tri0):
+    """g^-1 in closed form, O(k^2) -- no elimination.
+
+    With D_ii = tri_i, c = tri0, u = D^-1 1 and U = 1^T D^-1 1,
+
+        g^-1 = D^-1 + [ c / (1 - c U) ] D^-1 1 1^T D^-1
+             = D^-1 + beta u u^T,          beta = c / (1 - c U).
+
+    Building the k x k result is itself O(k^2), which is optimal for an
+    explicit inverse. `dir_curvature_sm_closed` avoids building it at all.
+    """
+    k = len(tri)
+    u = [1.0 / t for t in tri]
+    w = 1.0 - tri0 * sum(u)
+    if w == 0.0:
+        raise SingularMatrix("Sherman-Morrison denominator vanished")
+    beta = tri0 / w
+    M = [[beta * u[i] * u[a] for a in range(k)] for i in range(k)]
+    for i in range(k):
+        M[i][i] += u[i]
+    return M
+
+
+def _curvature_from_inverse(M, c, d):
+    """R from an explicit g^-1 and the structured cumulant tensor. O(k^2)."""
+    k = len(d)
     r = [sum(M[i][a] for i in range(k)) for a in range(k)]
     s = sum(r)
     S = [c * s + M[m][m] * d[m] for m in range(k)]
@@ -221,6 +312,127 @@ def dir_scalar_curvature(alpha):
             + 2.0 * c * sum(d[a] * r[a] ** 3 for a in range(k))
             + sum(d[i] * (M[i][a] ** 3) * d[a] for i in range(k) for a in range(k)))
     return 0.25 * (S_sq - T_sq)
+
+
+def dir_curvature_dense_inverse(tri, tri0, tet, tet0):
+    """Structured contraction on top of a generic O(k^3) matrix inverse."""
+    c, d = -tet0, list(tet)
+    return _curvature_from_inverse(mat_inv(dir_fisher_from(tri, tri0)), c, d)
+
+
+def dir_curvature_sm_matrix(tri, tri0, tet, tet0):
+    """Structured contraction on top of the O(k^2) Sherman-Morrison inverse."""
+    c, d = -tet0, list(tet)
+    return _curvature_from_inverse(dir_fisher_inverse_sm(tri, tri0), c, d)
+
+
+def dir_curvature_sm_closed(tri, tri0, tet, tet0):
+    """R(alpha) in O(k) time and O(k) memory. Nothing k x k is allocated.
+
+    Substituting g^-1 = D^-1 + beta u u^T into the structured contraction and
+    using U = sum u_i, w = 1 - tri0 * U, beta = tri0 / w:
+
+        r_a        = u_a / w                    (column sums of g^-1)
+        s          = U / w
+        (g^-1)_mm  = u_m (1 + beta u_m)
+        S_m        = c s + (g^-1)_mm d_m
+        ||S||^2_g  = sum_m S_m^2 u_m + beta (sum_m S_m u_m)^2
+        ||T||^2_g  = c^2 s^3
+                     + 2c sum_a d_a r_a^3
+                     + beta^3 [ (sum_i d_i u_i^3)^2 - sum_i (d_i u_i^3)^2 ]
+                     + sum_i d_i^2 u_i^3 (1 + beta u_i)^3
+
+    The last two lines are the split of sum_{i,a} d_i d_a (g^-1)_{ia}^3 into
+    its off-diagonal part (where (g^-1)_{ia} = beta u_i u_a factorises, so the
+    double sum becomes a square of a single sum) and its diagonal part.
+
+    Derivation and complexity proof: docs/sherman_morrison.md.
+    """
+    k = len(tri)
+    c, d = -tet0, tet
+    u = [1.0 / t for t in tri]
+    U = sum(u)
+    w = 1.0 - tri0 * U
+    if w == 0.0:
+        raise SingularMatrix("Sherman-Morrison denominator vanished")
+    beta = tri0 / w
+
+    s = U / w
+    S_sq = 0.0
+    Su = 0.0
+    for m in range(k):
+        S_m = c * s + u[m] * (1.0 + beta * u[m]) * d[m]
+        S_sq += S_m * S_m * u[m]
+        Su += S_m * u[m]
+    S_sq += beta * Su * Su
+
+    term_a = c * c * s ** 3
+    term_b = 0.0
+    du3_sum = 0.0
+    du3_sq = 0.0
+    diag = 0.0
+    for i in range(k):
+        u3 = u[i] ** 3
+        term_b += d[i] * u3
+        du3 = d[i] * u3
+        du3_sum += du3
+        du3_sq += du3 * du3
+        diag += d[i] * du3 * (1.0 + beta * u[i]) ** 3
+    term_b = 2.0 * c * term_b / (w ** 3)          # r_a^3 = u_a^3 / w^3
+    term_c = beta ** 3 * (du3_sum * du3_sum - du3_sq) + diag
+    return 0.25 * (S_sq - (term_a + term_b + term_c))
+
+
+def dir_curvature_sm_closed_diagnostic(tri, tri0, tet, tet0):
+    """(R, rho_hat) -- the curvature and a float64 estimate of its own accuracy.
+
+    `rho_hat` is the cancellation ratio: the largest intermediate magnitude
+    divided by |S^2 - T^2|. The expected relative error in R is eps * rho_hat,
+    so `16 - log10(rho_hat)` is roughly how many decimal digits of R survive.
+    Both come out of the same O(k) pass.
+
+    `experiments/highprec_reliability.py` measures how well this float64
+    estimate tracks the exact cancellation ratio, and how well eps * rho_hat
+    bounds the error. See docs/numerical_reliability.md.
+    """
+    k = len(tri)
+    c, d = -tet0, tet
+    u = [1.0 / t for t in tri]
+    U = sum(u)
+    w = 1.0 - tri0 * U
+    if w == 0.0:
+        raise SingularMatrix("Sherman-Morrison denominator vanished")
+    beta = tri0 / w
+
+    s = U / w
+    S_sq = 0.0
+    Su = 0.0
+    for m in range(k):
+        S_m = c * s + u[m] * (1.0 + beta * u[m]) * d[m]
+        S_sq += S_m * S_m * u[m]
+        Su += S_m * u[m]
+    S_sq += beta * Su * Su
+
+    term_a = c * c * s ** 3
+    tb = 0.0
+    du3_sum = 0.0
+    du3_sq = 0.0
+    diag = 0.0
+    for i in range(k):
+        u3 = u[i] ** 3
+        du3 = d[i] * u3
+        tb += du3
+        du3_sum += du3
+        du3_sq += du3 * du3
+        diag += d[i] * du3 * (1.0 + beta * u[i]) ** 3
+    term_b = 2.0 * c * tb / (w ** 3)
+    term_c = beta ** 3 * (du3_sum * du3_sum - du3_sq) + diag
+    T_sq = term_a + term_b + term_c
+
+    gap = S_sq - T_sq
+    biggest = max(abs(S_sq), abs(T_sq), abs(term_a), abs(term_b), abs(term_c))
+    rho_hat = float("inf") if gap == 0.0 else biggest / abs(gap)
+    return 0.25 * gap, rho_hat
 
 
 class ConvergenceError(Exception):

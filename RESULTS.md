@@ -2,6 +2,154 @@
 
 All results are reproducible via the scripts in `experiments/`.
 
+---
+
+## Current phase: does router structure predict 3D quality?
+
+**Part 0 — hard gate: FAILED. The real-data benchmark was not run, and no
+synthetic substitute was published in its place.**
+
+`python -m experiments.audit_environment` (exits non-zero) checks the five
+preconditions the brief requires. All five are unmet: no tensor runtime, no
+model weights (91 weight-suffixed files on disk, 0 over 10 MiB — they are
+package-manager caches), no MoE module to hook, no accelerator, no mesh
+library. `huggingface.co`, `pypi.org` and `archive.ubuntu.com` all return 403
+from the egress proxy, so none of it can be repaired from inside.
+
+Consequences, stated plainly:
+
+- Every question in the brief's final decision table that depends on real
+  routers or real 3D quality reads **Untested**. Not "No", and not a number.
+- The section-19 figures that need quality data were not produced.
+- What was produced instead: `docs/acquisition_checklist.md` — what to acquire,
+  which candidate models exist, where to hook, what to record, and the
+  statistical protocol — plus `experiments/trace_schema.py`, a tested record
+  contract with a check that rejects a post-top-k capture.
+
+The engineering work the brief asked for *before* touching a model was
+completed, and is below.
+
+---
+
+## Part 1.1 — Dirichlet curvature in O(k)
+
+`python -m experiments.benchmark_sherman_morrison` →
+`experiments/results/sherman_morrison_benchmark.json`
+
+The Fisher metric is diagonal-plus-rank-one, `g = D - c 1 1ᵀ`, so
+Sherman–Morrison gives `g⁻¹` in closed form. Substituting the *factored*
+inverse into the contraction collapses every remaining sum to a single pass:
+**O(k) time and O(k) memory, exact.** Derivation: `docs/sherman_morrison.md`.
+
+Measured wall clock (standard-library Python, minimum over repeats):
+
+| k | dense-inverse O(k³) | sm-matrix O(k²) | sm-closed O(k) |
+| ---: | ---: | ---: | ---: |
+| 8 | 0.000089 s | 0.000022 s | 0.000003 s |
+| 64 | 0.025820 s | 0.000928 s | 0.000021 s |
+| 256 | 1.426388 s | 0.015634 s | 0.000083 s |
+| 512 | 11.108448 s | 0.067341 s | 0.000166 s |
+| 1024 | 105.050579 s | 0.293489 s | 0.000331 s |
+| 2048 | — | 1.278177 s | 0.000685 s |
+| 131072 | — | — | 0.052921 s |
+
+| route | predicted | measured slope (k ≥ 64) | memory slope | k reached |
+| --- | --- | ---: | ---: | ---: |
+| dense-inverse | O(k³) | 2.99 | 2.01 | 1 024 |
+| sm-matrix | O(k²) | 2.10 | 2.03 | 2 048 |
+| **sm-closed** | **O(k)** | **1.03** | **1.01** | **131 072** |
+
+At k = 1024 that is **105 s → 0.33 ms**, a 317 000× speedup; peak allocation at
+k = 512 drops from 20.9 MiB to 14.3 KiB.
+
+Part 1.1 asked for O(k²) end-to-end. `sm-matrix` delivers exactly that;
+`sm-closed` never allocates anything k × k and does better.
+
+![measured wall clock](docs/figures/scaling_wallclock.svg)
+
+---
+
+## Part 1.2 — high-precision arbitration and the reliability boundary
+
+`python -m experiments.highprec_reliability` →
+`experiments/results/highprec_reliability.json`. Full write-up:
+`docs/numerical_reliability.md`.
+
+**The dense and structured formulae are the same number.** Four independent
+routes at 120 digits (literal six-index, pairwise dense, structured collapse,
+Sherman–Morrison) agree to **5.2e-145**, and the reference does not move when
+recomputed at 200 digits. Every float64 disagreement is therefore numerical.
+
+**The previous diagnosis was wrong on both counts, and this is the correction:**
+
+1. *The dominant error was the special functions, not the linear algebra.* The
+   stdlib `trigamma`/`tetragamma` were accurate to only ~1e-12 (≈4500 ulp).
+   Because every curvature route consumes the same values, the error cancelled
+   exactly in route-versus-route comparisons and was invisible: structured and
+   dense agreed to 1e-14 while both sat 6.3e-11 from the truth on
+   `symmetric k=3`. Corrected, that case is now accurate to 9.4e-16.
+
+2. *What remains is cancellation, not conditioning.* Regressing
+   `log10(error)` across 54 parameter points:
+
+   | predictor | slope | intercept | R² |
+   | --- | ---: | ---: | ---: |
+   | **log10 ρ** (cancellation ratio) | **1.00** | **−16.08** | **0.986** |
+   | log10 cond(g) | 0.46 | −14.05 | 0.673 |
+
+   The fitted intercept recovers `log10(eps) = −15.95`, so the law is
+   `error = eps · ρ` with no free parameter. Holding ρ fixed and moving cond(g)
+   by **fifteen orders of magnitude** changes the error by 9%. The old caveat
+   — "do not trust R beyond 1e-11 when cond(g) ≳ 1e3" — **is withdrawn**.
+
+**The boundary.** `8 · max(eps·ρ·kᵖ, input-rounding floor, special-function
+error)` held on **68 of 68** points for all three routes. Surviving digits are
+`16 − log10(ρ)`; past ρ ≈ 1e15 nothing survives, and no float64 implementation
+can do better — the input-rounding floor alone is 2.0e-09 there.
+
+**The guard rail is computable.** `dir_curvature_sm_closed_diagnostic` returns
+`(R, ρ̂)` from the same O(k) pass; ρ̂ is within 2× of the exact ρ on **68 of 68**
+points.
+
+**Unplanned bonus:** the O(k) route is also the *most accurate* route. Error
+grows as k^1.11 for `sm-closed` against k^2.02 for `dense-inverse` — a 60×
+accuracy advantage at k = 256. The literal six-index contraction is worst of
+all, accumulating as **k^7.67**.
+
+![error vs cancellation](docs/figures/error_vs_cancellation.svg)
+![error vs conditioning](docs/figures/error_vs_condition.svg)
+
+---
+
+## Final decision table
+
+Every row below needs real router traces from a real MoE 3D generator and a
+real 3D-quality measurement. The gate that supplies both failed, so nothing was
+measured. "Inconclusive" here means **not attempted**, which is a stronger
+statement than "attempted and ambiguous" — no experiment was run that could
+have moved any of these rows, and no synthetic result is being offered as a
+stand-in.
+
+| Question | Result | Verdict |
+| --- | --- | --- |
+| Does real router structure vary with 3D quality? | not measured — no MoE 3D checkpoint, no router to hook | Inconclusive |
+| Does it add information beyond load? | not measured — see also the expert-choice caveat below | Inconclusive |
+| Does it add information beyond entropy? | not measured | Inconclusive |
+| Does covariance structure predict final quality? | not measured — no 3D quality pipeline | Inconclusive |
+| Does it provide earlier warning? | not measured — the forecasting experiment needs per-timestep traces | Inconclusive |
+| Does any richer geometry beat covariance controls? | not measured on real data; **on synthetic data it did not** — scalar curvature lost to the affine-invariant covariance distance at every window over 5 seeds | Inconclusive (real) / No (synthetic) |
+| Is the signal stable across layers/checkpoints/categories? | not measured — one checkpoint is not available, let alone several | Inconclusive |
+| Is there a practical monitoring tool here? | not measured | Inconclusive |
+
+Two results that do carry forward, because they are mathematical rather than
+empirical, and both **narrow** what a future benchmark should test:
+
+- **Fisher–Rao distance and the affine-invariant covariance distance are the
+  same detector.** On the fixed-mean covariance manifold `d_FR = (1/√2)·d_AI`,
+  verified to 4.2e−7. Identical rankings, identical AUC. Enter one, not both.
+- **Under expert-choice routing the load baseline is degenerate.** It is
+  uniform by construction, so beating it is beating a constant. The trace
+  manifest records `routing_mode` for exactly this reason.
 
 ---
 

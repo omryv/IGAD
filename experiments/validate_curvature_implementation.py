@@ -5,10 +5,17 @@ Part A — validate the O(k^2) structured curvature route before asking whether
 curvature is useful for anything.
 
 A1 EXACTNESS
-    scalar_curvature_structured vs the general dense contraction, at every
-    parameter point where the dense path is computationally feasible:
-    symmetric, strongly asymmetric, low concentration, high concentration,
-    and deliberately ill-conditioned. Target |dR| / |R| < 1e-11.
+    Every float64 route -- structured, dense-naive, dense-pairwise -- against
+    a 120-digit reference, at every parameter point where the dense path is
+    computationally feasible: symmetric, strongly asymmetric, low
+    concentration, high concentration, and deliberately ill-conditioned.
+    The pass criterion is the measured accuracy law eps * rho * k^p rather
+    than a flat tolerance; see docs/numerical_reliability.md.
+
+A3 ACCUMULATION
+    How much accuracy each contraction order costs, in units of eps*rho.
+    The literal six-index route accumulates as k^7.7 -- it is the least
+    accurate route as well as the slowest.
 
 A2 COMPLEXITY
     Measured wall-clock for k in {3, 8, 16, 32, 64, 128, 256} across three
@@ -29,11 +36,16 @@ implementation-independent.
 """
 
 import argparse
+import math
 import time
 
 from experiments._router_common import (
     dir_cumulant_structure, dir_fisher, dir_scalar_curvature, mat_inv,
     print_table, save_results,
+)
+from experiments._highprec import (
+    cancellation_ratio, hp_curvature_sherman_morrison, hp_dirichlet_inputs,
+    precision, rel_error, to_decimal,
 )
 
 
@@ -113,36 +125,141 @@ A1_CASES = [
 ]
 
 
-def run_a1(tol):
-    rows = []
-    worst = 0.0
-    records = []
+EPS = 2.0 ** -53
+SAFETY = 64.0
+
+# Achievable accuracy is eps * rho * k^p, where rho is the cancellation ratio
+# and p depends on how much arithmetic the route does. Section A3 below
+# measures p; these are the next integer up from what it reports, and A3 fails
+# loudly if a measurement outgrows its constant.
+SIZE_EXPONENT = {"structured": 2, "dense_pairwise": 3, "dense_naive": 8}
+
+
+def run_a1(_unused_tol=None):
+    """Each float64 route against a 120-digit reference, not against a sibling.
+
+    This section used to compare the structured route to the dense route and
+    pass or fail on a flat 1e-11. Both parts of that were wrong:
+
+    - every route consumes the same psi' and psi'' values, so an error in the
+      special functions cancels exactly when routes are compared to each other.
+      That hid a ~6e-11 shared error on cases this table reported as passing.
+    - a flat tolerance is not a property any implementation can satisfy. The
+      achievable accuracy is eps * rho * k^p, where rho is the cancellation
+      ratio of the expression; at rho = 9e14 no float64 route reaches 1e-11,
+      and at rho = 2 the flat target is 1e5 times weaker than what is achieved.
+
+    See docs/numerical_reliability.md for the measurement behind both points.
+    """
+    rows, records = [], []
+    worst_ratio = 0.0
     for name, alpha in A1_CASES:
         k = len(alpha)
         r_struct = dir_scalar_curvature(alpha)
         r_naive = R_dense_naive(alpha)
         r_pair = R_dense_pairwise(alpha)
-        scale = max(1e-300, abs(r_naive))
-        abs_err = abs(r_struct - r_naive)
-        rel_err = abs_err / scale
+
+        with precision(120):
+            parts = hp_curvature_sherman_morrison(*hp_dirichlet_inputs(alpha))
+            ref = parts["R"]
+            rho = cancellation_ratio(parts)
+            errs = {"structured": rel_error(to_decimal(r_struct), ref),
+                    "dense_naive": rel_error(to_decimal(r_naive), ref),
+                    "dense_pairwise": rel_error(to_decimal(r_pair), ref)}
+            ref_float = float(ref)
+
+        bounds = {route: max(SAFETY * EPS * rho * k ** p, SAFETY * EPS)
+                  for route, p in SIZE_EXPONENT.items()}
+        ratios = {route: errs[route] / bounds[route] for route in errs}
+        ok = all(r < 1.0 for r in ratios.values())
+        worst_ratio = max(worst_ratio, max(ratios.values()))
         cond = condition_number(dir_fisher(alpha))
-        worst = max(worst, rel_err)
-        rows.append([name, k, "%.9f" % r_struct, "%.2e" % abs_err,
-                     "%.2e" % rel_err, "%.1e" % cond,
-                     "PASS" if rel_err < tol else "FAIL"])
+        rows.append([name, k, "%.9f" % ref_float, "%.1e" % rho,
+                     "%.2e" % errs["structured"], "%.2e" % errs["dense_pairwise"],
+                     "%.2e" % errs["dense_naive"],
+                     "%.2f" % max(ratios.values()), "PASS" if ok else "FAIL"])
         records.append({"case": name, "k": k, "alpha": alpha,
+                        "R_reference_hp": repr(ref), "R_reference": ref_float,
                         "R_structured": r_struct, "R_dense_naive": r_naive,
-                        "R_dense_pairwise": r_pair, "abs_err": abs_err,
-                        "rel_err": rel_err, "cond_g": cond,
-                        "pass": rel_err < tol})
-    print_table("A1 EXACTNESS -- structured vs dense-naive (target rel < %.0e)" % tol,
-                ["case", "k", "R_structured", "|dR|", "rel", "cond(g)", "verdict"],
-                rows)
-    print("  worst relative error across %d cases: %.2e" % (len(A1_CASES), worst))
+                        "R_dense_pairwise": r_pair,
+                        "rel_err_vs_reference": errs,
+                        "cancellation_rho": rho, "bounds": bounds,
+                        "error_over_bound": ratios,
+                        "cond_g": cond, "pass": ok})
+    print_table("A1 EXACTNESS -- every float64 route vs a 120-digit reference",
+                ["case", "k", "R (reference)", "rho", "rel structured",
+                 "rel pairwise", "rel naive", "worst err/bound", "verdict"], rows)
+    print("  bound = %.0f * eps * rho * k^p, p = %s"
+          % (SAFETY, ", ".join("%s %d" % (r, p)
+                               for r, p in sorted(SIZE_EXPONENT.items()))))
+    print("  worst error/bound ratio across %d cases: %.3f"
+          % (len(A1_CASES), worst_ratio))
     print("  all pass: %s" % all(r["pass"] for r in records))
     print()
-    return {"tolerance": tol, "worst_rel_err": worst,
+    return {"bound_rule": "%.0f * eps * rho * k^p" % SAFETY,
+            "size_exponents": SIZE_EXPONENT,
+            "worst_error_over_bound": worst_ratio,
             "all_pass": all(r["pass"] for r in records), "cases": records}
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# A3 — how much accuracy each contraction order costs
+# ─────────────────────────────────────────────────────────────────────────────
+
+def run_a3(ks=(3, 4, 5, 6, 7, 8, 10, 12, 14, 16)):
+    """Error in units of eps*rho, as k grows at a fixed alpha.
+
+    The cancellation ratio explains how much accuracy the *expression* costs.
+    This measures how much the *contraction order* costs on top of it -- a
+    route that touches more intermediate values accumulates more rounding.
+    The result is the second reason to prefer the closed form: the literal
+    six-index contraction is not merely slower, it is far less accurate.
+    """
+    rows, series = [], {r: [] for r in SIZE_EXPONENT}
+    for k in ks:
+        alpha = [2.0] * k
+        vals = {"structured": dir_scalar_curvature(alpha),
+                "dense_pairwise": R_dense_pairwise(alpha),
+                "dense_naive": R_dense_naive(alpha)}
+        with precision(120):
+            parts = hp_curvature_sherman_morrison(*hp_dirichlet_inputs(alpha))
+            rho = cancellation_ratio(parts)
+            excess = {r: rel_error(to_decimal(v), parts["R"]) / max(EPS * rho, EPS)
+                      for r, v in vals.items()}
+        for r, e in excess.items():
+            series[r].append((k, e))
+        rows.append([k, "%.2f" % rho] + ["%.1f" % excess[r]
+                                         for r in sorted(SIZE_EXPONENT)])
+    print_table("A3 ACCUMULATION -- error in units of eps*rho (alpha_i = 2)",
+                ["k", "rho"] + sorted(SIZE_EXPONENT), rows)
+
+    fitted, ok = {}, True
+    for route in sorted(SIZE_EXPONENT):
+        p = _loglog_slope(series[route])
+        fitted[route] = p
+        within = p is not None and p <= SIZE_EXPONENT[route]
+        ok = ok and within
+        print("    %-15s measured k^%.2f, bound uses k^%d  %s"
+              % (route, p if p is not None else float("nan"),
+                 SIZE_EXPONENT[route], "ok" if within else "EXPONENT TOO SMALL"))
+    print("  the six-index contraction sums k^6 terms into one accumulator; "
+          "that is\n  where its exponent comes from, and it is why the closed "
+          "form is also\n  the more accurate route, not only the faster one.")
+    print()
+    return {"ks": list(ks), "measured_exponents": fitted,
+            "declared_exponents": SIZE_EXPONENT, "exponents_valid": ok,
+            "excess_over_eps_rho": {r: series[r] for r in series}}
+
+
+def _loglog_slope(points):
+    pts = [(math.log10(k), math.log10(max(e, 1e-3))) for k, e in points if k > 0]
+    n = len(pts)
+    if n < 2:
+        return None
+    mx = sum(p[0] for p in pts) / n
+    my = sum(p[1] for p in pts) / n
+    den = sum((p[0] - mx) ** 2 for p in pts)
+    return (sum((p[0] - mx) * (p[1] - my) for p in pts) / den) if den else None
 
 
 def condition_number(M):
@@ -215,19 +332,20 @@ def main():
     p = argparse.ArgumentParser(description=__doc__)
     p.add_argument("--ks", type=int, nargs="+",
                    default=[3, 8, 16, 32, 64, 128, 256])
-    p.add_argument("--tol", type=float, default=1e-11)
     p.add_argument("--budget", type=float, default=20.0,
                    help="seconds per evaluation before a route is abandoned")
     a = p.parse_args()
 
-    a1 = run_a1(a.tol)
+    a1 = run_a1()
+    a3 = run_a3()
     a2 = run_a2(a.ks, a.budget)
 
     print("=" * 78)
     print("PART A VERDICT")
     print("=" * 78)
-    print("  A1 exactness  : %s (worst relative error %.2e, target < %.0e)"
-          % ("PASS" if a1["all_pass"] else "FAIL", a1["worst_rel_err"], a.tol))
+    print("  A1 exactness  : %s (worst error/bound ratio %.3f, bound = %s)"
+          % ("PASS" if a1["all_pass"] else "FAIL",
+             a1["worst_error_over_bound"], a1["bound_rule"]))
     reached = max((r["k"] for r in a2 if r.get("structured")), default=0)
     dense_max = max((r["k"] for r in a2 if r.get("dense-naive")), default=0)
     print("  A2 reach      : structured evaluated up to k=%d; dense-naive died at k=%d"
@@ -235,7 +353,7 @@ def main():
     print()
 
     save_results("curvature_implementation_validation",
-                 {"A1": a1, "A2": a2,
+                 {"A1": a1, "A2": a2, "A3": a3,
                   "note": "standard-library mirrors; pinned to igad by "
                           "tests/test_router_common_mirror.py when numpy is present"})
 
