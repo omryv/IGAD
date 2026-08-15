@@ -86,6 +86,36 @@ cell, standard deviation in parentheses.
 
 ---
 
+## The structural limitation
+
+This is the part that matters most, and it is not an empirical finding that
+better tuning could overturn.
+
+IGAD's score is a deterministic function of the fitted parameters. Therefore
+
+```
+alpha_hat_A = alpha_hat_B   =>   R(alpha_hat_A) = R(alpha_hat_B)
+```
+
+Two populations that induce the same fitted Dirichlet are **exactly**
+indistinguishable to scalar curvature — not weakly separated, not separated
+with poor power, but identical in score. The same holds for every other
+statistic of the form `f(alpha_hat)`, `MLE-a0` included.
+
+That is a limitation of the *representation*, not of the comparison. The
+Dirichlet MLE matches `E[log x]`, so it is enough for two populations to agree
+on that one sufficient statistic for curvature to be blind to every other way
+they differ. `experiments/demo_router_multimodal_control.py` builds exactly
+such a pair — a four-mode mixture and its own best-fit single Dirichlet — and
+measures the consequence: IGAD and `MLE-a0` agree to within 0.0075 AUC at every
+window tested, because they are two functions of one number.
+
+The practical reading: choosing curvature commits you to whatever the fit
+preserves. Any structure the family discards is gone before the geometry is
+evaluated, and no amount of geometric machinery downstream can recover it.
+
+---
+
 ## Verdict
 
 **The Dirichlet fit earns its place. The curvature tensor does not.**
@@ -137,19 +167,79 @@ was shown to carry signal the concentration does not.
 
 ---
 
+## Would a richer family rescue the geometry?
+
+The obvious response to the structural limitation is to stop projecting through
+a single Dirichlet and fit something that can represent directional covariance
+— a logistic-normal model, i.e. a Gaussian on the identifiable log-ratio
+coordinates `y_i = log(x_i / x_k)`.
+
+That family does preserve more. But before benchmarking it, ask what its
+geometry can contain. `experiments/demo_router_logistic_normal_geometry.py`
+answers this numerically, and the answer closes the route:
+
+1. **Scalar curvature is constant.** The affine group `y -> Ay + b` acts
+   transitively on `(mu, Sigma)` and acts by isometries of the Fisher metric,
+   so the manifold is homogeneous and every curvature invariant is
+   parameter-independent. Measured with the repository's own formula,
+   `R = d(d+1)^2/4` — depending only on the data dimension, never on the
+   parameters. Residual scatter across parameter points scales as `h^2` with
+   the finite-difference step (ratios 3.92, 3.95, 2.88 for a doubled step),
+   which is truncation error rather than parameter dependence. A detector built
+   on it would score identically zero on every input.
+
+2. **The Fisher metric block-diagonalises**, recovered from the KL divergence
+   to 1e-9: the mean block is `Sigma^-1` (Mahalanobis), the covariance block is
+   `1/2 tr(S^-1 dS S^-1 dS)` (affine-invariant), and the cross block is exactly
+   zero.
+
+3. **Fisher-Rao distance is a cheap control in disguise.** Integrating metric
+   length along the geodesic on the fixed-mean submanifold gives
+
+   ```
+   d_FR(S_ref, S_hat) = (1/sqrt 2) * ||log(S_ref^-1/2 S_hat S_ref^-1/2)||_F
+   ```
+
+   to a relative error of 4.2e-7. The right-hand side is the affine-invariant
+   covariance distance — a standard fitted-parameter summary. AUC is invariant
+   under monotone transforms, so the "information-geometric" statistic and the
+   "cheap control" produce *identical* rankings and identical AUC by
+   construction.
+
+Together these say the geometry of this family decomposes entirely into a
+Mahalanobis term on the mean and an affine-invariant term on the covariance —
+both already standard statistics. There is no residual for geometry to occupy,
+so the matched-control benchmark was not run: its outcome is fixed in advance.
+
+---
+
 ## Reproducing
 
 ```bash
-python -m experiments.demo_moe_router                      # defaults above
+python -m experiments.demo_moe_router                      # numpy; defaults above
 python -m experiments.demo_moe_router --experts 8 \
     --alpha-ref 0.5 --alpha-anom 0.6 --windows 8 16 32 64
+
+# stdlib only, no dependencies; each writes JSON to experiments/results/
+python -m experiments.demo_router_fixed_a0_anisotropy
+python -m experiments.demo_router_multimodal_control
+python -m experiments.demo_router_logistic_normal_geometry
 ```
 
-**Provenance.** The tables above were produced by a standard-library mirror
-of this script, because numpy could not be installed in the authoring
-sandbox (PyPI and the Ubuntu archives both returned 403). The curvature
-routine in that mirror was verified against the naive `O(k^6)` contraction
-to a relative error of 1e-13 across eight parameter points. These numbers
-have **not** been through a GitHub Actions run; re-running the committed
-script is the confirmation step, and per the repository's stated policy this
-counts as a new research iteration requiring its own validated run.
+The three `demo_router_*` scripts import only the standard library, so they run
+in any environment and were executed to produce every number quoted above and
+in `docs/router_geometry.html`. Raw output is written to
+`experiments/results/*.json` before any figure is drawn.
+
+`tests/test_router_common_mirror.py` cross-checks every mirrored Dirichlet,
+special-function and linear-algebra routine in `experiments/_router_common.py`
+against `igad` and scipy whenever numpy is installed, so the stdlib mirror
+cannot drift from the package unnoticed.
+
+**Provenance.** `demo_moe_router.py` is the one script here that requires numpy
+and has therefore not been executed — numpy could not be installed in the
+authoring environment (PyPI and the Ubuntu archives both returned 403). Its
+numbers came from the stdlib mirror that the `demo_router_*` scripts now make
+first-class. Nothing in this document has been through a GitHub Actions run;
+per the repository's stated policy this is a new research iteration requiring
+its own validated run.
