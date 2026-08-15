@@ -219,3 +219,118 @@ def scalar_curvature_structured(
     )
 
     return 0.25 * (S_norm_sq - T_norm_sq)
+
+
+def dirichlet_fisher_inverse(tri: np.ndarray, tri0: float) -> np.ndarray:
+    """Inverse of the Dirichlet Fisher metric in closed form. O(k^2).
+
+    The metric is a diagonal matrix plus a rank-one term,
+
+        g = D - c * 1 1^T,    D_ii = psi'(alpha_i),    c = psi'(alpha_0),
+
+    so the Sherman-Morrison identity gives g^{-1} without any elimination:
+
+        g^{-1} = D^{-1}
+                 + [ c / (1 - c * 1^T D^{-1} 1) ] D^{-1} 1 1^T D^{-1}
+               = D^{-1} + beta u u^T,
+        u      = D^{-1} 1,   U = 1^T u,   w = 1 - c U,   beta = c / w.
+
+    O(k^2) is optimal here only because the *result* has k^2 entries; the
+    factored form (u, beta) is O(k), and `scalar_curvature_dirichlet` uses it
+    directly rather than materialising this matrix.
+
+    Parameters
+    ----------
+    tri : ndarray of shape (k,)
+        psi'(alpha_i).
+    tri0 : float
+        psi'(alpha_0), alpha_0 = sum_i alpha_i.
+
+    Returns
+    -------
+    ndarray of shape (k, k)
+
+    Raises
+    ------
+    ZeroDivisionError
+        If 1 - c * 1^T D^{-1} 1 vanishes. For a genuine Dirichlet parameter
+        this quantity is strictly positive -- it equals det(g) / prod_i D_ii,
+        and g is positive definite -- so a zero here means the inputs are not
+        a valid (psi'(alpha), psi'(alpha_0)) pair.
+    """
+    tri = np.asarray(tri, dtype=np.float64)
+    u = 1.0 / tri
+    w = 1.0 - tri0 * float(u.sum())
+    if w == 0.0:
+        raise ZeroDivisionError("Sherman-Morrison denominator 1 - c*1'D^-1*1 vanished")
+    beta = tri0 / w
+    return np.diag(u) + beta * np.outer(u, u)
+
+
+def scalar_curvature_dirichlet(
+    tri: np.ndarray,
+    tri0: float,
+    tet: np.ndarray,
+    tet0: float,
+) -> float:
+    """Scalar curvature of the Dirichlet manifold in O(k) time and O(k) memory.
+
+    Neither g nor g^{-1} is formed. Substituting the Sherman-Morrison factored
+    inverse g^{-1} = D^{-1} + beta u u^T into the structured contraction of
+    :func:`scalar_curvature_structured` collapses every remaining sum to a
+    single pass over the k experts:
+
+        r_a       = u_a / w
+        s         = U / w
+        g^{-1}_mm = u_m (1 + beta u_m)
+        S_m       = c s + g^{-1}_mm d_m
+        ||S||^2_g = sum_m S_m^2 u_m + beta (sum_m S_m u_m)^2
+        ||T||^2_g = c^2 s^3
+                    + (2c / w^3) sum_a d_a u_a^3
+                    + beta^3 [ (sum_i d_i u_i^3)^2 - sum_i (d_i u_i^3)^2 ]
+                    + sum_i d_i^2 u_i^3 (1 + beta u_i)^3
+
+    with c = -psi''(alpha_0) and d_i = psi''(alpha_i). The third line is the
+    off-diagonal part of sum_{i,a} d_i d_a (g^{-1})_{ia}^3: off the diagonal
+    (g^{-1})_{ia} = beta u_i u_a factorises, so the double sum is a square of
+    a single sum. Exact, not an approximation.
+
+    Derivation and measured scaling: docs/sherman_morrison.md.
+
+    Parameters
+    ----------
+    tri, tet : ndarray of shape (k,)
+        psi'(alpha_i) and psi''(alpha_i).
+    tri0, tet0 : float
+        psi'(alpha_0) and psi''(alpha_0).
+
+    Returns
+    -------
+    float
+    """
+    tri = np.asarray(tri, dtype=np.float64)
+    tet = np.asarray(tet, dtype=np.float64)
+    c = -float(tet0)
+    d = tet
+
+    u = 1.0 / tri
+    U = float(u.sum())
+    w = 1.0 - tri0 * U
+    if w == 0.0:
+        raise ZeroDivisionError("Sherman-Morrison denominator 1 - c*1'D^-1*1 vanished")
+    beta = tri0 / w
+    s = U / w
+
+    S = c * s + u * (1.0 + beta * u) * d
+    S_norm_sq = float((S * S * u).sum()) + beta * float((S * u).sum()) ** 2
+
+    u3 = u ** 3
+    du3 = d * u3
+    T_norm_sq = (
+        c * c * s ** 3
+        + 2.0 * c * float((d * u3).sum()) / w ** 3
+        + beta ** 3 * (float(du3.sum()) ** 2 - float((du3 * du3).sum()))
+        + float((d * du3 * (1.0 + beta * u) ** 3).sum())
+    )
+
+    return 0.25 * (S_norm_sq - T_norm_sq)

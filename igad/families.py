@@ -5,7 +5,11 @@ Concrete exponential families with analytical log-partition functions.
 import numpy as np
 from scipy.special import gammaln, digamma, polygamma
 
-from .curvature import scalar_curvature_structured
+from .curvature import (
+    dirichlet_fisher_inverse,
+    scalar_curvature_dirichlet,
+    scalar_curvature_structured,
+)
 
 
 class GammaFamily:
@@ -210,15 +214,46 @@ class DirichletFamily:
         return c, d
 
     @staticmethod
+    def polygamma_inputs(theta: np.ndarray):
+        """(psi'(alpha), psi'(alpha_0), psi''(alpha), psi''(alpha_0))."""
+        alpha = np.asarray(theta, dtype=np.float64) + 1.0
+        alpha0 = float(alpha.sum())
+        return (polygamma(1, alpha), float(polygamma(1, alpha0)),
+                polygamma(2, alpha), float(polygamma(2, alpha0)))
+
+    @staticmethod
+    def fisher_metric_inverse_analytical(theta: np.ndarray) -> np.ndarray:
+        """g^{-1} in closed form via Sherman-Morrison. O(k^2), no elimination."""
+        tri, tri0, _, _ = DirichletFamily.polygamma_inputs(theta)
+        return dirichlet_fisher_inverse(tri, tri0)
+
+    @staticmethod
     def scalar_curvature_analytical(theta: np.ndarray) -> float:
         """
         Exact scalar curvature via the analytical metric and the structural
         third cumulant tensor. Mathematically identical to
-        ``curvature.scalar_curvature`` on this family, but O(k^2).
+        ``curvature.scalar_curvature`` on this family.
+
+        The contraction is O(k^2), but ``np.linalg.inv`` inside
+        ``scalar_curvature_structured`` makes the complete path O(k^3).
+        ``scalar_curvature_fast`` removes that bottleneck.
         """
         g = DirichletFamily.fisher_metric_analytical(theta)
         c, d = DirichletFamily.third_cumulant_structure(theta)
         return scalar_curvature_structured(g, c, d)
+
+    @staticmethod
+    def scalar_curvature_fast(theta: np.ndarray) -> float:
+        """
+        Exact scalar curvature in O(k) time and O(k) memory.
+
+        Same number as ``scalar_curvature_analytical``, reached without ever
+        forming a k x k matrix: the Dirichlet Fisher metric is diagonal-plus-
+        rank-one, so Sherman-Morrison supplies g^{-1} in factored form and
+        every contraction in R collapses to a single pass over the experts.
+        See ``curvature.scalar_curvature_dirichlet``.
+        """
+        return scalar_curvature_dirichlet(*DirichletFamily.polygamma_inputs(theta))
 
     @staticmethod
     def mle(data: np.ndarray, max_iter: int = 1000, tol: float = 1e-8) -> np.ndarray:

@@ -4,6 +4,34 @@ Three claims were treated as hypotheses to falsify, not conclusions to defend.
 
 ---
 
+> ## Superseded in Part A
+>
+> **Two conclusions in this report's Part A are withdrawn.** A later pass built
+> a 120-digit reference (`experiments/_highprec.py`) and measured what Part A
+> could only infer from comparing two float64 routes to each other.
+>
+> 1. **"The residual sits in the shared, ill-conditioned `g⁻¹`."** Withdrawn.
+>    The dominant error was the standard-library `trigamma`/`tetragamma`, which
+>    were accurate to only ~1e-12. Because every curvature route consumes the
+>    same values, that error cancelled exactly in the route-versus-route
+>    comparison this report used, and stayed invisible: several cases listed
+>    below as passing at 1e-14 were in fact 6e-11 from the truth. Corrected,
+>    they are accurate to ~1e-15.
+> 2. **"Do not trust R beyond ~1e-11 relative when cond(g) ≳ 1e3."** Withdrawn.
+>    Conditioning of `g` does not order the error. The cancellation ratio ρ does,
+>    with R² = 0.986 and slope 1.00 against R² = 0.673 for cond(g); holding ρ
+>    fixed while moving cond(g) by fifteen orders of magnitude changes the error
+>    by 9%. The replacement rule is `error ≈ eps · ρ · kᵖ`.
+>
+> Part A's complexity table is also superseded: the O(k³) matrix inverse it
+> identified as the bottleneck has been removed, and the complete path is now
+> O(k) in time and memory.
+>
+> See `docs/numerical_reliability.md` and `docs/sherman_morrison.md`. The rest
+> of this report — Parts B, C, D, F, and the scope limit — stands as written.
+
+---
+
 ## Scope limit, stated before any result
 
 Part E of the brief — *does router structure predict 3D-generation degradation
@@ -12,6 +40,12 @@ has no MoE checkpoint, no 3D generator, no mesh tooling, and no network to
 obtain them: `torch`, `numpy`, `scipy`, `trimesh` and `open3d` are all absent,
 and PyPI and the Ubuntu archives both return 403. There are no `.pt`,
 `.safetensors`, `.obj` or `.ply` files anywhere in the repository.
+
+That scope limit was later re-checked by machine rather than by hand:
+`python -m experiments.audit_environment` evaluates all five gate conditions,
+verifies file contents rather than trusting suffixes, and exits non-zero. It
+confirms this paragraph. What is missing, and how to acquire it, is written up
+in `docs/acquisition_checklist.md`.
 
 Every router vector below is **synthetic**. That supports a *possibility*
 result — structure surviving cheap controls can exist and can be measured — and
@@ -40,14 +74,25 @@ The four misses were investigated rather than excused:
 - **Summation order ruled out.** Re-running the dense route with `math.fsum`
   (exactly rounded) changes the disagreement by less than a factor of 1.2. It
   is not k⁶ accumulation error.
-- **Catastrophic cancellation ruled out.** `‖S‖²_g` and `‖T‖²_g` differ by
-  enough that only 0.3–0.9 decimal digits are lost in the subtraction.
+- ~~**Catastrophic cancellation ruled out.** `‖S‖²_g` and `‖T‖²_g` differ by
+  enough that only 0.3–0.9 decimal digits are lost in the subtraction.~~
+  **Withdrawn.** This measured only the *final* subtraction. The larger
+  cancellation happens one level down, among the three terms that build
+  `‖T‖²_g`: at α = (200, 200, 200) they are +3.6e5, −7.2e5 and +3.6e5,
+  summing to −190. Counting every intermediate gives a cancellation ratio
+  ρ = 1.2e5 for that point, and ρ explains the error with R² = 0.986.
 
-The residual therefore sits in the shared, ill-conditioned `g⁻¹` and the
+~~The residual therefore sits in the shared, ill-conditioned `g⁻¹` and the
 polygamma inputs, which the two contraction orders amplify differently.
 Neither route is "the truth" in float64 at cond(g) ≈ 1e14. **Operational
 caveat: do not trust R beyond ~1e−11 relative when cond(g) ≳ 1e3, whichever
-route computes it.** This is a property of the formula, not of the closed form.
+route computes it.**~~
+
+**Both sentences are withdrawn**; see the banner at the top of this report.
+The table above is also stale, because it measured the routes against each
+other rather than against the truth, and because the special functions have
+since been corrected. The current numbers are in `docs/numerical_reliability.md`
+and `experiments/results/highprec_reliability.json`.
 
 ### A2 complexity — measured, not extrapolated
 
@@ -73,6 +118,18 @@ rather than claiming a clean k².
 k=64 goes from infeasible (naive) / 4.47 s (pairwise) to 0.031 s, and k=256 is
 reachable at all for the first time. Agreement across surviving routes stays
 between 1e−14 and 1e−7.
+
+**Superseded.** The bottleneck this paragraph correctly identified — the O(k³)
+matrix inverse — has since been removed. The Dirichlet Fisher metric is
+diagonal-plus-rank-one, so Sherman–Morrison gives `g⁻¹` in closed form, and
+substituting the factored inverse into the contraction makes the complete path
+O(k) in both time and memory. k=1024 goes from 105 s to 0.33 ms; k=131 072 is
+now reachable. See `docs/sherman_morrison.md` and the tables in `RESULTS.md`.
+
+The accumulation ordering also turned out to matter for accuracy, not only
+speed: in units of eps·ρ the literal six-index route grows as k^7.67, the
+pairwise route as k^2.46, and the closed form as k^0.30
+(`validate_curvature_implementation.py`, section A3).
 
 ---
 
