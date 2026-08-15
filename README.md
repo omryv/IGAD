@@ -3,11 +3,6 @@
 **Information-Geometric Anomaly Detection**
 
 
-  <a href="PASTE_EXACT_SUCCESSFUL_ACTIONS_RUN_URL_HERE">
-    <img src="https://img.shields.io/badge/verified%20run-54%2F54%20passed-brightgreen?logo=github&logoColor=white"
-         alt="Verified GitHub Actions run: 54/54 tests passed">
-  </a>
-
   <a href="https://github.com/Visigence/IGAD/commit/81dd1eb4540643083854232d9645f6add4150512">
     <img src="https://img.shields.io/badge/verified%20commit-81dd1eb-6e40c9?logo=github&logoColor=white"
          alt="Verified commit 81dd1eb">
@@ -36,13 +31,16 @@ directs it:
 | --- | --- |
 | `python -m experiments.audit_environment` | measures all five gate conditions and exits non-zero |
 | [`docs/acquisition_checklist.md`](docs/acquisition_checklist.md) | what to acquire, which candidate models exist, where to hook, what to record, and the statistical protocol |
-| `experiments/trace_schema.py` | tested record contract, including a check that rejects a post-top-k capture |
+| [`docs/experiment_plan.md`](docs/experiment_plan.md) | the experiment itself, specified step by step, calling only functions that are already written and tested |
+| `experiments/trace_schema.py`, `experiments/quality_schema.py` | tested record contracts — one rejects a post-top-k capture, the other rejects a failure label derived from routing |
+| `experiments/router_stats.py`, `experiments/evaluation.py` | the baselines, the structure-aware statistics, and the object-level statistical protocol |
 | [`docs/sherman_morrison.md`](docs/sherman_morrison.md) | Dirichlet curvature reduced from O(k³) to **O(k)** — 105 s → 0.33 ms at k=1024 |
-| [`docs/numerical_reliability.md`](docs/numerical_reliability.md) | 120-digit arbitration; `error = eps · ρ`, and the old cond(g) caveat withdrawn |
+| [`docs/numerical_reliability.md`](docs/numerical_reliability.md) | 120-digit arbitration; `error = eps · ρ`, the old cond(g) caveat withdrawn, and a read-only runtime diagnostic |
 
 Every entry in the brief's decision table that depends on real routers or real
-3D quality reads **Untested** — not "No", and not a number. Details in
-[`RESULTS.md`](RESULTS.md).
+3D quality reads **Untested** — not "No", and not a number.
+**[`docs/handoff.md`](docs/handoff.md) is the summary**: what is proven here,
+what needs external resources, and the single next action.
 
 ---
 ## Repository Status
@@ -211,6 +209,9 @@ tests/
   test_sherman_morrison.py O(k) route vs dense routes vs 120-digit reference
   test_highprec.py         The high-precision reference, against identities
   test_trace_schema.py     Router-trace contract, incl. post-top-k rejection
+  test_quality_schema.py   3D-quality contract, incl. router-derived labels
+  test_router_stats.py     Baselines and structure-aware statistics
+  test_evaluation.py       Metrics and the object-level protocol
 
 experiments/
   demo_easy.py             Experiment 1: Gamma vs Gamma
@@ -218,11 +219,18 @@ experiments/
   demo_gaussian2d.py       Experiment 3: Gaussian failure mode
   demo_dirichlet.py        Experiment 4: Dirichlet shape shifts
   demo_moe_router.py       Experiment 5: MoE router monitoring + MLE control
+
   audit_environment.py     Part 0 hard gate, measured (exits non-zero on fail)
-  trace_schema.py          Router-trace record contract + validator
+  report_test_status.py    What ran, what could not, and why
   benchmark_sherman_morrison.py  O(k^3) vs O(k^2) vs O(k), measured
   highprec_reliability.py  120-digit arbitration and the reliability boundary
+  special_function_accuracy.py   psi/psi'/psi'' vs the 120-digit reference
   make_figures.py          SVG figures, read only from saved JSON
+
+  trace_schema.py          Router-trace record contract + validator
+  quality_schema.py        3D-quality record contract + validator
+  router_stats.py          Cheap baselines and structure-aware statistics
+  evaluation.py            Metrics + object-level bootstrap/splits/paired tests
 
 docs/
   proof.md                 Mathematical background with full attribution
@@ -230,6 +238,8 @@ docs/
   sherman_morrison.md      Derivation of the O(k) curvature path
   numerical_reliability.md When R(alpha) can be trusted, and why
   acquisition_checklist.md What the 3D benchmark needs before it can run
+  experiment_plan.md       The early-warning experiment, step by step
+  handoff.md               What is proven, what needs external resources
   router_geometry.html     Concentration vs geometry: figures from sampled data
   figures/                 Experiment plots with descriptions
 
@@ -410,11 +420,32 @@ Potential applications:
 | 1D families                     | `R ≡ 0` for Poisson, Exponential, Bernoulli |
 | Gaussian families               | `R` is constant under the relevant geometry |
 | Large n with misspecified model | Model-free methods can dominate             |
-| Computational cost              | `O(d³)` tensor contractions per evaluation  |
+| Computational cost              | `O(d⁶)` literal / `O(d⁴)` pairwise for a general family; **`O(k)` for Dirichlet** |
+| Numerical cancellation          | ~`16 − log₁₀ ρ` digits survive; `curvature_reliability` reports ρ |
 
 ---
 
 ## Validation — Automated Tests
+
+**Current status is measured, not transcribed.** Run:
+
+```bash
+python -m experiments.report_test_status
+```
+
+It classifies every test into three exclusive buckets — *verified locally*
+(executed here and passed), *skipped, no dependency*, and *not collected* —
+and writes `experiments/results/test_status.json`. Only the first bucket may
+be described as verified.
+
+CI is reported separately. Every GitHub Actions run on this repository,
+including runs on `main`, currently ends in 1–3 seconds with `runner_id: 0`
+and no executed steps: the jobs never receive a runner. That is **CI
+infrastructure unavailability**, not a code result in either direction, and
+it predates the current work.
+
+The block below is the historical record of the pinned `IGAD-Ver1.0.0`
+validation run, kept for the release citation. It is not a current status.
 
 ```text
 ======================== 54 passed in 316.74s ========================

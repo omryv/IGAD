@@ -80,8 +80,32 @@ them directly.
 | [3D-MoE](https://arxiv.org/abs/2501.16698) | partly — 3D vision + pose diffusion MLLM | yes | no release found |
 | [FastDiT-3D](https://arxiv.org/abs/2312.07231) | yes — point clouds | yes — MoE for multi-category generation | no usable release found |
 
-So there are four routes, in increasing order of cost and decreasing order of
-risk that the answer will be uninterpretable.
+### The two halves exist separately, and neither half is the experiment
+
+This is worth stating on its own, because it is the mistake the rest of this
+document is arranged to prevent.
+
+| what is available | what it can validate | what it **cannot** validate |
+| --- | --- | --- |
+| **A dense 3D generator** (TRELLIS.2-4B) | the 3D quality tooling: that Chamfer, watertightness, component counts, hole detection and render alignment run, agree with hand-checked meshes, and produce a usable failure-label distribution | anything about routers. It has none. |
+| **A token-level MoE generator that is not 3D** (Nucleus-Image) | the instrumentation: that the pre-top-k hook fires at the right module, that `trace_schema` accepts the capture, that the volume budget is real, that the object-level protocol runs end to end | anything about 3D quality. Its outputs are images. |
+
+Used together they de-risk the engineering, and that is genuinely worth doing
+before spending training compute. But:
+
+> Neither one, nor both side by side, is evidence for
+> **3D MoE router → 3D quality**.
+
+A result from the image model is a result about image generation. A result
+from the dense 3D model is a result about meshes. The hypothesis is about a
+router *inside a 3D generator*, and only a model that is both can test it.
+Any report that uses either stand-in must say so in the same sentence as the
+number.
+
+### Four routes to a model that is both
+
+In increasing order of cost and decreasing order of risk that the answer will
+be uninterpretable.
 
 ### Path A — find one (cheapest, may simply fail)
 
@@ -284,21 +308,26 @@ objects only, and per-timestep references must use step ≤ *s* data.
 
 | component | file | status |
 | --- | --- | --- |
-| trace record + manifest schema, pre-top-k detector | `experiments/trace_schema.py` | built, tested |
 | gate audit | `experiments/audit_environment.py` | built, tested |
-| cheap baselines (§6): mean load, entropy, max-prob, L2 mass, trace-cov | `experiments/_router_common.py` | built |
-| log-ratio transform, empirical covariance, matrix log/power, affine-invariant distance | `experiments/_router_common.py` | built |
-| AUC, Cohen's d, seed aggregation, JSON persistence | `experiments/_router_common.py` | built |
+| router trace + manifest schema, pre-top-k detector | `experiments/trace_schema.py` | built, 23 tests |
+| 3D quality schema, router-derived-label rejection, threshold pre-registration | `experiments/quality_schema.py` | built, 30 tests |
+| cheap baselines (§6): load, imbalance, entropy, max-prob, top-1/top-2 margin, routing variance | `experiments/router_stats.py` | built, tested |
+| structure-aware statistics (§7): covariance spectrum, λ_max, spectral entropy, effective rank, anisotropy, covariance/correlation drift, affine-invariant distance | `experiments/router_stats.py` | built, tested |
+| window summary → reference state → drift scores, per-layer/per-timestep references (§9) | `experiments/router_stats.py` | built, tested |
+| ROC AUC, PR AUC, sensitivity at fixed FPR, achievable-FPR grid, Spearman, Pearson, cross-validated R² | `experiments/evaluation.py` | built, tested |
+| earliest-warning time with the "and stays there" rule (§11) | `experiments/evaluation.py` | built, tested |
+| **object-level** bootstrap CI, train/test split, k-fold, paired detector test, group-aware splitting, sample-size planner (§3) | `experiments/evaluation.py` | built, tested |
 | Dirichlet MLE with a convergence gate | `experiments/_router_common.py`, `igad/families.py` | built |
 | exact O(k) Dirichlet curvature | `igad/curvature.py`, `docs/sherman_morrison.md` | built, benchmarked |
-| numerical reliability boundary for curvature | `docs/numerical_reliability.md` | built, measured |
+| numerical reliability boundary + runtime diagnostic | `igad/curvature.py::curvature_reliability`, `docs/numerical_reliability.md` | built, measured |
+| the experiment itself, step by step | `docs/experiment_plan.md` | specified |
 
-Not built, deliberately: `capture_router_traces.py`, `evaluate_3d_quality.py`,
-`analyze_router_structure.py`, `evaluate_early_warning.py`. Writing a pipeline
-against a model that cannot be loaded produces code that has never executed a
-single line against real data, and the brief asked for a checklist rather than
-a hopeful scaffold. The schema is the exception because it is a contract that
-can be tested on its own.
+Not built, deliberately: `capture_router_traces.py` and `evaluate_3d_quality.py`
+— the two scripts that must call a model and a mesh library. Writing those
+against a runtime that cannot be imported produces code that has never executed
+a single line, and no test could tell you whether the hook is attached to the
+right module. Everything they would *call* is built and tested; what is missing
+is the twenty lines that bind them to a specific checkpoint's module names.
 
 ---
 
@@ -319,16 +348,27 @@ can be tested on its own.
 
 ---
 
-## 11. The one-line acceptance test
+## 11. The acceptance test
 
-The gate is passed when this exits zero:
+The gate is passed when all three of these exit zero:
 
 ```bash
-python -m experiments.audit_environment && \
-python -m experiments.trace_schema --manifest run_manifest.json --traces traces.jsonl
+python -m experiments.audit_environment
+python -m experiments.trace_schema   --manifest run_manifest.json     --traces  traces.jsonl
+python -m experiments.quality_schema --manifest quality_manifest.json --quality quality.jsonl
 ```
 
-and the manifest reports `pre_topk_verified: true` on real hook output, with
-at least two distinct `object_id` values in the traces. Until then, sections
-2–19 of the brief are specifications, and every entry in the final decision
-table that depends on real data reads **Untested** rather than a number.
+with, specifically:
+
+- `pre_topk_verified: true` in the trace manifest, set from
+  `verify_pre_topk_capture` on **real hook output**, not by hand;
+- at least two distinct `object_id` values on both sides;
+- `thresholds_registered_before_router_analysis: true` in the quality
+  manifest, with the commit that fixed them;
+- every `output_id` in the traces having a matching quality record.
+
+At that point `docs/experiment_plan.md` is executable start to finish, and the
+analysis functions it calls are already written and tested. Until then,
+sections 2–19 of the brief are specifications, and every entry in the final
+decision table that depends on real data reads **Untested** rather than a
+number.

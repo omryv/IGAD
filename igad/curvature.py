@@ -334,3 +334,114 @@ def scalar_curvature_dirichlet(
     )
 
     return 0.25 * (S_norm_sq - T_norm_sq)
+
+
+# Measured size exponent p in the accuracy law eps * rho * k^p, from
+# experiments/highprec_reliability.py section C5: 1.11 for this closed form,
+# 2.02-2.16 for routes that build a k x k matrix. The next integer up is used.
+_SIZE_EXPONENT_CLOSED_FORM = 1
+_EPS = 2.0 ** -53
+# Safety factor validated in section C4: 8 * max(eps*rho*k^p, floors) bounded
+# the measured error on 80 of 80 parameter points. Using the same factor here
+# keeps the digit estimate consistent with the bound, and makes it
+# conservative -- section C6 measures the worst over-promise without it at
+# 0.51 digits, against the 0.90 digits this factor buys back.
+_SAFETY = 8.0
+
+
+def curvature_reliability(
+    tri: np.ndarray,
+    tri0: float,
+    tet: np.ndarray,
+    tet0: float,
+) -> dict:
+    """How many digits of ``scalar_curvature_dirichlet`` can be trusted here.
+
+    **Diagnostic only. This does not modify R, and R is not computed
+    differently because of it.** Call it alongside
+    :func:`scalar_curvature_dirichlet` when you need to know whether the answer
+    is worth acting on.
+
+    ``R = (||S||^2_g - ||T||^2_g) / 4`` is a difference of quantities that can
+    each be enormously larger than the result. The cancellation ratio
+
+        rho = max(|intermediate|) / |S^2 - T^2|
+
+    measures that, and the measured accuracy law is ``eps * rho * k^p`` -- see
+    ``docs/numerical_reliability.md``, where the regression of log10(error) on
+    log10(rho) has R^2 = 0.986 with slope 1.00 and an intercept that recovers
+    log10(eps). Conditioning of ``g`` does *not* order the error: R^2 = 0.673,
+    and holding rho fixed while moving cond(g) fifteen orders of magnitude
+    changes the error by 9%.
+
+    Everything here comes out of the same O(k) pass that produces R, so the
+    diagnostic is free relative to the computation it describes.
+
+    Parameters
+    ----------
+    tri, tet : ndarray of shape (k,)
+        psi'(alpha_i) and psi''(alpha_i).
+    tri0, tet0 : float
+        psi'(alpha_0) and psi''(alpha_0).
+
+    Returns
+    -------
+    dict with keys:
+        ``R``                    the curvature, identical to
+                                 :func:`scalar_curvature_dirichlet`
+        ``cancellation_ratio``   rho
+        ``trusted_digits``       -log10(8 * eps * rho * k), clipped at 0; a
+                                 deliberately conservative estimate of the
+                                 number of correct significant decimal digits
+        ``relative_error_bound`` 8 * eps * rho * k, the estimated relative error
+        ``sm_denominator``       w = 1 - psi'(alpha_0) sum_i 1/psi'(alpha_i);
+                                 strictly positive for a valid parameter, and
+                                 small exactly when the router is concentrated
+
+    Notes
+    -----
+    ``trusted_digits`` is an estimate, not a certificate. It was calibrated on
+    68 parameter points spanning rho from 1 to 9e14 and k from 3 to 256, where
+    ``8 * max(eps*rho*k, input-rounding floor, special-function error)``
+    bounded the measured error in every case. It does not account for error in
+    the psi values supplied by the caller.
+    """
+    tri = np.asarray(tri, dtype=np.float64)
+    tet = np.asarray(tet, dtype=np.float64)
+    k = tri.shape[0]
+    c = -float(tet0)
+    d = tet
+
+    u = 1.0 / tri
+    U = float(u.sum())
+    w = 1.0 - tri0 * U
+    if w == 0.0:
+        raise ZeroDivisionError("Sherman-Morrison denominator 1 - c*1'D^-1*1 vanished")
+    beta = tri0 / w
+    s = U / w
+
+    S = c * s + u * (1.0 + beta * u) * d
+    S_norm_sq = float((S * S * u).sum()) + beta * float((S * u).sum()) ** 2
+
+    u3 = u ** 3
+    du3 = d * u3
+    term_a = c * c * s ** 3
+    term_b = 2.0 * c * float((d * u3).sum()) / w ** 3
+    term_c = (beta ** 3 * (float(du3.sum()) ** 2 - float((du3 * du3).sum()))
+              + float((d * du3 * (1.0 + beta * u) ** 3).sum()))
+    T_norm_sq = term_a + term_b + term_c
+
+    gap = S_norm_sq - T_norm_sq
+    biggest = max(abs(S_norm_sq), abs(T_norm_sq),
+                  abs(term_a), abs(term_b), abs(term_c))
+    rho = float("inf") if gap == 0.0 else biggest / abs(gap)
+    bound = _SAFETY * _EPS * rho * k ** _SIZE_EXPONENT_CLOSED_FORM
+    digits = 0.0 if bound >= 1.0 else -np.log10(max(bound, _EPS))
+
+    return {
+        "R": 0.25 * gap,
+        "cancellation_ratio": rho,
+        "trusted_digits": float(max(digits, 0.0)),
+        "relative_error_bound": bound,
+        "sm_denominator": w,
+    }
