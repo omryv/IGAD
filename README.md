@@ -187,9 +187,11 @@ experiments/
   demo_hard.py             Experiment 2: Gamma vs LogNormal + MLE control
   demo_gaussian2d.py       Experiment 3: Gaussian failure mode
   demo_dirichlet.py        Experiment 4: Dirichlet shape shifts
+  demo_moe_router.py       Experiment 5: MoE router monitoring + MLE control
 
 docs/
   proof.md                 Mathematical background with full attribution
+  moe_router.md            Experiment 5 results and operational guards
   figures/                 Experiment plots with descriptions
 
 RESULTS.md                 Full experimental results and analysis
