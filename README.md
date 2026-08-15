@@ -192,6 +192,7 @@ experiments/
 docs/
   proof.md                 Mathematical background with full attribution
   moe_router.md            Experiment 5 results and operational guards
+  router_geometry.html     Concentration vs geometry: figures from sampled data
   figures/                 Experiment plots with descriptions
 
 RESULTS.md                 Full experimental results and analysis
