@@ -19,6 +19,32 @@
 > Omry Damari
 
 ---
+
+## Current research phase — router structure vs 3D quality
+
+The open question is whether the internal structure of an MoE router gives an
+early-warning signal for real 3D-generation quality degradation, beyond expert
+load, routing entropy and other cheap diagnostics.
+
+**Status: the hard gate failed and the real-data benchmark was not run.** This
+environment has no tensor runtime, no checkpoint, no MoE module to hook, no
+accelerator, no mesh library, and no egress to obtain any of them. Rather than
+publish another synthetic AUC in its place, the work went where the brief
+directs it:
+
+| | |
+| --- | --- |
+| `python -m experiments.audit_environment` | measures all five gate conditions and exits non-zero |
+| [`docs/acquisition_checklist.md`](docs/acquisition_checklist.md) | what to acquire, which candidate models exist, where to hook, what to record, and the statistical protocol |
+| `experiments/trace_schema.py` | tested record contract, including a check that rejects a post-top-k capture |
+| [`docs/sherman_morrison.md`](docs/sherman_morrison.md) | Dirichlet curvature reduced from O(k³) to **O(k)** — 105 s → 0.33 ms at k=1024 |
+| [`docs/numerical_reliability.md`](docs/numerical_reliability.md) | 120-digit arbitration; `error = eps · ρ`, and the old cond(g) caveat withdrawn |
+
+Every entry in the brief's decision table that depends on real routers or real
+3D quality reads **Untested** — not "No", and not a number. Details in
+[`RESULTS.md`](RESULTS.md).
+
+---
 ## Repository Status
 
 IGAD is currently a verified research artifact.
@@ -174,13 +200,17 @@ The critical quantity is `‖T‖²_g`: a three-index contraction of the third c
 ```text
 igad/
   __init__.py         Package version and public exports
-  curvature.py        Fisher metric, third cumulant tensor, scalar curvature
+  curvature.py        Fisher metric, third cumulant tensor, scalar curvature,
+                      O(k) Dirichlet curvature via Sherman-Morrison
   families.py         GammaFamily, PoissonFamily, DirichletFamily
   detector.py         IGADDetector batch-level scoring
 
 tests/
   test_curvature.py        Curvature and Gamma family validation
   test_dirichlet_family.py Dirichlet validation and sample efficiency
+  test_sherman_morrison.py O(k) route vs dense routes vs 120-digit reference
+  test_highprec.py         The high-precision reference, against identities
+  test_trace_schema.py     Router-trace contract, incl. post-top-k rejection
 
 experiments/
   demo_easy.py             Experiment 1: Gamma vs Gamma
@@ -188,10 +218,18 @@ experiments/
   demo_gaussian2d.py       Experiment 3: Gaussian failure mode
   demo_dirichlet.py        Experiment 4: Dirichlet shape shifts
   demo_moe_router.py       Experiment 5: MoE router monitoring + MLE control
+  audit_environment.py     Part 0 hard gate, measured (exits non-zero on fail)
+  trace_schema.py          Router-trace record contract + validator
+  benchmark_sherman_morrison.py  O(k^3) vs O(k^2) vs O(k), measured
+  highprec_reliability.py  120-digit arbitration and the reliability boundary
+  make_figures.py          SVG figures, read only from saved JSON
 
 docs/
   proof.md                 Mathematical background with full attribution
   moe_router.md            Experiment 5 results and operational guards
+  sherman_morrison.md      Derivation of the O(k) curvature path
+  numerical_reliability.md When R(alpha) can be trusted, and why
+  acquisition_checklist.md What the 3D benchmark needs before it can run
   router_geometry.html     Concentration vs geometry: figures from sampled data
   figures/                 Experiment plots with descriptions
 
@@ -226,7 +264,6 @@ print(f"IGAD score: {score:.6f}")  # Higher = more anomalous
 ```bash
 pip install -e ".[dev]"
 pytest tests/ -v
-# 54 passed
 ```
 
 ---
@@ -377,7 +414,7 @@ Potential applications:
 
 ---
 
-## Validation — 54 Automated Tests
+## Validation — Automated Tests
 
 ```text
 ======================== 54 passed in 316.74s ========================

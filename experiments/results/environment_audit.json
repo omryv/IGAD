@@ -1,0 +1,738 @@
+{
+  "accelerator": {
+    "nvidia_devices": [],
+    "nvidia_smi": false,
+    "rocm_smi": false,
+    "torch_cuda": null,
+    "torch_mps": null
+  },
+  "filesystem": {
+    "ambiguous": [
+      {
+        "bytes": 10740,
+        "path": "/etc/apparmor.d/usr.lib.libreoffice.program.soffice.bin",
+        "plausible": false
+      },
+      {
+        "bytes": 0,
+        "path": "/etc/apparmor.d/local/usr.lib.libreoffice.program.soffice.bin",
+        "plausible": false
+      },
+      {
+        "bytes": 14488,
+        "path": "/usr/lib/libreoffice/program/unopkg.bin",
+        "plausible": false
+      },
+      {
+        "bytes": 14488,
+        "path": "/usr/lib/libreoffice/program/soffice.bin",
+        "plausible": false
+      },
+      {
+        "bytes": 85048,
+        "path": "/usr/lib/libreoffice/program/uno.bin",
+        "plausible": false
+      },
+      {
+        "bytes": 133202,
+        "path": "/usr/local/go1.24.7/src/debug/dwarf/testdata/line-gcc-win.bin",
+        "plausible": false
+      },
+      {
+        "bytes": 65,
+        "path": "/usr/local/go1.24.7/src/compress/bzip2/testdata/pass-random2.bin",
+        "plausible": false
+      },
+      {
+        "bytes": 1024,
+        "path": "/usr/local/go1.24.7/src/compress/bzip2/testdata/pass-random1.bin",
+        "plausible": false
+      },
+      {
+        "bytes": 22688,
+        "path": "/usr/bin/valgrind.bin",
+        "plausible": false
+      },
+      {
+        "bytes": 712401,
+        "path": "/opt/pw-browsers/chromium_headless_shell-1194/chrome-linux/v8_context_snapshot.bin",
+        "plausible": false
+      },
+      {
+        "bytes": 712401,
+        "path": "/opt/pw-browsers/chromium-1194/chrome-linux/v8_context_snapshot.bin",
+        "plausible": false
+      }
+    ],
+    "checkpoints": [
+      {
+        "bytes": 930,
+        "path": "/root/.cache/uv/interpreter-v4/cfa55447e292f25d/de80ffa6bd4218f9.msgpack",
+        "plausible": false
+      },
+      {
+        "bytes": 563,
+        "path": "/root/.cache/uv/wheels-v5/pypi/distlib/0.4.0-py2.py3-none-any.msgpack",
+        "plausible": false
+      },
+      {
+        "bytes": 580,
+        "path": "/root/.cache/uv/wheels-v5/pypi/shellingham/1.5.4-py2.py3-none-any.msgpack",
+        "plausible": false
+      },
+      {
+        "bytes": 584,
+        "path": "/root/.cache/uv/wheels-v5/pypi/more-itertools/10.8.0-py3-none-any.msgpack",
+        "plausible": false
+      },
+      {
+        "bytes": 788,
+        "path": "/root/.cache/uv/wheels-v5/pypi/pathspec/1.0.4-py3-none-any.msgpack",
+        "plausible": false
+      },
+      {
+        "bytes": 1255,
+        "path": "/root/.cache/uv/wheels-v5/pypi/importlib-metadata/9.0.0-py3-none-any.msgpack",
+        "plausible": false
+      },
+      {
+        "bytes": 567,
+        "path": "/root/.cache/uv/wheels-v5/pypi/mccabe/0.7.0-py2.py3-none-any.msgpack",
+        "plausible": false
+      },
+      {
+        "bytes": 571,
+        "path": "/root/.cache/uv/wheels-v5/pypi/iniconfig/2.3.0-py3-none-any.msgpack",
+        "plausible": false
+      },
+      {
+        "bytes": 569,
+        "path": "/root/.cache/uv/wheels-v5/pypi/packaging/26.0-py3-none-any.msgpack",
+        "plausible": false
+      },
+      {
+        "bytes": 571,
+        "path": "/root/.cache/uv/wheels-v5/pypi/filelock/3.25.2-py3-none-any.msgpack",
+        "plausible": false
+      },
+      {
+        "bytes": 666,
+        "path": "/root/.cache/uv/wheels-v5/pypi/pkginfo/1.12.1.2-py3-none-any.msgpack",
+        "plausible": false
+      },
+      {
+        "bytes": 681,
+        "path": "/root/.cache/uv/wheels-v5/pypi/idna/3.11-py3-none-any.msgpack",
+        "plausible": false
+      },
+      {
+        "bytes": 1034,
+        "path": "/root/.cache/uv/wheels-v5/pypi/jaraco-classes/3.4.0-py3-none-any.msgpack",
+        "plausible": false
+      },
+      {
+        "bytes": 648,
+        "path": "/root/.cache/uv/wheels-v5/pypi/cffi/2.0.0-cp311-cp311-manylinux2014_x86_64.manylinux_2_17_x86_64.msgpack",
+        "plausible": false
+      },
+      {
+        "bytes": 614,
+        "path": "/root/.cache/uv/wheels-v5/pypi/secretstorage/3.5.0-py3-none-any.msgpack",
+        "plausible": false
+      },
+      {
+        "bytes": 1141,
+        "path": "/root/.cache/uv/wheels-v5/pypi/dulwich/1.1.0-cp311-cp311-manylinux_2_28_x86_64.msgpack",
+        "plausible": false
+      },
+      {
+        "bytes": 650,
+        "path": "/root/.cache/uv/wheels-v5/pypi/requests-toolbelt/1.0.0-py2.py3-none-any.msgpack",
+        "plausible": false
+      },
+      {
+        "bytes": 587,
+        "path": "/root/.cache/uv/wheels-v5/pypi/typing-extensions/4.15.0-py3-none-any.msgpack",
+        "plausible": false
+      },
+      {
+        "bytes": 642,
+        "path": "/root/.cache/uv/wheels-v5/pypi/pygments/2.20.0-py3-none-any.msgpack",
+        "plausible": false
+      },
+      {
+        "bytes": 1092,
+        "path": "/root/.cache/uv/wheels-v5/pypi/cachecontrol/0.14.4-py3-none-any.msgpack",
+        "plausible": false
+      },
+      {
+        "bytes": 908,
+        "path": "/root/.cache/uv/wheels-v5/pypi/urllib3/2.6.3-py3-none-any.msgpack",
+        "plausible": false
+      },
+      {
+        "bytes": 962,
+        "path": "/root/.cache/uv/wheels-v5/pypi/pytest/9.0.2-py3-none-any.msgpack",
+        "plausible": false
+      },
+      {
+        "bytes": 630,
+        "path": "/root/.cache/uv/wheels-v5/pypi/librt/0.8.1-516d0c2242d49034.msgpack",
+        "plausible": false
+      },
+      {
+        "bytes": 668,
+        "path": "/root/.cache/uv/wheels-v5/pypi/charset-normalizer/3.4.6-516d0c2242d49034.msgpack",
+        "plausible": false
+      },
+      {
+        "bytes": 639,
+        "path": "/root/.cache/uv/wheels-v5/pypi/flake8/7.3.0-py2.py3-none-any.msgpack",
+        "plausible": false
+      },
+      {
+        "bytes": 570,
+        "path": "/root/.cache/uv/wheels-v5/pypi/installer/0.7.0-py3-none-any.msgpack",
+        "plausible": false
+      },
+      {
+        "bytes": 569,
+        "path": "/root/.cache/uv/wheels-v5/pypi/pyflakes/3.4.0-py2.py3-none-any.msgpack",
+        "plausible": false
+      },
+      {
+        "bytes": 766,
+        "path": "/root/.cache/uv/wheels-v5/pypi/pyright/1.1.408-py3-none-any.msgpack",
+        "plausible": false
+      },
+      {
+        "bytes": 1192,
+        "path": "/root/.cache/uv/wheels-v5/pypi/jaraco-functools/4.4.0-py3-none-any.msgpack",
+        "plausible": false
+      },
+      {
+        "bytes": 1465,
+        "path": "/root/.cache/uv/wheels-v5/pypi/keyring/25.7.0-py3-none-any.msgpack",
+        "plausible": false
+      },
+      {
+        "bytes": 626,
+        "path": "/root/.cache/uv/wheels-v5/pypi/nodeenv/1.10.0-py2.py3-none-any.msgpack",
+        "plausible": false
+      },
+      {
+        "bytes": 574,
+        "path": "/root/.cache/uv/wheels-v5/pypi/platformdirs/4.9.4-py3-none-any.msgpack",
+        "plausible": false
+      },
+      {
+        "bytes": 569,
+        "path": "/root/.cache/uv/wheels-v5/pypi/pycparser/3.0-py3-none-any.msgpack",
+        "plausible": false
+      },
+      {
+        "bytes": 632,
+        "path": "/root/.cache/uv/wheels-v5/pypi/msgpack/1.1.2-516d0c2242d49034.msgpack",
+        "plausible": false
+      },
+      {
+        "bytes": 1228,
+        "path": "/root/.cache/uv/wheels-v5/pypi/jaraco-context/6.1.2-py3-none-any.msgpack",
+        "plausible": false
+      },
+      {
+        "bytes": 737,
+        "path": "/root/.cache/uv/wheels-v5/pypi/pbs-installer/2026.3.25-py3-none-any.msgpack",
+        "plausible": false
+      },
+      {
+        "bytes": 857,
+        "path": "/root/.cache/uv/wheels-v5/pypi/virtualenv/21.2.0-py3-none-any.msgpack",
+        "plausible": false
+      },
+      {
+        "bytes": 575,
+        "path": "/root/.cache/uv/wheels-v5/pypi/crashtest/0.4.1-py3-none-any.msgpack",
+        "plausible": false
+      },
+      {
+        "bytes": 596,
+        "path": "/root/.cache/uv/wheels-v5/pypi/trove-classifiers/2026.1.14.14-py3-none-any.msgpack",
+        "plausible": false
+      },
+      {
+        "bytes": 852,
+        "path": "/root/.cache/uv/wheels-v5/pypi/pytokens/0.4.1-516d0c2242d49034.msgpack",
+        "plausible": false
+      },
+      {
+        "bytes": 986,
+        "path": "/root/.cache/uv/wheels-v5/pypi/backports-tarfile/1.2.0-py3-none-any.msgpack",
+        "plausible": false
+      },
+      {
+        "bytes": 824,
+        "path": "/root/.cache/uv/wheels-v5/pypi/fastjsonschema/2.21.2-py3-none-any.msgpack",
+        "plausible": false
+      },
+      {
+        "bytes": 598,
+        "path": "/root/.cache/uv/wheels-v5/pypi/ruff/0.15.8-py3-none-manylinux_2_17_x86_64.manylinux2014_x86_64.msgpack",
+        "plausible": false
+      },
+      {
+        "bytes": 1709,
+        "path": "/root/.cache/uv/wheels-v5/pypi/cryptography/46.0.6-cp311-abi3-manylinux_2_34_x86_64.msgpack",
+        "plausible": false
+      },
+      {
+        "bytes": 578,
+        "path": "/root/.cache/uv/wheels-v5/pypi/poetry-core/2.3.2-py3-none-any.msgpack",
+        "plausible": false
+      },
+      {
+        "bytes": 970,
+        "path": "/root/.cache/uv/wheels-v5/pypi/httpx/0.28.1-py3-none-any.msgpack",
+        "plausible": false
+      },
+      {
+        "bytes": 557,
+        "path": "/root/.cache/uv/wheels-v5/pypi/h11/0.16.0-py3-none-any.msgpack",
+        "plausible": false
+      },
+      {
+        "bytes": 836,
+        "path": "/root/.cache/uv/wheels-v5/pypi/zstandard/0.25.0-cp311-cp311-manylinux2014_x86_64.manylinux_2_17_x86_64.msgpack",
+        "plausible": false
+      },
+      {
+        "bytes": 723,
+        "path": "/root/.cache/uv/wheels-v5/pypi/anyio/4.13.0-py3-none-any.msgpack",
+        "plausible": false
+      },
+      {
+        "bytes": 1243,
+        "path": "/root/.cache/uv/wheels-v5/pypi/zipp/3.23.0-py3-none-any.msgpack",
+        "plausible": false
+      },
+      {
+        "bytes": 772,
+        "path": "/root/.cache/uv/wheels-v5/pypi/requests/2.33.1-py3-none-any.msgpack",
+        "plausible": false
+      },
+      {
+        "bytes": 1032,
+        "path": "/root/.cache/uv/wheels-v5/pypi/build/1.4.2-py3-none-any.msgpack",
+        "plausible": false
+      },
+      {
+        "bytes": 605,
+        "path": "/root/.cache/uv/wheels-v5/pypi/findpython/0.7.1-py3-none-any.msgpack",
+        "plausible": false
+      },
+      {
+        "bytes": 1134,
+        "path": "/root/.cache/uv/wheels-v5/pypi/black/26.3.1-516d0c2242d49034.msgpack",
+        "plausible": false
+      },
+      {
+        "bytes": 812,
+        "path": "/root/.cache/uv/wheels-v5/pypi/jeepney/0.9.0-py3-none-any.msgpack",
+        "plausible": false
+      },
+      {
+        "bytes": 569,
+        "path": "/root/.cache/uv/wheels-v5/pypi/tomlkit/0.14.0-py3-none-any.msgpack",
+        "plausible": false
+      },
+      {
+        "bytes": 991,
+        "path": "/root/.cache/uv/wheels-v5/pypi/python-discovery/1.2.1-py3-none-any.msgpack",
+        "plausible": false
+      },
+      {
+        "bytes": 1174,
+        "path": "/root/.cache/uv/wheels-v5/pypi/poetry/2.3.3-py3-none-any.msgpack",
+        "plausible": false
+      },
+      {
+        "bytes": 572,
+        "path": "/root/.cache/uv/wheels-v5/pypi/certifi/2026.2.25-py3-none-any.msgpack",
+        "plausible": false
+      },
+      {
+        "bytes": 584,
+        "path": "/root/.cache/uv/wheels-v5/pypi/pyproject-hooks/1.2.0-py3-none-any.msgpack",
+        "plausible": false
+      },
+      {
+        "bytes": 603,
+        "path": "/root/.cache/uv/wheels-v5/pypi/click/8.3.1-py3-none-any.msgpack",
+        "plausible": false
+      },
+      {
+        "bytes": 1008,
+        "path": "/root/.cache/uv/wheels-v5/pypi/mypy/1.19.1-516d0c2242d49034.msgpack",
+        "plausible": false
+      },
+      {
+        "bytes": 747,
+        "path": "/root/.cache/uv/wheels-v5/pypi/httpcore/1.0.9-py3-none-any.msgpack",
+        "plausible": false
+      },
+      {
+        "bytes": 581,
+        "path": "/root/.cache/uv/wheels-v5/pypi/pycodestyle/2.14.0-py2.py3-none-any.msgpack",
+        "plausible": false
+      },
+      {
+        "bytes": 647,
+        "path": "/root/.cache/uv/wheels-v5/pypi/rapidfuzz/3.14.3-cp311-cp311-manylinux_2_27_x86_64.manylinux_2_28_x86_64.msgpack",
+        "plausible": false
+      },
+      {
+        "bytes": 610,
+        "path": "/root/.cache/uv/wheels-v5/pypi/cleo/2.1.0-py3-none-any.msgpack",
+        "plausible": false
+      },
+      {
+        "bytes": 725,
+        "path": "/root/.cache/uv/wheels-v5/pypi/pluggy/1.6.0-py3-none-any.msgpack",
+        "plausible": false
+      },
+      {
+        "bytes": 584,
+        "path": "/root/.cache/uv/wheels-v5/pypi/mypy-extensions/1.1.0-py3-none-any.msgpack",
+        "plausible": false
+      },
+      {
+        "bytes": 18,
+        "path": "/root/.local/share/uv/tools/pytest/lib/python3.11/site-packages/_virtualenv.pth",
+        "plausible": false
+      },
+      {
+        "bytes": 18,
+        "path": "/root/.local/share/uv/tools/flake8/lib/python3.11/site-packages/_virtualenv.pth",
+        "plausible": false
+      },
+      {
+        "bytes": 18,
+        "path": "/root/.local/share/uv/tools/pyright/lib/python3.11/site-packages/_virtualenv.pth",
+        "plausible": false
+      },
+      {
+        "bytes": 18,
+        "path": "/root/.local/share/uv/tools/ruff/lib/python3.11/site-packages/_virtualenv.pth",
+        "plausible": false
+      },
+      {
+        "bytes": 18,
+        "path": "/root/.local/share/uv/tools/black/lib/python3.11/site-packages/_virtualenv.pth",
+        "plausible": false
+      },
+      {
+        "bytes": 18,
+        "path": "/root/.local/share/uv/tools/poetry/lib/python3.11/site-packages/_virtualenv.pth",
+        "plausible": false
+      },
+      {
+        "bytes": 18,
+        "path": "/root/.local/share/uv/tools/mypy/lib/python3.11/site-packages/_virtualenv.pth",
+        "plausible": false
+      },
+      {
+        "bytes": 151,
+        "path": "/usr/lib/python3/dist-packages/distutils-precedence.pth",
+        "plausible": false
+      },
+      {
+        "bytes": 31,
+        "path": "/usr/local/lib/python3.10/dist-packages/uno.pth",
+        "plausible": false
+      },
+      {
+        "bytes": 31,
+        "path": "/usr/local/lib/python3.12/dist-packages/uno.pth",
+        "plausible": false
+      },
+      {
+        "bytes": 31,
+        "path": "/usr/local/lib/python3.11/dist-packages/uno.pth",
+        "plausible": false
+      },
+      {
+        "bytes": 151,
+        "path": "/home/user/IGAD/.venv/lib/python3.11/site-packages/distutils-precedence.pth",
+        "plausible": false
+      }
+    ],
+    "meshes": [
+      {
+        "bytes": 4160,
+        "path": "/usr/local/go1.24.7/src/debug/elf/testdata/go-relocation-test-gcc493-mips64le.obj",
+        "plausible": false
+      },
+      {
+        "bytes": 3016,
+        "path": "/usr/local/go1.24.7/src/debug/elf/testdata/go-relocation-test-gcc482-ppc64le.obj",
+        "plausible": false
+      },
+      {
+        "bytes": 2208,
+        "path": "/usr/local/go1.24.7/src/debug/elf/testdata/compressed-32.obj",
+        "plausible": false
+      },
+      {
+        "bytes": 3092,
+        "path": "/usr/local/go1.24.7/src/debug/elf/testdata/go-relocation-test-clang-arm.obj",
+        "plausible": false
+      },
+      {
+        "bytes": 3088,
+        "path": "/usr/local/go1.24.7/src/debug/elf/testdata/go-relocation-test-gcc424-x86-64.obj",
+        "plausible": false
+      },
+      {
+        "bytes": 3392,
+        "path": "/usr/local/go1.24.7/src/debug/elf/testdata/go-relocation-test-gcc482-aarch64.obj",
+        "plausible": false
+      },
+      {
+        "bytes": 3064,
+        "path": "/usr/local/go1.24.7/src/debug/elf/testdata/go-relocation-test-gcc540-mips.obj",
+        "plausible": false
+      },
+      {
+        "bytes": 1884,
+        "path": "/usr/local/go1.24.7/src/debug/elf/testdata/go-relocation-test-gcc441-x86.obj",
+        "plausible": false
+      },
+      {
+        "bytes": 4120,
+        "path": "/usr/local/go1.24.7/src/debug/elf/testdata/go-relocation-test-gcc492-mips64.obj",
+        "plausible": false
+      },
+      {
+        "bytes": 3280,
+        "path": "/usr/local/go1.24.7/src/debug/elf/testdata/compressed-64.obj",
+        "plausible": false
+      },
+      {
+        "bytes": 2356,
+        "path": "/usr/local/go1.24.7/src/debug/elf/testdata/go-relocation-test-gcc5-ppc.obj",
+        "plausible": false
+      },
+      {
+        "bytes": 5952,
+        "path": "/usr/local/go1.24.7/src/debug/elf/testdata/go-relocation-test-gcc620-sparc64.obj",
+        "plausible": false
+      },
+      {
+        "bytes": 6544,
+        "path": "/usr/local/go1.24.7/src/debug/elf/testdata/gcc-amd64-openbsd-debug-with-rela.obj",
+        "plausible": false
+      },
+      {
+        "bytes": 3216,
+        "path": "/usr/local/go1.24.7/src/debug/elf/testdata/zdebug-test-gcc484-x86-64.obj",
+        "plausible": false
+      },
+      {
+        "bytes": 2864,
+        "path": "/usr/local/go1.24.7/src/debug/elf/testdata/go-relocation-test-gcc492-mipsle.obj",
+        "plausible": false
+      },
+      {
+        "bytes": 2648,
+        "path": "/usr/local/go1.24.7/src/debug/elf/testdata/go-relocation-test-gcc492-arm.obj",
+        "plausible": false
+      },
+      {
+        "bytes": 3864,
+        "path": "/usr/local/go1.24.7/src/debug/elf/testdata/go-relocation-test-gcc531-s390x.obj",
+        "plausible": false
+      },
+      {
+        "bytes": 9576,
+        "path": "/usr/local/go1.24.7/src/debug/elf/testdata/go-relocation-test-gcc720-riscv64.obj",
+        "plausible": false
+      },
+      {
+        "bytes": 1900,
+        "path": "/usr/local/go1.24.7/src/debug/elf/testdata/go-relocation-test-clang-x86.obj",
+        "plausible": false
+      },
+      {
+        "bytes": 2936,
+        "path": "/usr/local/go1.24.7/src/debug/elf/testdata/go-relocation-test-gcc441-x86-64.obj",
+        "plausible": false
+      }
+    ],
+    "min_checkpoint_bytes": 10485760,
+    "n_ambiguous": 11,
+    "n_checkpoints": 80,
+    "n_checkpoints_plausible": 0,
+    "n_meshes": 20,
+    "n_meshes_plausible": 0,
+    "scanned_dirs": 20077,
+    "truncated": false
+  },
+  "gate": {
+    "conditions": [
+      {
+        "blocking": [
+          "tensor runtime",
+          "3D generator code"
+        ],
+        "condition": "a runnable 3D generator with actual MoE routing",
+        "evidence": "no tensor runtime installed (torch/jax/tensorflow all absent)",
+        "id": 1,
+        "met": false
+      },
+      {
+        "blocking": [
+          "no weights on disk",
+          "huggingface.co unreachable"
+        ],
+        "condition": "a real checkpoint",
+        "evidence": "91 files carry a weight suffix but only 0 are larger than 10 MiB; the rest are package-manager caches and toolchain fixtures, not model weights",
+        "id": 2,
+        "met": false
+      },
+      {
+        "blocking": [
+          "no MoE module to hook"
+        ],
+        "condition": "access to the router logits or probabilities",
+        "evidence": "moot without a model; capturing pre-top-k softmax needs a forward hook on an MoE gate module that does not exist here",
+        "id": 3,
+        "met": false
+      },
+      {
+        "blocking": [
+          "no generator",
+          "no GPU"
+        ],
+        "condition": "a way to generate multiple 3D outputs",
+        "evidence": "no generator, and no accelerator: no nvidia-smi, no /dev/nvidia*, no CUDA-capable torch",
+        "id": 4,
+        "met": false
+      },
+      {
+        "blocking": [
+          "no mesh/geometry library",
+          "no reference meshes"
+        ],
+        "condition": "at least one quantitative 3D-quality measurement",
+        "evidence": "no mesh library installed; of 20 mesh-suffixed files on disk, 0 survive a header check (the rest are ELF object files named .obj)",
+        "id": 5,
+        "met": false
+      }
+    ],
+    "gate_passed": false,
+    "installable": false,
+    "reachable_hosts": [],
+    "weights_downloadable": false
+  },
+  "network": [
+    {
+      "detail": "URLError: <urlopen error Tunnel connection failed: 403 Forbidden>",
+      "host": "huggingface.co",
+      "purpose": "model weights",
+      "reachable": false,
+      "url": "https://huggingface.co/api/models?limit=1"
+    },
+    {
+      "detail": "HTTP 403",
+      "host": "pypi.org",
+      "purpose": "python packages",
+      "reachable": false,
+      "url": "https://pypi.org/simple/torch/"
+    },
+    {
+      "detail": "HTTP 403",
+      "host": "files.pythonhosted.org",
+      "purpose": "python wheels",
+      "reachable": false,
+      "url": "https://files.pythonhosted.org/"
+    },
+    {
+      "detail": "HTTP 400",
+      "host": "github.com",
+      "purpose": "source checkouts",
+      "reachable": false,
+      "url": "https://github.com/"
+    },
+    {
+      "detail": "URLError: <urlopen error Tunnel connection failed: 403 Forbidden>",
+      "host": "raw.githubusercontent.com",
+      "purpose": "source files",
+      "reachable": false,
+      "url": "https://raw.githubusercontent.com/"
+    },
+    {
+      "detail": "URLError: <urlopen error Tunnel connection failed: 403 Forbidden>",
+      "host": "objaverse (allenai)",
+      "purpose": "3D evaluation assets",
+      "reachable": false,
+      "url": "https://huggingface.co/datasets/allenai/objaverse"
+    },
+    {
+      "detail": "HTTP 403",
+      "host": "archive.ubuntu.com",
+      "purpose": "system packages",
+      "reachable": false,
+      "url": "http://archive.ubuntu.com/ubuntu/"
+    }
+  ],
+  "packages": {
+    "3D geometry": {
+      "kaolin": null,
+      "libigl": null,
+      "nvdiffrast": null,
+      "open3d": null,
+      "point_cloud_utils": null,
+      "pymeshlab": null,
+      "pyrender": null,
+      "pytorch3d": null,
+      "trimesh": null
+    },
+    "generation runtime": {
+      "jax": null,
+      "tensorflow": null,
+      "torch": null
+    },
+    "image/conditioning": {
+      "PIL": null,
+      "clip": null,
+      "cv2": null,
+      "open_clip": null
+    },
+    "model plumbing": {
+      "accelerate": null,
+      "diffusers": null,
+      "einops": null,
+      "huggingface_hub": null,
+      "safetensors": null,
+      "timm": null,
+      "transformers": null
+    },
+    "numerics": {
+      "matplotlib": null,
+      "mpmath": null,
+      "numpy": null,
+      "scipy": null,
+      "sklearn": null
+    }
+  },
+  "resources": {
+    "cpu_count": 4,
+    "disk_free_bytes": 32169144320,
+    "disk_total_bytes": 270553174016,
+    "mem_available_bytes": 16043945984,
+    "mem_total_bytes": 16856068096,
+    "platform": "Linux-6.18.5-fc-v20-x86_64-with-glibc2.39",
+    "python": "3.11.15"
+  },
+  "scan_root": "/"
+}
