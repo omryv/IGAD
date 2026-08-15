@@ -1,0 +1,298 @@
+{
+  "A1": {
+    "all_pass": false,
+    "cases": [
+      {
+        "R_dense_naive": 1.5109257631247774,
+        "R_dense_pairwise": 1.5109257631247708,
+        "R_structured": 1.5109257631247983,
+        "abs_err": 2.0872192862952943e-14,
+        "alpha": [
+          4.0,
+          4.0,
+          4.0
+        ],
+        "case": "symmetric k=3",
+        "cond_g": 12.277493477689289,
+        "k": 3,
+        "pass": true,
+        "rel_err": 1.3814174972956131e-14
+      },
+      {
+        "R_dense_naive": 2.0212577073420173,
+        "R_dense_pairwise": 2.0212577073420537,
+        "R_structured": 2.0212577073420563,
+        "abs_err": 3.907985046680551e-14,
+        "alpha": [
+          2.0,
+          2.0,
+          2.0,
+          2.0
+        ],
+        "case": "symmetric k=4",
+        "cond_g": 5.738561925187846,
+        "k": 4,
+        "pass": true,
+        "rel_err": 1.9334422485985754e-14
+      },
+      {
+        "R_dense_naive": 2.9176863238863646,
+        "R_dense_pairwise": 2.9176863238857873,
+        "R_structured": 2.917686323885782,
+        "abs_err": 5.826450433232822e-13,
+        "alpha": [
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ],
+        "case": "symmetric k=6",
+        "cond_g": 2.9532224380787446,
+        "k": 6,
+        "pass": true,
+        "rel_err": 1.9969420240733682e-13
+      },
+      {
+        "R_dense_naive": 1.4961771272316806,
+        "R_dense_pairwise": 1.4961771272316815,
+        "R_structured": 1.496177127231693,
+        "abs_err": 1.2434497875801753e-14,
+        "alpha": [
+          1.5,
+          4.0,
+          6.5
+        ],
+        "case": "asymmetric k=3",
+        "cond_g": 52.4534627069216,
+        "k": 3,
+        "pass": true,
+        "rel_err": 8.310846122082369e-15
+      },
+      {
+        "R_dense_naive": 1.68325483796501,
+        "R_dense_pairwise": 1.683254837965047,
+        "R_structured": 1.6832548379649914,
+        "abs_err": 1.865174681370263e-14,
+        "alpha": [
+          14.5,
+          0.5,
+          0.5,
+          0.5
+        ],
+        "case": "strongly asymmetric k=4",
+        "cond_g": 1155.6178894591214,
+        "k": 4,
+        "pass": true,
+        "rel_err": 1.1080762337954643e-14
+      },
+      {
+        "R_dense_naive": 1.9458309360155388,
+        "R_dense_pairwise": 1.9458309360155184,
+        "R_structured": 1.945830936015505,
+        "abs_err": 3.375077994860476e-14,
+        "alpha": [
+          0.05,
+          3.0,
+          12.0,
+          0.4,
+          6.0
+        ],
+        "case": "strongly asymmetric k=5",
+        "cond_g": 58018.15484555274,
+        "k": 5,
+        "pass": true,
+        "rel_err": 1.734517594715394e-14
+      },
+      {
+        "R_dense_naive": 0.3668668730760807,
+        "R_dense_pairwise": 0.3668668730760771,
+        "R_structured": 0.3668668730760789,
+        "abs_err": 1.7763568394002505e-15,
+        "alpha": [
+          0.05,
+          0.05,
+          0.05
+        ],
+        "case": "low concentration k=3",
+        "cond_g": 1.5200211668852006,
+        "k": 3,
+        "pass": true,
+        "rel_err": 4.841965764054882e-15
+      },
+      {
+        "R_dense_naive": 0.4930509425530758,
+        "R_dense_pairwise": 0.4930509425531113,
+        "R_structured": 0.49305094255310955,
+        "abs_err": 3.375077994860476e-14,
+        "alpha": [
+          0.02,
+          0.03,
+          0.02,
+          0.05
+        ],
+        "case": "low concentration k=4",
+        "cond_g": 7.871722882489729,
+        "k": 4,
+        "pass": true,
+        "rel_err": 6.84529265350133e-14
+      },
+      {
+        "R_dense_naive": 1.5005499331934713,
+        "R_dense_pairwise": 1.500549933194267,
+        "R_structured": 1.500549933168804,
+        "abs_err": 2.4667379250331578e-11,
+        "alpha": [
+          200.0,
+          200.0,
+          200.0
+        ],
+        "case": "high concentration k=3",
+        "cond_g": 600.1687989547788,
+        "k": 3,
+        "pass": false,
+        "rel_err": 1.6438892638403874e-11
+      },
+      {
+        "R_dense_naive": 2.0004190957166044,
+        "R_dense_pairwise": 2.000419095734311,
+        "R_structured": 2.000419095754591,
+        "abs_err": 3.7986502832154656e-11,
+        "alpha": [
+          500.0,
+          480.0,
+          510.0,
+          495.0
+        ],
+        "case": "high concentration k=4",
+        "cond_g": 1356.0459737370495,
+        "k": 4,
+        "pass": false,
+        "rel_err": 1.8989272254745628e-11
+      },
+      {
+        "R_dense_naive": 0.9152065230881039,
+        "R_dense_pairwise": 0.915206523088111,
+        "R_structured": 0.9152065141147308,
+        "abs_err": 8.97337315564073e-09,
+        "alpha": [
+          0.001,
+          1.0,
+          5000.0
+        ],
+        "case": "ill-conditioned k=3",
+        "cond_g": 63593981997972.64,
+        "k": 3,
+        "pass": false,
+        "rel_err": 9.804752183542831e-09
+      },
+      {
+        "R_dense_naive": 0.9378793664234042,
+        "R_dense_pairwise": 0.9378793664234006,
+        "R_structured": 0.9378793661280653,
+        "abs_err": 2.9533886447552504e-10,
+        "alpha": [
+          0.0001,
+          0.01,
+          1.0,
+          1000.0
+        ],
+        "case": "ill-conditioned k=4",
+        "cond_g": 248562604626558.72,
+        "k": 4,
+        "pass": false,
+        "rel_err": 3.1490069517340757e-10
+      },
+      {
+        "R_dense_naive": 0.6000000046388125,
+        "R_dense_pairwise": 0.6000000046382556,
+        "R_structured": 0.6000000046382707,
+        "abs_err": 5.417888360170764e-13,
+        "alpha": [
+          1e-05,
+          1e-05,
+          1e-05,
+          1e-05,
+          1e-05
+        ],
+        "case": "near-degenerate k=5",
+        "cond_g": 1.2500000012336072,
+        "k": 5,
+        "pass": true,
+        "rel_err": 9.02981386380525e-13
+      }
+    ],
+    "tolerance": 1e-11,
+    "worst_rel_err": 9.804752183542831e-09
+  },
+  "A2": [
+    {
+      "dense-naive": 0.00015417099996284378,
+      "dense-naive_R": 1.4838623348242286,
+      "dense-pairwise": 0.00013896699999804696,
+      "dense-pairwise_R": 1.4838623348242543,
+      "k": 3,
+      "max_disagreement": 2.5757174171303632e-14,
+      "structured": 3.8976999974238424e-05,
+      "structured_R": 1.483862334824254
+    },
+    {
+      "dense-naive": 0.027238694999994095,
+      "dense-naive_R": 4.138394559400256,
+      "dense-pairwise": 0.0020441610000148103,
+      "dense-pairwise_R": 4.138394559395579,
+      "k": 8,
+      "max_disagreement": 4.718003765447065e-12,
+      "structured": 0.00018756200000780154,
+      "structured_R": 4.138394559395538
+    },
+    {
+      "dense-naive": 1.5849055039999485,
+      "dense-naive_R": 8.34655244972484,
+      "dense-pairwise": 0.020930383000006714,
+      "dense-pairwise_R": 8.34655244861235,
+      "k": 16,
+      "max_disagreement": 1.11249320866591e-09,
+      "structured": 0.0007313879999628625,
+      "structured_R": 8.346552448612346
+    },
+    {
+      "dense-naive": 96.02359921599998,
+      "dense-naive_R": 16.751058975620726,
+      "dense-pairwise": 0.2808156080000117,
+      "dense-pairwise_R": 16.751059085895474,
+      "k": 32,
+      "max_disagreement": 1.1027474755564981e-07,
+      "structured": 0.004327350999972168,
+      "structured_R": 16.751059085890937
+    },
+    {
+      "dense-naive": null,
+      "dense-pairwise": 4.467545663999999,
+      "dense-pairwise_R": 33.55447716056847,
+      "k": 64,
+      "max_disagreement": 3.126388037344441e-12,
+      "structured": 0.0313825179999867,
+      "structured_R": 33.554477160571594
+    },
+    {
+      "dense-naive": null,
+      "dense-pairwise": 76.28289759699999,
+      "dense-pairwise_R": 67.15859236768368,
+      "k": 128,
+      "max_disagreement": 1.0978311593135004e-09,
+      "structured": 0.2598110789999737,
+      "structured_R": 67.15859236878151
+    },
+    {
+      "dense-naive": null,
+      "dense-pairwise": null,
+      "k": 256,
+      "max_disagreement": 0.0,
+      "structured": 2.0366632420000315,
+      "structured_R": 134.36548137381735
+    }
+  ],
+  "note": "standard-library mirrors; pinned to igad by tests/test_router_common_mirror.py when numpy is present"
+}
