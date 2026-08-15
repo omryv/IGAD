@@ -1,0 +1,390 @@
+<title>Router Concentration vs Router Geometry</title>
+<style>
+:root{
+  --ink:#070B18; --panel:#0C1326; --panel2:#111A33; --line:#1E2A4A;
+  --fg:#C9D3EC; --dim:#7C89AB; --cy:#43E2FF; --vi:#9B8CFF;
+  --mg:#FF4F94; --am:#FFC061; --ok:#4BE3A8;
+  --serif:ui-serif,"Iowan Old Style","Palatino Linotype",Palatino,Georgia,serif;
+  --sans:ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  --mono:ui-monospace,"SF Mono","Cascadia Mono",Menlo,Consolas,monospace;
+}
+*{box-sizing:border-box}
+body{
+  margin:0; background:var(--ink); color:var(--fg);
+  font-family:var(--sans); font-size:15px; line-height:1.62;
+  background-image:
+    radial-gradient(1100px 620px at 12% -8%, rgba(67,226,255,.10), transparent 60%),
+    radial-gradient(900px 560px at 92% 4%, rgba(155,140,255,.10), transparent 62%);
+  background-attachment:fixed;
+}
+.wrap{max-width:1120px;margin:0 auto;padding:56px 26px 80px}
+h1,h2,h3{font-family:var(--serif);font-weight:600;text-wrap:balance;margin:0}
+.eyebrow{font-family:var(--mono);font-size:11.5px;letter-spacing:.18em;
+  text-transform:uppercase;color:var(--dim)}
+header{border-bottom:1px solid var(--line);padding-bottom:34px;margin-bottom:14px}
+h1{font-size:clamp(34px,5.2vw,58px);line-height:1.06;letter-spacing:-.015em;margin:16px 0 14px}
+h1 .cy{color:var(--cy)} h1 .vi{color:var(--vi)}
+.sub{font-size:17.5px;color:var(--dim);max-width:70ch;margin:0}
+.prov{margin-top:22px;font-family:var(--mono);font-size:11.5px;color:var(--dim);
+  display:flex;flex-wrap:wrap;gap:8px 20px}
+.prov b{color:var(--ok);font-weight:500}
+
+.stage{margin-top:52px;border:1px solid var(--line);border-radius:3px;
+  background:linear-gradient(180deg,var(--panel2),var(--panel));overflow:hidden}
+.stage-hd{display:flex;gap:20px;align-items:baseline;padding:24px 28px 20px;
+  border-bottom:1px solid var(--line)}
+.num{font-family:var(--mono);font-size:34px;line-height:1;color:var(--line);
+  -webkit-text-stroke:1px var(--cy);letter-spacing:-.02em}
+.stage.s2 .num{-webkit-text-stroke-color:var(--vi)}
+.stage.s3 .num{-webkit-text-stroke-color:var(--mg)}
+.stage-hd h2{font-size:25px;letter-spacing:-.01em}
+.stage-hd p{margin:6px 0 0;color:var(--dim);font-size:14.5px}
+.body{padding:26px 28px 30px;display:grid;gap:26px}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:22px}
+@media(max-width:860px){.two{grid-template-columns:1fr}}
+
+figure{margin:0;background:#080E1E;border:1px solid var(--line);border-radius:3px;
+  padding:16px 16px 12px;overflow-x:auto}
+figcaption{font-size:12.5px;color:var(--dim);margin-top:10px;line-height:1.5}
+svg{display:block;max-width:100%;height:auto}
+.pt-cy{fill:var(--cy);opacity:.62} .pt-vi{fill:var(--vi);opacity:.62}
+.simplex{fill:none;stroke:var(--line);stroke-width:1.4}
+.vlab{font-family:var(--mono);font-size:11px;fill:var(--dim)}
+.grid{stroke:var(--line);stroke-width:1;opacity:.6}
+.ax{stroke:var(--line);stroke-width:1.2}
+.ref{stroke:var(--am);stroke-width:1;stroke-dasharray:4 4;opacity:.8}
+.tick{font-family:var(--mono);font-size:10.5px;fill:var(--dim)}
+.curve{fill:none;stroke:var(--cy);stroke-width:2.2}
+.curve-v{fill:none;stroke:var(--vi);stroke-width:2.2}
+.marker{fill:var(--am)} .mlab{font-family:var(--mono);font-size:10.5px;fill:var(--am)}
+.twin{stroke:var(--mg);stroke-width:1.2;stroke-dasharray:3 3}
+.twlab{font-family:var(--mono);font-size:10.5px;fill:var(--mg)}
+.pc{fill:none;stroke-width:1;opacity:.42}
+.pc0{stroke:var(--cy)} .pc1{stroke:var(--vi)}
+.pc2{stroke:var(--mg)} .pc3{stroke:var(--ok)}
+.lg{font-family:var(--mono);font-size:10px;fill:var(--dim)}
+.meanline{fill:none;stroke:var(--am);stroke-width:2.4}
+.axlab{font-family:var(--mono);font-size:10.5px;fill:var(--dim)}
+
+.eq{font-family:var(--mono);background:#060B18;border:1px solid var(--line);
+  border-left:2px solid var(--cy);border-radius:2px;padding:13px 16px;
+  font-size:13.5px;color:var(--fg);overflow-x:auto;white-space:pre}
+.eq.vi{border-left-color:var(--vi)} .eq.mg{border-left-color:var(--mg)}
+.eq .c{color:var(--dim)}
+
+table{width:100%;border-collapse:collapse;font-family:var(--mono);font-size:12.5px;
+  font-variant-numeric:tabular-nums}
+caption{text-align:left;font-family:var(--mono);font-size:11px;letter-spacing:.14em;
+  text-transform:uppercase;color:var(--dim);padding-bottom:9px}
+th,td{padding:8px 10px;border-bottom:1px solid var(--line);text-align:right}
+th:first-child,td:first-child{text-align:left}
+thead th{color:var(--dim);font-weight:500;font-size:11px;letter-spacing:.06em}
+td .sd{color:var(--dim);font-size:11px}
+.win{color:var(--ok)} .lose{color:var(--mg)} .flat{color:var(--dim)}
+
+.note{border:1px solid var(--line);border-left:2px solid var(--am);border-radius:2px;
+  background:rgba(255,192,97,.05);padding:16px 18px;font-size:14px}
+.note.mg{border-left-color:var(--mg);background:rgba(255,79,148,.06)}
+.note.ok{border-left-color:var(--ok);background:rgba(75,227,168,.05)}
+.note b{font-family:var(--mono);font-size:11px;letter-spacing:.14em;
+  text-transform:uppercase;display:block;margin-bottom:7px}
+.note.mg b{color:var(--mg)} .note.ok b{color:var(--ok)} .note b{color:var(--am)}
+
+.verdict{margin-top:22px;padding:20px 22px;border:1px solid var(--line);
+  border-radius:3px;background:#060B18;display:grid;gap:8px}
+.verdict .k{font-family:var(--mono);font-size:11px;letter-spacing:.14em;
+  text-transform:uppercase;color:var(--dim)}
+.verdict .v{font-family:var(--serif);font-size:19px;line-height:1.4}
+
+.caps{margin-top:52px;display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
+@media(max-width:900px){.caps{grid-template-columns:1fr 1fr}}
+@media(max-width:560px){.caps{grid-template-columns:1fr}}
+.cap{border:1px solid var(--line);border-radius:3px;padding:18px;background:var(--panel);
+  display:grid;gap:8px;align-content:start}
+.cap .n{font-family:var(--mono);font-size:11px;color:var(--dim);letter-spacing:.12em}
+.cap p{margin:0;font-size:14px}
+.cap.c1{box-shadow:inset 2px 0 0 var(--cy)} .cap.c2{box-shadow:inset 2px 0 0 var(--vi)}
+.cap.c3{box-shadow:inset 2px 0 0 var(--am)} .cap.c4{box-shadow:inset 2px 0 0 var(--mg)}
+
+.final{margin-top:36px;padding:30px 32px;border:1px solid var(--line);border-radius:3px;
+  background:linear-gradient(120deg,rgba(67,226,255,.07),rgba(255,79,148,.07));
+  font-family:var(--serif);font-size:clamp(19px,2.5vw,25px);line-height:1.42;
+  text-wrap:balance}
+.final .hl{color:var(--mg)}
+footer{margin-top:44px;padding-top:22px;border-top:1px solid var(--line);
+  font-family:var(--mono);font-size:11.5px;color:var(--dim);line-height:1.75}
+</style>
+
+<div class="wrap">
+<header>
+  <div class="eyebrow">Information geometry &middot; Mixture-of-Experts routing</div>
+  <h1>Router <span class="cy">Concentration</span><br>vs Router <span class="vi">Geometry</span></h1>
+  <p class="sub">Why &alpha;<sub>0</sub> can be sufficient for symmetric routing, and where scalar
+  curvature <i>R</i> may add information &mdash; tested rather than asserted.</p>
+  <div class="prov">
+    <span><b>All figures generated from sampled data.</b></span>
+    <span>Curvature via the exact O(k&sup2;) route, verified to 1e&minus;13 against the naive O(k&#8310;) contraction.</span>
+    <span>AUC: mean over seeds 11/23/42, 40 vs 40 batches.</span>
+  </div>
+</header>
+
+<!-- ══ STAGE 1 ══ -->
+<section class="stage s1">
+  <div class="stage-hd">
+    <div class="num">01</div>
+    <div>
+      <h2>&alpha;<sub>0</sub> measures concentration</h2>
+      <p>How tightly is the routing distribution packed? Fix the normalised proportions and
+      &alpha;<sub>0</sub> controls the radius of the cloud, nothing else.</p>
+    </div>
+  </div>
+  <div class="body">
+    <div class="two">
+      <figure>
+        <svg viewBox="0 0 320 300" role="img" aria-label="Simplex with a low alpha-zero Dirichlet cloud spread toward the vertices">
+          <polygon class="simplex" points="160,26 24,262 296,262"/>
+          <circle class="pt-cy" cx="271.1" cy="261.9" r="2.0"/><circle class="pt-cy" cx="295.7" cy="262.0" r="2.0"/><circle class="pt-cy" cx="48.3" cy="262.0" r="2.0"/><circle class="pt-cy" cx="186.8" cy="87.3" r="2.0"/><circle class="pt-cy" cx="71.7" cy="236.7" r="2.0"/><circle class="pt-cy" cx="225.2" cy="181.0" r="2.0"/><circle class="pt-cy" cx="284.2" cy="261.3" r="2.0"/><circle class="pt-cy" cx="160.1" cy="26.2" r="2.0"/><circle class="pt-cy" cx="57.2" cy="229.3" r="2.0"/><circle class="pt-cy" cx="33.2" cy="251.2" r="2.0"/><circle class="pt-cy" cx="180.2" cy="63.3" r="2.0"/><circle class="pt-cy" cx="169.2" cy="233.2" r="2.0"/><circle class="pt-cy" cx="149.3" cy="45.0" r="2.0"/><circle class="pt-cy" cx="271.2" cy="243.0" r="2.0"/><circle class="pt-cy" cx="157.5" cy="32.1" r="2.0"/><circle class="pt-cy" cx="225.2" cy="151.2" r="2.0"/><circle class="pt-cy" cx="112.2" cy="262.0" r="2.0"/><circle class="pt-cy" cx="251.0" cy="185.8" r="2.0"/><circle class="pt-cy" cx="106.5" cy="118.8" r="2.0"/><circle class="pt-cy" cx="201.0" cy="112.1" r="2.0"/><circle class="pt-cy" cx="78.4" cy="168.5" r="2.0"/><circle class="pt-cy" cx="26.0" cy="259.3" r="2.0"/><circle class="pt-cy" cx="148.4" cy="54.6" r="2.0"/><circle class="pt-cy" cx="151.0" cy="54.6" r="2.0"/><circle class="pt-cy" cx="268.0" cy="233.5" r="2.0"/><circle class="pt-cy" cx="195.4" cy="262.0" r="2.0"/><circle class="pt-cy" cx="255.9" cy="253.9" r="2.0"/><circle class="pt-cy" cx="55.8" cy="211.8" r="2.0"/><circle class="pt-cy" cx="39.1" cy="261.7" r="2.0"/><circle class="pt-cy" cx="201.6" cy="134.3" r="2.0"/><circle class="pt-cy" cx="129.8" cy="80.9" r="2.0"/><circle class="pt-cy" cx="63.5" cy="193.5" r="2.0"/><circle class="pt-cy" cx="288.9" cy="260.8" r="2.0"/><circle class="pt-cy" cx="127.0" cy="249.3" r="2.0"/><circle class="pt-cy" cx="121.6" cy="231.1" r="2.0"/><circle class="pt-cy" cx="45.9" cy="262.0" r="2.0"/><circle class="pt-cy" cx="24.1" cy="261.9" r="2.0"/><circle class="pt-cy" cx="156.8" cy="48.7" r="2.0"/><circle class="pt-cy" cx="294.7" cy="259.8" r="2.0"/><circle class="pt-cy" cx="111.6" cy="123.5" r="2.0"/><circle class="pt-cy" cx="162.9" cy="37.8" r="2.0"/><circle class="pt-cy" cx="292.2" cy="256.0" r="2.0"/><circle class="pt-cy" cx="164.0" cy="249.7" r="2.0"/><circle class="pt-cy" cx="159.7" cy="26.4" r="2.0"/><circle class="pt-cy" cx="218.1" cy="135.0" r="2.0"/><circle class="pt-cy" cx="195.7" cy="257.2" r="2.0"/><circle class="pt-cy" cx="125.2" cy="239.6" r="2.0"/><circle class="pt-cy" cx="157.0" cy="206.3" r="2.0"/><circle class="pt-cy" cx="155.1" cy="34.5" r="2.0"/><circle class="pt-cy" cx="143.3" cy="143.3" r="2.0"/><circle class="pt-cy" cx="61.0" cy="261.1" r="2.0"/><circle class="pt-cy" cx="285.3" cy="251.4" r="2.0"/><circle class="pt-cy" cx="108.2" cy="121.6" r="2.0"/><circle class="pt-cy" cx="157.0" cy="31.7" r="2.0"/><circle class="pt-cy" cx="278.1" cy="259.9" r="2.0"/><circle class="pt-cy" cx="233.6" cy="154.7" r="2.0"/><circle class="pt-cy" cx="93.0" cy="261.9" r="2.0"/><circle class="pt-cy" cx="108.8" cy="261.7" r="2.0"/><circle class="pt-cy" cx="160.6" cy="34.1" r="2.0"/><circle class="pt-cy" cx="282.2" cy="260.2" r="2.0"/><circle class="pt-cy" cx="287.1" cy="251.7" r="2.0"/><circle class="pt-cy" cx="198.6" cy="206.1" r="2.0"/><circle class="pt-cy" cx="54.8" cy="229.0" r="2.0"/><circle class="pt-cy" cx="252.6" cy="262.0" r="2.0"/><circle class="pt-cy" cx="181.5" cy="191.1" r="2.0"/><circle class="pt-cy" cx="191.7" cy="169.1" r="2.0"/><circle class="pt-cy" cx="274.0" cy="229.4" r="2.0"/><circle class="pt-cy" cx="179.1" cy="137.6" r="2.0"/><circle class="pt-cy" cx="187.2" cy="98.5" r="2.0"/><circle class="pt-cy" cx="194.1" cy="88.8" r="2.0"/><circle class="pt-cy" cx="128.3" cy="204.1" r="2.0"/><circle class="pt-cy" cx="111.5" cy="235.1" r="2.0"/><circle class="pt-cy" cx="189.5" cy="77.9" r="2.0"/><circle class="pt-cy" cx="265.4" cy="245.1" r="2.0"/><circle class="pt-cy" cx="105.0" cy="133.8" r="2.0"/><circle class="pt-cy" cx="101.1" cy="134.0" r="2.0"/><circle class="pt-cy" cx="295.7" cy="262.0" r="2.0"/><circle class="pt-cy" cx="99.7" cy="261.9" r="2.0"/><circle class="pt-cy" cx="119.9" cy="122.0" r="2.0"/><circle class="pt-cy" cx="195.3" cy="104.0" r="2.0"/><circle class="pt-cy" cx="273.4" cy="238.4" r="2.0"/><circle class="pt-cy" cx="240.6" cy="165.9" r="2.0"/><circle class="pt-cy" cx="31.6" cy="261.8" r="2.0"/><circle class="pt-cy" cx="237.2" cy="160.9" r="2.0"/><circle class="pt-cy" cx="273.1" cy="234.1" r="2.0"/><circle class="pt-cy" cx="282.3" cy="239.5" r="2.0"/><circle class="pt-cy" cx="28.8" cy="261.4" r="2.0"/><circle class="pt-cy" cx="76.4" cy="257.7" r="2.0"/><circle class="pt-cy" cx="134.3" cy="178.0" r="2.0"/><circle class="pt-cy" cx="92.3" cy="260.9" r="2.0"/><circle class="pt-cy" cx="294.8" cy="262.0" r="2.0"/><circle class="pt-cy" cx="36.6" cy="258.3" r="2.0"/><circle class="pt-cy" cx="290.9" cy="253.1" r="2.0"/><circle class="pt-cy" cx="130.1" cy="214.3" r="2.0"/><circle class="pt-cy" cx="154.8" cy="34.9" r="2.0"/><circle class="pt-cy" cx="162.3" cy="32.4" r="2.0"/><circle class="pt-cy" cx="205.1" cy="170.4" r="2.0"/><circle class="pt-cy" cx="32.1" cy="261.7" r="2.0"/><circle class="pt-cy" cx="63.1" cy="225.8" r="2.0"/><circle class="pt-cy" cx="120.0" cy="151.2" r="2.0"/><circle class="pt-cy" cx="116.3" cy="113.2" r="2.0"/><circle class="pt-cy" cx="145.5" cy="53.7" r="2.0"/><circle class="pt-cy" cx="126.1" cy="84.9" r="2.0"/><circle class="pt-cy" cx="50.8" cy="215.6" r="2.0"/><circle class="pt-cy" cx="262.6" cy="251.7" r="2.0"/><circle class="pt-cy" cx="38.6" cy="236.7" r="2.0"/><circle class="pt-cy" cx="142.1" cy="57.2" r="2.0"/><circle class="pt-cy" cx="284.6" cy="251.2" r="2.0"/><circle class="pt-cy" cx="157.2" cy="152.9" r="2.0"/><circle class="pt-cy" cx="120.0" cy="95.5" r="2.0"/><circle class="pt-cy" cx="198.8" cy="94.7" r="2.0"/><circle class="pt-cy" cx="165.3" cy="149.5" r="2.0"/><circle class="pt-cy" cx="224.6" cy="138.4" r="2.0"/><circle class="pt-cy" cx="28.9" cy="257.1" r="2.0"/><circle class="pt-cy" cx="260.3" cy="261.4" r="2.0"/><circle class="pt-cy" cx="285.6" cy="261.9" r="2.0"/><circle class="pt-cy" cx="28.9" cy="254.7" r="2.0"/><circle class="pt-cy" cx="231.0" cy="244.8" r="2.0"/><circle class="pt-cy" cx="220.5" cy="132.2" r="2.0"/><circle class="pt-cy" cx="108.8" cy="150.1" r="2.0"/><circle class="pt-cy" cx="295.5" cy="261.4" r="2.0"/><circle class="pt-cy" cx="142.5" cy="185.9" r="2.0"/><circle class="pt-cy" cx="68.8" cy="184.3" r="2.0"/><circle class="pt-cy" cx="51.8" cy="261.9" r="2.0"/><circle class="pt-cy" cx="60.3" cy="240.6" r="2.0"/><circle class="pt-cy" cx="172.3" cy="48.1" r="2.0"/><circle class="pt-cy" cx="40.0" cy="235.6" r="2.0"/><circle class="pt-cy" cx="159.2" cy="27.7" r="2.0"/><circle class="pt-cy" cx="251.5" cy="257.5" r="2.0"/><circle class="pt-cy" cx="110.7" cy="212.6" r="2.0"/><circle class="pt-cy" cx="84.7" cy="165.2" r="2.0"/><circle class="pt-cy" cx="55.8" cy="259.2" r="2.0"/><circle class="pt-cy" cx="151.3" cy="41.4" r="2.0"/><circle class="pt-cy" cx="104.7" cy="133.8" r="2.0"/><circle class="pt-cy" cx="291.5" cy="257.2" r="2.0"/><circle class="pt-cy" cx="64.7" cy="194.5" r="2.0"/><circle class="pt-cy" cx="162.0" cy="29.6" r="2.0"/><circle class="pt-cy" cx="158.7" cy="93.3" r="2.0"/><circle class="pt-cy" cx="291.9" cy="260.2" r="2.0"/><circle class="pt-cy" cx="244.3" cy="213.8" r="2.0"/><circle class="pt-cy" cx="173.8" cy="255.3" r="2.0"/><circle class="pt-cy" cx="176.3" cy="54.4" r="2.0"/><circle class="pt-cy" cx="282.9" cy="247.6" r="2.0"/><circle class="pt-cy" cx="216.8" cy="157.0" r="2.0"/><circle class="pt-cy" cx="290.4" cy="252.7" r="2.0"/><circle class="pt-cy" cx="108.7" cy="261.9" r="2.0"/><circle class="pt-cy" cx="195.9" cy="256.7" r="2.0"/><circle class="pt-cy" cx="151.2" cy="41.6" r="2.0"/><circle class="pt-cy" cx="94.3" cy="261.4" r="2.0"/><circle class="pt-cy" cx="159.2" cy="28.0" r="2.0"/><circle class="pt-cy" cx="243.6" cy="205.6" r="2.0"/><circle class="pt-cy" cx="179.8" cy="68.7" r="2.0"/><circle class="pt-cy" cx="183.0" cy="76.6" r="2.0"/><circle class="pt-cy" cx="68.4" cy="193.7" r="2.0"/><circle class="pt-cy" cx="158.7" cy="195.6" r="2.0"/><circle class="pt-cy" cx="158.5" cy="259.6" r="2.0"/><circle class="pt-cy" cx="173.3" cy="49.2" r="2.0"/><circle class="pt-cy" cx="119.8" cy="101.6" r="2.0"/><circle class="pt-cy" cx="167.9" cy="62.1" r="2.0"/><circle class="pt-cy" cx="90.7" cy="146.3" r="2.0"/><circle class="pt-cy" cx="216.1" cy="125.1" r="2.0"/><circle class="pt-cy" cx="283.2" cy="240.4" r="2.0"/><circle class="pt-cy" cx="173.5" cy="156.5" r="2.0"/><circle class="pt-cy" cx="154.2" cy="60.7" r="2.0"/><circle class="pt-cy" cx="161.5" cy="231.7" r="2.0"/><circle class="pt-cy" cx="65.2" cy="252.6" r="2.0"/><circle class="pt-cy" cx="42.7" cy="258.2" r="2.0"/><circle class="pt-cy" cx="174.0" cy="250.5" r="2.0"/><circle class="pt-cy" cx="64.4" cy="192.8" r="2.0"/><circle class="pt-cy" cx="160.0" cy="26.0" r="2.0"/>
+          <text class="vlab" x="160" y="16" text-anchor="middle">e1</text>
+          <text class="vlab" x="18" y="278" text-anchor="start">e2</text>
+          <text class="vlab" x="302" y="278" text-anchor="end">e3</text>
+        </svg>
+        <figcaption><b style="color:var(--cy)">Low &alpha;<sub>0</sub> = 0.9</b> &mdash; 170 sampled tokens,
+        Dir(0.3,&nbsp;0.3,&nbsp;0.3). Mass pushed to the vertices: decisive routing,
+        high per-token variability.</figcaption>
+      </figure>
+      <figure>
+        <svg viewBox="0 0 320 300" role="img" aria-label="Simplex with a high alpha-zero Dirichlet cloud concentrated at the centre">
+          <polygon class="simplex" points="160,26 24,262 296,262"/>
+          <circle class="pt-vi" cx="165.4" cy="202.9" r="2.0"/><circle class="pt-vi" cx="134.5" cy="212.1" r="2.0"/><circle class="pt-vi" cx="128.0" cy="182.1" r="2.0"/><circle class="pt-vi" cx="149.4" cy="195.0" r="2.0"/><circle class="pt-vi" cx="175.6" cy="183.8" r="2.0"/><circle class="pt-vi" cx="153.3" cy="225.2" r="2.0"/><circle class="pt-vi" cx="139.6" cy="194.3" r="2.0"/><circle class="pt-vi" cx="178.6" cy="167.6" r="2.0"/><circle class="pt-vi" cx="175.8" cy="199.8" r="2.0"/><circle class="pt-vi" cx="160.4" cy="195.8" r="2.0"/><circle class="pt-vi" cx="164.7" cy="185.7" r="2.0"/><circle class="pt-vi" cx="150.3" cy="167.7" r="2.0"/><circle class="pt-vi" cx="140.1" cy="204.2" r="2.0"/><circle class="pt-vi" cx="170.9" cy="203.8" r="2.0"/><circle class="pt-vi" cx="149.8" cy="179.6" r="2.0"/><circle class="pt-vi" cx="168.4" cy="189.8" r="2.0"/><circle class="pt-vi" cx="170.8" cy="189.4" r="2.0"/><circle class="pt-vi" cx="154.9" cy="194.3" r="2.0"/><circle class="pt-vi" cx="157.8" cy="192.8" r="2.0"/><circle class="pt-vi" cx="171.4" cy="196.9" r="2.0"/><circle class="pt-vi" cx="146.3" cy="193.9" r="2.0"/><circle class="pt-vi" cx="166.8" cy="170.9" r="2.0"/><circle class="pt-vi" cx="160.7" cy="197.3" r="2.0"/><circle class="pt-vi" cx="176.9" cy="183.5" r="2.0"/><circle class="pt-vi" cx="146.8" cy="183.7" r="2.0"/><circle class="pt-vi" cx="164.8" cy="190.7" r="2.0"/><circle class="pt-vi" cx="151.5" cy="189.9" r="2.0"/><circle class="pt-vi" cx="177.6" cy="171.3" r="2.0"/><circle class="pt-vi" cx="150.3" cy="195.2" r="2.0"/><circle class="pt-vi" cx="146.9" cy="193.9" r="2.0"/><circle class="pt-vi" cx="170.7" cy="180.2" r="2.0"/><circle class="pt-vi" cx="159.6" cy="193.0" r="2.0"/><circle class="pt-vi" cx="172.6" cy="176.3" r="2.0"/><circle class="pt-vi" cx="159.6" cy="187.6" r="2.0"/><circle class="pt-vi" cx="140.3" cy="201.0" r="2.0"/><circle class="pt-vi" cx="168.1" cy="173.9" r="2.0"/><circle class="pt-vi" cx="150.0" cy="190.9" r="2.0"/><circle class="pt-vi" cx="138.6" cy="173.7" r="2.0"/><circle class="pt-vi" cx="138.0" cy="189.0" r="2.0"/><circle class="pt-vi" cx="156.5" cy="175.7" r="2.0"/><circle class="pt-vi" cx="166.5" cy="189.9" r="2.0"/><circle class="pt-vi" cx="169.1" cy="187.9" r="2.0"/><circle class="pt-vi" cx="168.4" cy="158.9" r="2.0"/><circle class="pt-vi" cx="157.0" cy="200.3" r="2.0"/><circle class="pt-vi" cx="157.0" cy="210.7" r="2.0"/><circle class="pt-vi" cx="177.6" cy="165.8" r="2.0"/><circle class="pt-vi" cx="154.4" cy="173.6" r="2.0"/><circle class="pt-vi" cx="164.2" cy="175.1" r="2.0"/><circle class="pt-vi" cx="181.3" cy="183.6" r="2.0"/><circle class="pt-vi" cx="154.2" cy="168.5" r="2.0"/><circle class="pt-vi" cx="154.2" cy="145.9" r="2.0"/><circle class="pt-vi" cx="169.7" cy="183.4" r="2.0"/><circle class="pt-vi" cx="154.3" cy="202.1" r="2.0"/><circle class="pt-vi" cx="146.9" cy="192.7" r="2.0"/><circle class="pt-vi" cx="150.5" cy="191.2" r="2.0"/><circle class="pt-vi" cx="170.8" cy="181.6" r="2.0"/><circle class="pt-vi" cx="152.9" cy="153.2" r="2.0"/><circle class="pt-vi" cx="158.7" cy="200.7" r="2.0"/><circle class="pt-vi" cx="161.3" cy="172.7" r="2.0"/><circle class="pt-vi" cx="169.2" cy="184.5" r="2.0"/><circle class="pt-vi" cx="143.9" cy="169.9" r="2.0"/><circle class="pt-vi" cx="156.2" cy="183.1" r="2.0"/><circle class="pt-vi" cx="137.0" cy="200.8" r="2.0"/><circle class="pt-vi" cx="148.0" cy="199.6" r="2.0"/><circle class="pt-vi" cx="168.8" cy="175.2" r="2.0"/><circle class="pt-vi" cx="155.4" cy="192.2" r="2.0"/><circle class="pt-vi" cx="146.4" cy="167.8" r="2.0"/><circle class="pt-vi" cx="169.2" cy="158.5" r="2.0"/><circle class="pt-vi" cx="148.9" cy="194.2" r="2.0"/><circle class="pt-vi" cx="165.4" cy="200.1" r="2.0"/><circle class="pt-vi" cx="168.2" cy="169.3" r="2.0"/><circle class="pt-vi" cx="174.2" cy="182.7" r="2.0"/><circle class="pt-vi" cx="194.0" cy="192.2" r="2.0"/><circle class="pt-vi" cx="143.1" cy="171.2" r="2.0"/><circle class="pt-vi" cx="168.8" cy="166.5" r="2.0"/><circle class="pt-vi" cx="158.3" cy="189.2" r="2.0"/><circle class="pt-vi" cx="174.7" cy="183.5" r="2.0"/><circle class="pt-vi" cx="166.4" cy="183.6" r="2.0"/><circle class="pt-vi" cx="148.6" cy="182.3" r="2.0"/><circle class="pt-vi" cx="145.0" cy="175.4" r="2.0"/><circle class="pt-vi" cx="148.1" cy="180.5" r="2.0"/><circle class="pt-vi" cx="163.5" cy="166.1" r="2.0"/><circle class="pt-vi" cx="151.3" cy="181.9" r="2.0"/><circle class="pt-vi" cx="159.1" cy="203.3" r="2.0"/><circle class="pt-vi" cx="189.7" cy="190.5" r="2.0"/><circle class="pt-vi" cx="155.7" cy="193.1" r="2.0"/><circle class="pt-vi" cx="163.2" cy="186.7" r="2.0"/><circle class="pt-vi" cx="139.5" cy="187.4" r="2.0"/><circle class="pt-vi" cx="143.9" cy="181.9" r="2.0"/><circle class="pt-vi" cx="161.5" cy="201.3" r="2.0"/><circle class="pt-vi" cx="179.4" cy="179.7" r="2.0"/><circle class="pt-vi" cx="164.0" cy="183.8" r="2.0"/><circle class="pt-vi" cx="163.1" cy="179.0" r="2.0"/><circle class="pt-vi" cx="156.8" cy="174.3" r="2.0"/><circle class="pt-vi" cx="173.3" cy="184.4" r="2.0"/><circle class="pt-vi" cx="168.4" cy="193.8" r="2.0"/><circle class="pt-vi" cx="154.5" cy="195.6" r="2.0"/><circle class="pt-vi" cx="147.6" cy="174.9" r="2.0"/><circle class="pt-vi" cx="151.2" cy="184.4" r="2.0"/><circle class="pt-vi" cx="176.1" cy="173.3" r="2.0"/><circle class="pt-vi" cx="152.2" cy="164.6" r="2.0"/><circle class="pt-vi" cx="183.8" cy="186.7" r="2.0"/><circle class="pt-vi" cx="158.8" cy="178.7" r="2.0"/><circle class="pt-vi" cx="160.7" cy="159.8" r="2.0"/><circle class="pt-vi" cx="172.2" cy="212.0" r="2.0"/><circle class="pt-vi" cx="151.5" cy="183.2" r="2.0"/><circle class="pt-vi" cx="137.4" cy="195.6" r="2.0"/><circle class="pt-vi" cx="162.2" cy="195.5" r="2.0"/><circle class="pt-vi" cx="171.1" cy="180.9" r="2.0"/><circle class="pt-vi" cx="168.7" cy="185.8" r="2.0"/><circle class="pt-vi" cx="176.6" cy="193.4" r="2.0"/><circle class="pt-vi" cx="182.8" cy="186.4" r="2.0"/><circle class="pt-vi" cx="171.0" cy="180.7" r="2.0"/><circle class="pt-vi" cx="171.7" cy="190.6" r="2.0"/><circle class="pt-vi" cx="166.4" cy="146.7" r="2.0"/><circle class="pt-vi" cx="161.9" cy="181.8" r="2.0"/><circle class="pt-vi" cx="176.8" cy="177.5" r="2.0"/><circle class="pt-vi" cx="160.0" cy="147.7" r="2.0"/><circle class="pt-vi" cx="154.6" cy="178.4" r="2.0"/><circle class="pt-vi" cx="158.9" cy="195.0" r="2.0"/><circle class="pt-vi" cx="157.2" cy="179.4" r="2.0"/><circle class="pt-vi" cx="152.5" cy="213.9" r="2.0"/><circle class="pt-vi" cx="188.2" cy="192.8" r="2.0"/><circle class="pt-vi" cx="155.8" cy="208.0" r="2.0"/><circle class="pt-vi" cx="171.6" cy="184.0" r="2.0"/><circle class="pt-vi" cx="144.0" cy="195.3" r="2.0"/><circle class="pt-vi" cx="168.8" cy="199.0" r="2.0"/><circle class="pt-vi" cx="151.3" cy="158.9" r="2.0"/><circle class="pt-vi" cx="161.5" cy="154.7" r="2.0"/><circle class="pt-vi" cx="165.1" cy="174.1" r="2.0"/><circle class="pt-vi" cx="159.8" cy="188.5" r="2.0"/><circle class="pt-vi" cx="168.9" cy="199.1" r="2.0"/><circle class="pt-vi" cx="147.2" cy="189.8" r="2.0"/><circle class="pt-vi" cx="184.1" cy="168.7" r="2.0"/><circle class="pt-vi" cx="157.2" cy="165.6" r="2.0"/><circle class="pt-vi" cx="185.1" cy="195.9" r="2.0"/><circle class="pt-vi" cx="172.0" cy="171.2" r="2.0"/><circle class="pt-vi" cx="153.3" cy="169.8" r="2.0"/><circle class="pt-vi" cx="160.3" cy="195.6" r="2.0"/><circle class="pt-vi" cx="155.6" cy="177.4" r="2.0"/><circle class="pt-vi" cx="158.9" cy="144.6" r="2.0"/><circle class="pt-vi" cx="148.1" cy="163.5" r="2.0"/><circle class="pt-vi" cx="169.3" cy="202.5" r="2.0"/><circle class="pt-vi" cx="156.1" cy="183.0" r="2.0"/><circle class="pt-vi" cx="167.1" cy="166.6" r="2.0"/><circle class="pt-vi" cx="177.3" cy="201.0" r="2.0"/><circle class="pt-vi" cx="150.6" cy="190.6" r="2.0"/><circle class="pt-vi" cx="158.1" cy="208.4" r="2.0"/><circle class="pt-vi" cx="144.8" cy="188.3" r="2.0"/><circle class="pt-vi" cx="185.0" cy="163.0" r="2.0"/><circle class="pt-vi" cx="148.6" cy="168.3" r="2.0"/><circle class="pt-vi" cx="159.2" cy="204.4" r="2.0"/><circle class="pt-vi" cx="161.8" cy="179.5" r="2.0"/><circle class="pt-vi" cx="169.7" cy="180.5" r="2.0"/><circle class="pt-vi" cx="157.4" cy="168.1" r="2.0"/><circle class="pt-vi" cx="153.2" cy="174.4" r="2.0"/><circle class="pt-vi" cx="148.5" cy="180.8" r="2.0"/><circle class="pt-vi" cx="152.6" cy="189.2" r="2.0"/><circle class="pt-vi" cx="156.2" cy="170.5" r="2.0"/><circle class="pt-vi" cx="172.5" cy="192.3" r="2.0"/><circle class="pt-vi" cx="168.3" cy="186.8" r="2.0"/><circle class="pt-vi" cx="160.7" cy="175.8" r="2.0"/><circle class="pt-vi" cx="176.8" cy="186.0" r="2.0"/><circle class="pt-vi" cx="166.2" cy="197.2" r="2.0"/><circle class="pt-vi" cx="154.4" cy="189.0" r="2.0"/><circle class="pt-vi" cx="152.1" cy="189.8" r="2.0"/><circle class="pt-vi" cx="168.1" cy="185.8" r="2.0"/><circle class="pt-vi" cx="152.1" cy="181.7" r="2.0"/><circle class="pt-vi" cx="155.2" cy="163.3" r="2.0"/><circle class="pt-vi" cx="166.0" cy="167.1" r="2.0"/>
+          <text class="vlab" x="160" y="16" text-anchor="middle">e1</text>
+          <text class="vlab" x="18" y="278" text-anchor="start">e2</text>
+          <text class="vlab" x="302" y="278" text-anchor="end">e3</text>
+        </svg>
+        <figcaption><b style="color:var(--vi)">High &alpha;<sub>0</sub> = 72</b> &mdash; 170 sampled tokens,
+        Dir(24,&nbsp;24,&nbsp;24). Mass collapsed to the centre: mushy routing,
+        low per-token variability. <b>Identical mean</b> (1/3,&nbsp;1/3,&nbsp;1/3).</figcaption>
+      </figure>
+    </div>
+
+    <div class="eq">&alpha;<sub>0</sub> = &Sigma;<sub>i</sub> &alpha;<sub>i</sub>          E[x<sub>i</sub>] = &alpha;<sub>i</sub> / &alpha;<sub>0</sub>          <span class="c">&rarr; fixing &alpha;<sub>i</sub>/&alpha;<sub>0</sub> and varying &alpha;<sub>0</sub> changes only the tightness</span></div>
+
+    <div class="note">
+      <b>In the symmetric experiment the problem is exactly one-dimensional</b>
+      With &alpha; = (a,&nbsp;&hellip;,&nbsp;a) we have &alpha;<sub>0</sub> = ka, so &alpha; is a
+      bijective function of &alpha;<sub>0</sub>. Curvature is therefore not
+      <i>approximately</i> a function of concentration on this slice &mdash; it is
+      <b style="display:inline;font-family:inherit;font-size:inherit;letter-spacing:0;text-transform:none;color:var(--am)">exactly</b>
+      <span class="eq" style="display:inline;padding:2px 7px;border:0;border-left:0;background:none;color:var(--am)">R = f(&alpha;<sub>0</sub>)</span>.
+      Here curvature can only re-encode concentration.
+    </div>
+
+    <figure>
+      <svg viewBox="0 0 680 268" role="img" aria-label="Curve of scalar curvature against alpha zero for k equals four, rising to a peak near twelve then decaying">
+        <line class="grid" x1="62.0" y1="227.8" x2="658.0" y2="227.8"/><text class="tick" x="54.0" y="231.8" text-anchor="end">0.5</text><line class="grid" x1="62.0" y1="166.1" x2="658.0" y2="166.1"/><text class="tick" x="54.0" y="170.1" text-anchor="end">1.0</text><line class="grid" x1="62.0" y1="104.3" x2="658.0" y2="104.3"/><text class="tick" x="54.0" y="108.3" text-anchor="end">1.5</text><line class="grid" x1="62.0" y1="42.5" x2="658.0" y2="42.5"/><text class="tick" x="54.0" y="46.5" text-anchor="end">2.0</text><line class="grid" x1="80.4" y1="24.0" x2="80.4" y2="234.0"/><text class="tick" x="80.4" y="250.0" text-anchor="middle">0.2</text><line class="grid" x1="212.8" y1="24.0" x2="212.8" y2="234.0"/><text class="tick" x="212.8" y="250.0" text-anchor="middle">1</text><line class="grid" x1="326.8" y1="24.0" x2="326.8" y2="234.0"/><text class="tick" x="326.8" y="250.0" text-anchor="middle">4</text><line class="grid" x1="417.2" y1="24.0" x2="417.2" y2="234.0"/><text class="tick" x="417.2" y="250.0" text-anchor="middle">12</text><line class="grid" x1="516.3" y1="24.0" x2="516.3" y2="234.0"/><text class="tick" x="516.3" y="250.0" text-anchor="middle">40</text><line class="grid" x1="606.7" y1="24.0" x2="606.7" y2="234.0"/><text class="tick" x="606.7" y="250.0" text-anchor="middle">120</text>
+        <path class="curve" d="M 62.0 223.3 L 69.8 222.5 L 77.7 221.6 L 85.5 220.5 L 93.4 219.2 L 101.2 217.8 L 109.1 216.1 L 116.9 214.2 L 124.7 212.0 L 132.6 209.5 L 140.4 206.7 L 148.3 203.5 L 156.1 199.9 L 163.9 196.0 L 171.8 191.6 L 179.6 186.7 L 187.5 181.4 L 195.3 175.7 L 203.2 169.4 L 211.0 162.7 L 218.8 155.6 L 226.7 148.1 L 234.5 140.3 L 242.4 132.3 L 250.2 124.1 L 258.1 115.8 L 265.9 107.6 L 273.7 99.6 L 281.6 91.9 L 289.4 84.5 L 297.3 77.6 L 305.1 71.3 L 312.9 65.5 L 320.8 60.4 L 328.6 55.9 L 336.5 52.1 L 344.3 48.9 L 352.2 46.2 L 360.0 44.0 L 367.8 42.3 L 375.7 40.9 L 383.5 39.9 L 391.4 39.2 L 399.2 38.7 L 407.1 38.4 L 414.9 38.3 L 422.7 38.2 L 430.6 38.2 L 438.4 38.3 L 446.3 38.5 L 454.1 38.7 L 461.9 38.9 L 469.8 39.1 L 477.6 39.3 L 485.5 39.5 L 493.3 39.7 L 501.2 39.9 L 509.0 40.1 L 516.8 40.3 L 524.7 40.5 L 532.5 40.6 L 540.4 40.8 L 548.2 40.9 L 556.1 41.1 L 563.9 41.2 L 571.7 41.3 L 579.6 41.4 L 587.4 41.5 L 595.3 41.6 L 603.1 41.7 L 610.9 41.7 L 618.8 41.8 L 626.6 41.9 L 634.5 41.9 L 642.3 42.0 L 650.2 42.0 L 658.0 42.1"/>
+        <line class="twin" x1="383.9" y1="39.9" x2="516.3" y2="40.3"/>
+        <circle class="marker" cx="417.2" cy="38.2" r="3.6"/>
+        <text class="mlab" x="417.2" y="26.2" text-anchor="middle">peak α₀ = 12 · R = 2.034849</text>
+        <circle class="twin" style="fill:var(--mg);stroke:none" cx="383.9" cy="39.9" r="3"/>
+        <circle class="twin" style="fill:var(--mg);stroke:none" cx="516.3" cy="40.3" r="3"/>
+        <text class="twlab" x="658.0" y="91.9" text-anchor="end">α₀ 8 → 40 : |ΔR| = 3.0×10⁻³</text>
+        <text class="axlab" x="360" y="262" text-anchor="middle">α₀  (log scale)</text>
+        <text class="axlab" x="14" y="120" text-anchor="middle" transform="rotate(-90 14 120)">R</text>
+      </svg>
+      <figcaption>Scalar curvature on the symmetric slice, k&nbsp;=&nbsp;4, computed at 77 points.
+      <b style="color:var(--mg)">f is not invertible.</b> R rises steeply while routing is sparse
+      (&alpha;<sub>i</sub>&nbsp;&lt;&nbsp;1), peaks at &alpha;<sub>0</sub>&nbsp;=&nbsp;12, then decays &mdash; so a
+      fivefold change in concentration, &alpha;<sub>0</sub> from 8 to 40, moves R by 0.15%.
+      Curvature saturates exactly where a confident router lives.</figcaption>
+    </figure>
+  </div>
+</section>
+
+<!-- ══ STAGE 2 ══ -->
+<section class="stage s2">
+  <div class="stage-hd">
+    <div class="num">02</div>
+    <div>
+      <h2>R responds to anisotropy, &alpha;<sub>0</sub> does not</h2>
+      <p>Hold total concentration fixed and rotate the distribution across simplex
+      directions. Concentration is blind by construction; curvature is not.</p>
+    </div>
+  </div>
+  <div class="body">
+    <div class="eq vi">&alpha;<sup>(A)</sup> = (4, 4, 4, 4)      &alpha;<sub>0</sub> = 16      R = 2.033612      mean = (.250, .250, .250, .250)
+&alpha;<sup>(B)</sup> = (7, 5, 3, 1)      &alpha;<sub>0</sub> = 16      R = 2.001826      mean = (.438, .313, .188, .063)
+
+<span class="c">MLE-&alpha;<sub>0</sub> sees:  16 vs 16  &rarr;  IDENTICAL</span>          |&Delta;R| = 0.031786  (1.563%)</div>
+
+    <figure>
+      <svg viewBox="0 0 680 212" role="img" aria-label="Scalar curvature along a path across the fixed alpha-zero equals sixteen slice, falling as the distribution becomes anisotropic">
+        <line class="grid" x1="62.0" y1="144.5" x2="658.0" y2="144.5"/><text class="tick" x="54.0" y="148.5" text-anchor="end">1.70</text><line class="grid" x1="62.0" y1="96.6" x2="658.0" y2="96.6"/><text class="tick" x="54.0" y="100.6" text-anchor="end">1.85</text><line class="grid" x1="62.0" y1="48.7" x2="658.0" y2="48.7"/><text class="tick" x="54.0" y="52.7" text-anchor="end">2.00</text>
+        <path style="fill:var(--vi);opacity:.13;stroke:none" d="M 62.0 38.0 L 69.5 38.0 L 76.9 38.0 L 84.3 38.0 L 91.8 38.0 L 99.2 38.0 L 106.7 38.0 L 114.2 38.0 L 121.6 38.0 L 129.1 38.0 L 136.5 38.0 L 143.9 38.0 L 151.4 38.0 L 158.9 38.0 L 166.3 38.0 L 173.8 38.0 L 181.2 38.1 L 188.6 38.1 L 196.1 38.1 L 203.5 38.1 L 211.0 38.1 L 218.5 38.1 L 225.9 38.1 L 233.3 38.2 L 240.8 38.2 L 248.2 38.2 L 255.7 38.2 L 263.1 38.3 L 270.6 38.3 L 278.0 38.4 L 285.5 38.4 L 293.0 38.5 L 300.4 38.6 L 307.9 38.6 L 315.3 38.7 L 322.8 38.8 L 330.2 38.9 L 337.7 39.1 L 345.1 39.2 L 352.6 39.3 L 360.0 39.5 L 367.4 39.7 L 374.9 39.9 L 382.3 40.1 L 389.8 40.4 L 397.2 40.6 L 404.7 40.9 L 412.2 41.3 L 419.6 41.6 L 427.1 42.1 L 434.5 42.5 L 441.9 43.0 L 449.4 43.6 L 456.8 44.2 L 464.3 44.8 L 471.8 45.6 L 479.2 46.4 L 486.7 47.3 L 494.1 48.4 L 501.6 49.5 L 509.0 50.7 L 516.5 52.1 L 523.9 53.7 L 531.3 55.4 L 538.8 57.3 L 546.2 59.4 L 553.7 61.8 L 561.2 64.5 L 568.6 67.5 L 576.1 70.8 L 583.5 74.5 L 590.9 78.7 L 598.4 83.4 L 605.9 88.7 L 613.3 94.6 L 620.8 101.3 L 628.2 108.8 L 635.6 117.3 L 643.1 126.9 L 650.6 137.7 L 658.0 149.8 L 658.0 170.0 L 62.0 170.0 Z"/>
+        <path class="curve-v" d="M 62.0 38.0 L 69.5 38.0 L 76.9 38.0 L 84.3 38.0 L 91.8 38.0 L 99.2 38.0 L 106.7 38.0 L 114.2 38.0 L 121.6 38.0 L 129.1 38.0 L 136.5 38.0 L 143.9 38.0 L 151.4 38.0 L 158.9 38.0 L 166.3 38.0 L 173.8 38.0 L 181.2 38.1 L 188.6 38.1 L 196.1 38.1 L 203.5 38.1 L 211.0 38.1 L 218.5 38.1 L 225.9 38.1 L 233.3 38.2 L 240.8 38.2 L 248.2 38.2 L 255.7 38.2 L 263.1 38.3 L 270.6 38.3 L 278.0 38.4 L 285.5 38.4 L 293.0 38.5 L 300.4 38.6 L 307.9 38.6 L 315.3 38.7 L 322.8 38.8 L 330.2 38.9 L 337.7 39.1 L 345.1 39.2 L 352.6 39.3 L 360.0 39.5 L 367.4 39.7 L 374.9 39.9 L 382.3 40.1 L 389.8 40.4 L 397.2 40.6 L 404.7 40.9 L 412.2 41.3 L 419.6 41.6 L 427.1 42.1 L 434.5 42.5 L 441.9 43.0 L 449.4 43.6 L 456.8 44.2 L 464.3 44.8 L 471.8 45.6 L 479.2 46.4 L 486.7 47.3 L 494.1 48.4 L 501.6 49.5 L 509.0 50.7 L 516.5 52.1 L 523.9 53.7 L 531.3 55.4 L 538.8 57.3 L 546.2 59.4 L 553.7 61.8 L 561.2 64.5 L 568.6 67.5 L 576.1 70.8 L 583.5 74.5 L 590.9 78.7 L 598.4 83.4 L 605.9 88.7 L 613.3 94.6 L 620.8 101.3 L 628.2 108.8 L 635.6 117.3 L 643.1 126.9 L 650.6 137.7 L 658.0 149.8"/>
+        <text class="tick" x="62.0" y="186.0" text-anchor="start">(4,4,4,4) symmetric</text>
+        <text class="tick" x="658.0" y="186.0" text-anchor="end">(14.5,.5,.5,.5) extreme</text>
+        <text class="axlab" x="371" y="206" text-anchor="middle">direction across the α₀ = 16 slice</text>
+        <text class="axlab" x="14" y="95" text-anchor="middle" transform="rotate(-90 14 95)">R</text>
+      </svg>
+      <figcaption>R evaluated at 81 points along a straight path through the
+      &alpha;<sub>0</sub>&nbsp;=&nbsp;16 slice, where &alpha;<sub>0</sub> is constant throughout.
+      Across a 4,495-point grid search of that whole slice, R ranges from
+      <b style="color:var(--vi)">1.683255</b> at (14.5,&nbsp;.5,&nbsp;.5,&nbsp;.5) to
+      <b style="color:var(--vi)">2.033612</b> at the symmetric point &mdash; a spread of
+      <b style="color:var(--vi)">17.2%</b>. Curvature genuinely encodes direction, not just radius.</figcaption>
+    </figure>
+
+    <table>
+      <caption>Measured detection &mdash; Dir(4,4,4,4) vs Dir(7,5,3,1), window 100 tokens</caption>
+      <thead><tr><th>Detector</th><th>What it reads</th><th>AUC</th></tr></thead>
+      <tbody>
+        <tr><td>IGAD (R)</td><td>full parameter vector via curvature</td><td class="win">1.0000 <span class="sd">(.000)</span></td></tr>
+        <tr><td>MLE-&alpha;<sub>0</sub></td><td>concentration only</td><td class="lose">0.4929 <span class="sd">(.058)</span></td></tr>
+        <tr><td>Mean load</td><td>aggregate expert load</td><td class="flat">1.0000 <span class="sd">(.000)</span></td></tr>
+        <tr><td>Entropy</td><td>per-token decisiveness</td><td class="flat">1.0000 <span class="sd">(.000)</span></td></tr>
+        <tr><td>MMD</td><td>non-parametric two-sample</td><td class="flat">1.0000 <span class="sd">(.000)</span></td></tr>
+      </tbody>
+    </table>
+
+    <div class="note mg">
+      <b>The win is real, but the territory is not exclusive</b>
+      R separates these perfectly where &alpha;<sub>0</sub> sits at chance &mdash; the geometry is
+      doing something concentration cannot. But <b style="display:inline;font-family:inherit;font-size:inherit;letter-spacing:0;text-transform:none;color:var(--mg)">mean load also scores 1.0000</b>,
+      and it is the cheapest monitor in the stack. Because &alpha;<sub>i</sub> = &alpha;<sub>0</sub>&nbsp;E[x<sub>i</sub>],
+      any direction change at fixed &alpha;<sub>0</sub> <i>must</i> move the mean &mdash; so every
+      anisotropic shift is visible to a first-moment detector. Beating &alpha;<sub>0</sub> here does
+      not establish that curvature earns a slot.
+    </div>
+  </div>
+</section>
+
+<!-- ══ STAGE 3 ══ -->
+<section class="stage s3">
+  <div class="stage-hd">
+    <div class="num">03</div>
+    <div>
+      <h2>The decisive test: balanced load, hidden modes</h2>
+      <p>Identical aggregate expert load, identical sufficient statistics, genuinely
+      different token-level structure. This is where geometry would have to earn its keep.</p>
+    </div>
+  </div>
+  <div class="body">
+    <div class="two">
+      <figure>
+        <svg viewBox="0 0 560 260" role="img" aria-label="Parallel coordinates of tokens under a single coherent routing regime, one diffuse band across four experts">
+          <line class="ax" x1="58.0" y1="26.0" x2="58.0" y2="222.0"/><text class="tick" x="58.0" y="239.0" text-anchor="middle">e1</text><line class="ax" x1="214.7" y1="26.0" x2="214.7" y2="222.0"/><text class="tick" x="214.7" y="239.0" text-anchor="middle">e2</text><line class="ax" x1="371.3" y1="26.0" x2="371.3" y2="222.0"/><text class="tick" x="371.3" y="239.0" text-anchor="middle">e3</text><line class="ax" x1="528.0" y1="26.0" x2="528.0" y2="222.0"/><text class="tick" x="528.0" y="239.0" text-anchor="middle">e4</text><line class="grid" x1="58.0" y1="222.0" x2="528.0" y2="222.0"/><text class="tick" x="50.0" y="226.0" text-anchor="end">0</text><line class="grid" x1="58.0" y1="124.0" x2="528.0" y2="124.0"/><text class="tick" x="50.0" y="128.0" text-anchor="end">0.50</text><line class="grid" x1="58.0" y1="26.0" x2="528.0" y2="26.0"/><text class="tick" x="50.0" y="30.0" text-anchor="end">1.00</text><line class="ref" x1="58.0" y1="173.0" x2="528.0" y2="173.0"/><text class="tick" style="fill:var(--am)" x="50.0" y="177.0" text-anchor="end">0.25</text><polyline class="pc pc0" points="58.0,51.1 214.7,220.5 371.3,201.2 528.0,219.2"/><polyline class="pc pc0" points="58.0,106.6 214.7,210.8 371.3,153.8 528.0,220.9"/><polyline class="pc pc0" points="58.0,114.7 214.7,137.0 371.3,220.7 528.0,219.5"/><polyline class="pc pc0" points="58.0,141.5 214.7,208.5 371.3,142.4 528.0,199.5"/><polyline class="pc pc0" points="58.0,52.0 214.7,201.2 371.3,221.7 528.0,217.0"/><polyline class="pc pc0" points="58.0,129.4 214.7,216.8 371.3,147.5 528.0,198.3"/><polyline class="pc pc0" points="58.0,133.8 214.7,222.0 371.3,200.0 528.0,136.2"/><polyline class="pc pc0" points="58.0,75.6 214.7,211.0 371.3,190.5 528.0,214.8"/><polyline class="pc pc0" points="58.0,82.8 214.7,190.8 371.3,202.7 528.0,215.7"/><polyline class="pc pc0" points="58.0,89.4 214.7,161.9 371.3,219.9 528.0,220.8"/><polyline class="pc pc0" points="58.0,75.4 214.7,175.9 371.3,221.9 528.0,218.8"/><polyline class="pc pc0" points="58.0,157.7 214.7,157.8 371.3,165.1 528.0,211.5"/><polyline class="pc pc0" points="58.0,80.5 214.7,187.2 371.3,211.4 528.0,212.9"/><polyline class="pc pc0" points="58.0,140.2 214.7,149.4 371.3,205.5 528.0,197.0"/><polyline class="pc pc0" points="58.0,144.6 214.7,146.0 371.3,206.6 528.0,194.8"/><polyline class="pc pc0" points="58.0,167.2 214.7,171.5 371.3,186.0 528.0,167.4"/><polyline class="pc pc0" points="58.0,76.8 214.7,211.6 371.3,184.7 528.0,219.0"/><polyline class="pc pc0" points="58.0,135.0 214.7,213.4 371.3,145.0 528.0,198.6"/><polyline class="pc pc0" points="58.0,66.8 214.7,213.9 371.3,189.4 528.0,222.0"/><polyline class="pc pc0" points="58.0,96.8 214.7,201.3 371.3,218.2 528.0,175.7"/><polyline class="pc pc1" points="58.0,205.7 214.7,89.1 371.3,222.0 528.0,175.2"/><polyline class="pc pc1" points="58.0,190.4 214.7,108.5 371.3,171.3 528.0,221.8"/><polyline class="pc pc1" points="58.0,196.4 214.7,110.7 371.3,179.5 528.0,205.4"/><polyline class="pc pc1" points="58.0,186.6 214.7,139.6 371.3,220.3 528.0,145.5"/><polyline class="pc pc1" points="58.0,182.7 214.7,92.5 371.3,203.7 528.0,213.2"/><polyline class="pc pc1" points="58.0,204.7 214.7,89.9 371.3,181.2 528.0,216.3"/><polyline class="pc pc1" points="58.0,174.7 214.7,87.6 371.3,221.2 528.0,208.5"/><polyline class="pc pc1" points="58.0,173.0 214.7,89.4 371.3,208.0 528.0,221.6"/><polyline class="pc pc1" points="58.0,217.3 214.7,51.1 371.3,215.7 528.0,207.8"/><polyline class="pc pc1" points="58.0,220.5 214.7,75.1 371.3,198.0 528.0,198.4"/><polyline class="pc pc1" points="58.0,176.6 214.7,127.9 371.3,195.8 528.0,191.7"/><polyline class="pc pc1" points="58.0,204.8 214.7,107.6 371.3,161.4 528.0,218.2"/><polyline class="pc pc1" points="58.0,214.8 214.7,73.8 371.3,181.6 528.0,221.9"/><polyline class="pc pc1" points="58.0,154.7 214.7,142.4 371.3,210.4 528.0,184.4"/><polyline class="pc pc1" points="58.0,219.2 214.7,132.7 371.3,186.8 528.0,153.3"/><polyline class="pc pc1" points="58.0,217.2 214.7,74.2 371.3,199.1 528.0,201.5"/><polyline class="pc pc1" points="58.0,221.8 214.7,114.2 371.3,221.8 528.0,134.2"/><polyline class="pc pc1" points="58.0,221.2 214.7,121.7 371.3,203.8 528.0,145.2"/><polyline class="pc pc1" points="58.0,216.8 214.7,108.7 371.3,179.9 528.0,186.6"/><polyline class="pc pc1" points="58.0,160.6 214.7,155.3 371.3,206.7 528.0,169.5"/><polyline class="pc pc1" points="58.0,194.3 214.7,125.4 371.3,199.9 528.0,172.4"/><polyline class="pc pc1" points="58.0,167.5 214.7,96.3 371.3,208.6 528.0,219.5"/><polyline class="pc pc2" points="58.0,175.4 214.7,181.9 371.3,133.7 528.0,201.0"/><polyline class="pc pc2" points="58.0,210.6 214.7,214.5 371.3,106.1 528.0,160.8"/><polyline class="pc pc2" points="58.0,190.9 214.7,216.3 371.3,62.8 528.0,221.9"/><polyline class="pc pc2" points="58.0,150.2 214.7,205.2 371.3,143.9 528.0,192.6"/><polyline class="pc pc2" points="58.0,156.5 214.7,211.6 371.3,139.2 528.0,184.7"/><polyline class="pc pc2" points="58.0,217.2 214.7,168.6 371.3,87.3 528.0,218.9"/><polyline class="pc pc2" points="58.0,195.2 214.7,221.9 371.3,100.4 528.0,174.5"/><polyline class="pc pc2" points="58.0,219.9 214.7,179.7 371.3,70.6 528.0,221.7"/><polyline class="pc pc2" points="58.0,211.0 214.7,200.3 371.3,74.7 528.0,206.0"/><polyline class="pc pc2" points="58.0,208.8 214.7,190.3 371.3,112.6 528.0,180.3"/><polyline class="pc pc2" points="58.0,149.7 214.7,219.0 371.3,111.6 528.0,211.7"/><polyline class="pc pc3" points="58.0,186.5 214.7,218.9 371.3,185.2 528.0,101.4"/><polyline class="pc pc3" points="58.0,172.1 214.7,211.1 371.3,201.3 528.0,107.6"/><polyline class="pc pc3" points="58.0,159.1 214.7,186.8 371.3,194.8 528.0,151.3"/><polyline class="pc pc3" points="58.0,210.5 214.7,175.5 371.3,219.0 528.0,86.9"/><polyline class="pc pc3" points="58.0,199.8 214.7,187.4 371.3,158.9 528.0,145.9"/><polyline class="pc pc3" points="58.0,165.4 214.7,219.0 371.3,220.4 528.0,87.2"/><polyline class="pc pc3" points="58.0,153.2 214.7,216.4 371.3,219.4 528.0,103.1"/><polyline class="pc pc3" points="58.0,215.2 214.7,210.8 371.3,192.4 528.0,73.7"/><polyline class="pc pc3" points="58.0,213.3 214.7,168.3 371.3,168.5 528.0,141.9"/><polyline class="pc pc3" points="58.0,139.8 214.7,219.2 371.3,194.9 528.0,138.1"/><polyline class="pc pc3" points="58.0,185.8 214.7,177.1 371.3,172.3 528.0,156.8"/><polyline class="pc pc3" points="58.0,218.4 214.7,220.9 371.3,169.3 528.0,83.5"/><polyline class="pc pc3" points="58.0,199.9 214.7,183.4 371.3,221.5 528.0,87.3"/><polyline class="pc pc3" points="58.0,183.1 214.7,167.2 371.3,208.4 528.0,133.3"/><polyline class="pc pc3" points="58.0,176.7 214.7,189.1 371.3,164.8 528.0,161.5"/><polyline class="pc pc3" points="58.0,172.3 214.7,216.6 371.3,177.4 528.0,125.6"/><polyline class="pc pc3" points="58.0,205.2 214.7,178.1 371.3,191.6 528.0,117.2"/><polyline class="meanline" points="58.0,172.6 214.7,172.3 371.3,174.5 528.0,172.6"/>
+          <text class="axlab" x="290" y="256" text-anchor="middle">70 sampled tokens &middot; coloured by dominant expert</text>
+        </svg>
+        <figcaption><b style="color:var(--cy)">A &mdash; single coherent regime.</b>
+        Dir(0.5497,&nbsp;&hellip;), &alpha;<sub>0</sub>&nbsp;=&nbsp;2.1990. Dominant-expert groups overlap heavily; no bundle separates.
+        Measured mean (0.2520, 0.2537, 0.2424, 0.2520).</figcaption>
+      </figure>
+      <figure>
+        <svg viewBox="0 0 560 260" role="img" aria-label="Parallel coordinates of tokens under a four-mode mixture, four separate bundles each peaking at a different expert">
+          <line class="ax" x1="58.0" y1="26.0" x2="58.0" y2="222.0"/><text class="tick" x="58.0" y="239.0" text-anchor="middle">e1</text><line class="ax" x1="214.7" y1="26.0" x2="214.7" y2="222.0"/><text class="tick" x="214.7" y="239.0" text-anchor="middle">e2</text><line class="ax" x1="371.3" y1="26.0" x2="371.3" y2="222.0"/><text class="tick" x="371.3" y="239.0" text-anchor="middle">e3</text><line class="ax" x1="528.0" y1="26.0" x2="528.0" y2="222.0"/><text class="tick" x="528.0" y="239.0" text-anchor="middle">e4</text><line class="grid" x1="58.0" y1="222.0" x2="528.0" y2="222.0"/><text class="tick" x="50.0" y="226.0" text-anchor="end">0</text><line class="grid" x1="58.0" y1="124.0" x2="528.0" y2="124.0"/><text class="tick" x="50.0" y="128.0" text-anchor="end">0.50</text><line class="grid" x1="58.0" y1="26.0" x2="528.0" y2="26.0"/><text class="tick" x="50.0" y="30.0" text-anchor="end">1.00</text><line class="ref" x1="58.0" y1="173.0" x2="528.0" y2="173.0"/><text class="tick" style="fill:var(--am)" x="50.0" y="177.0" text-anchor="end">0.25</text><polyline class="pc pc0" points="58.0,63.6 214.7,205.6 371.3,217.6 528.0,205.2"/><polyline class="pc pc0" points="58.0,58.4 214.7,204.9 371.3,208.0 528.0,220.6"/><polyline class="pc pc0" points="58.0,113.8 214.7,206.2 371.3,171.8 528.0,200.1"/><polyline class="pc pc0" points="58.0,111.8 214.7,168.0 371.3,191.0 528.0,221.3"/><polyline class="pc pc0" points="58.0,82.9 214.7,176.4 371.3,215.4 528.0,217.3"/><polyline class="pc pc0" points="58.0,64.2 214.7,211.1 371.3,201.1 528.0,215.6"/><polyline class="pc pc0" points="58.0,56.0 214.7,205.4 371.3,210.2 528.0,220.4"/><polyline class="pc pc0" points="58.0,56.2 214.7,213.3 371.3,209.1 528.0,213.4"/><polyline class="pc pc0" points="58.0,60.8 214.7,210.7 371.3,212.7 528.0,207.8"/><polyline class="pc pc0" points="58.0,74.9 214.7,215.2 371.3,206.7 528.0,195.3"/><polyline class="pc pc0" points="58.0,60.3 214.7,215.2 371.3,199.0 528.0,217.5"/><polyline class="pc pc1" points="58.0,202.8 214.7,85.6 371.3,182.8 528.0,220.8"/><polyline class="pc pc1" points="58.0,215.8 214.7,55.4 371.3,216.1 528.0,204.7"/><polyline class="pc pc1" points="58.0,213.0 214.7,76.9 371.3,182.2 528.0,219.8"/><polyline class="pc pc1" points="58.0,213.9 214.7,45.6 371.3,220.4 528.0,212.1"/><polyline class="pc pc1" points="58.0,219.4 214.7,78.3 371.3,183.0 528.0,211.4"/><polyline class="pc pc1" points="58.0,202.9 214.7,87.1 371.3,180.0 528.0,222.0"/><polyline class="pc pc1" points="58.0,222.0 214.7,79.9 371.3,178.9 528.0,211.2"/><polyline class="pc pc1" points="58.0,209.2 214.7,81.3 371.3,191.2 528.0,210.4"/><polyline class="pc pc1" points="58.0,165.3 214.7,111.2 371.3,199.5 528.0,216.0"/><polyline class="pc pc1" points="58.0,174.0 214.7,106.7 371.3,213.9 528.0,197.4"/><polyline class="pc pc1" points="58.0,201.9 214.7,64.2 371.3,206.9 528.0,218.9"/><polyline class="pc pc1" points="58.0,215.1 214.7,72.8 371.3,185.5 528.0,218.6"/><polyline class="pc pc2" points="58.0,210.9 214.7,214.8 371.3,44.5 528.0,221.8"/><polyline class="pc pc2" points="58.0,201.0 214.7,208.8 371.3,61.4 528.0,220.8"/><polyline class="pc pc2" points="58.0,214.9 214.7,192.3 371.3,86.3 528.0,198.5"/><polyline class="pc pc2" points="58.0,188.0 214.7,207.5 371.3,95.3 528.0,201.2"/><polyline class="pc pc2" points="58.0,201.6 214.7,217.0 371.3,65.2 528.0,208.1"/><polyline class="pc pc2" points="58.0,207.0 214.7,216.5 371.3,61.4 528.0,207.0"/><polyline class="pc pc2" points="58.0,219.9 214.7,182.5 371.3,82.6 528.0,207.0"/><polyline class="pc pc2" points="58.0,214.7 214.7,203.5 371.3,97.7 528.0,176.1"/><polyline class="pc pc2" points="58.0,200.5 214.7,191.8 371.3,80.0 528.0,219.7"/><polyline class="pc pc2" points="58.0,208.8 214.7,195.8 371.3,93.5 528.0,193.9"/><polyline class="pc pc2" points="58.0,217.7 214.7,215.1 371.3,48.4 528.0,210.9"/><polyline class="pc pc2" points="58.0,207.3 214.7,152.3 371.3,125.4 528.0,207.0"/><polyline class="pc pc2" points="58.0,209.0 214.7,178.6 371.3,83.1 528.0,221.4"/><polyline class="pc pc2" points="58.0,201.5 214.7,184.8 371.3,93.2 528.0,212.5"/><polyline class="pc pc2" points="58.0,213.1 214.7,220.4 371.3,46.1 528.0,212.4"/><polyline class="pc pc2" points="58.0,189.4 214.7,194.5 371.3,96.5 528.0,211.6"/><polyline class="pc pc2" points="58.0,197.3 214.7,180.6 371.3,101.1 528.0,213.0"/><polyline class="pc pc2" points="58.0,221.7 214.7,199.6 371.3,85.9 528.0,184.9"/><polyline class="pc pc2" points="58.0,175.2 214.7,220.2 371.3,96.4 528.0,200.2"/><polyline class="pc pc2" points="58.0,212.7 214.7,195.6 371.3,69.1 528.0,214.6"/><polyline class="pc pc2" points="58.0,218.9 214.7,220.5 371.3,54.8 528.0,197.8"/><polyline class="pc pc2" points="58.0,190.0 214.7,214.0 371.3,73.4 528.0,214.6"/><polyline class="pc pc2" points="58.0,219.6 214.7,198.8 371.3,59.4 528.0,214.2"/><polyline class="pc pc2" points="58.0,190.7 214.7,209.0 371.3,76.5 528.0,215.8"/><polyline class="pc pc2" points="58.0,185.6 214.7,201.0 371.3,87.5 528.0,217.9"/><polyline class="pc pc2" points="58.0,171.2 214.7,208.4 371.3,98.9 528.0,213.5"/><polyline class="pc pc2" points="58.0,215.5 214.7,195.9 371.3,73.5 528.0,207.0"/><polyline class="pc pc2" points="58.0,205.4 214.7,195.2 371.3,86.8 528.0,204.6"/><polyline class="pc pc2" points="58.0,201.5 214.7,206.5 371.3,76.8 528.0,207.2"/><polyline class="pc pc2" points="58.0,203.4 214.7,204.9 371.3,80.1 528.0,203.6"/><polyline class="pc pc3" points="58.0,220.2 214.7,178.8 371.3,217.1 528.0,75.9"/><polyline class="pc pc3" points="58.0,219.0 214.7,219.7 371.3,218.7 528.0,34.6"/><polyline class="pc pc3" points="58.0,216.0 214.7,216.5 371.3,205.2 528.0,54.2"/><polyline class="pc pc3" points="58.0,219.5 214.7,206.5 371.3,146.6 528.0,119.3"/><polyline class="pc pc3" points="58.0,207.9 214.7,216.8 371.3,205.6 528.0,61.7"/><polyline class="pc pc3" points="58.0,220.5 214.7,220.8 371.3,216.6 528.0,34.0"/><polyline class="pc pc3" points="58.0,211.1 214.7,221.2 371.3,173.5 528.0,86.2"/><polyline class="pc pc3" points="58.0,206.5 214.7,221.6 371.3,200.9 528.0,63.1"/><polyline class="pc pc3" points="58.0,197.1 214.7,221.2 371.3,202.3 528.0,71.4"/><polyline class="pc pc3" points="58.0,201.8 214.7,211.9 371.3,219.0 528.0,59.2"/><polyline class="pc pc3" points="58.0,216.1 214.7,212.8 371.3,194.1 528.0,69.0"/><polyline class="pc pc3" points="58.0,216.2 214.7,198.7 371.3,213.8 528.0,63.3"/><polyline class="pc pc3" points="58.0,212.5 214.7,180.4 371.3,215.8 528.0,83.3"/><polyline class="pc pc3" points="58.0,209.0 214.7,208.3 371.3,217.8 528.0,56.9"/><polyline class="pc pc3" points="58.0,207.2 214.7,221.2 371.3,167.2 528.0,96.4"/><polyline class="pc pc3" points="58.0,196.6 214.7,219.3 371.3,189.8 528.0,86.3"/><polyline class="pc pc3" points="58.0,212.4 214.7,219.1 371.3,200.9 528.0,59.6"/><polyline class="meanline" points="58.0,174.7 214.7,171.3 371.3,170.8 528.0,175.3"/>
+          <text class="axlab" x="290" y="256" text-anchor="middle">70 sampled tokens &middot; coloured by dominant expert</text>
+        </svg>
+        <figcaption><b style="color:var(--mg)">B &mdash; four expert-specialised modes.</b>
+        Equal mixture of Dir(8,1,1,1) and its permutations. Each group peaks near 8/11 on its own expert and sits near 1/11 elsewhere.
+        Measured mean (0.2413, 0.2589, 0.2613, 0.2385).</figcaption>
+      </figure>
+    </div>
+
+    <div class="eq mg">aggregate mean = (1/4, 1/4, 1/4, 1/4)  in <b>both</b> conditions   <span class="c">&rarr; load-balance loss sees no difference</span>
+
+E[log x<sub>i</sub>] under the mixture = &frac14;(&psi;(8)&minus;&psi;(11)) + &frac34;(&psi;(1)&minus;&psi;(11)) = &minus;2.280753968
+best single-Dirichlet fit                = &alpha;&#770; = (0.549738, &hellip;),  &alpha;&#770;<sub>0</sub> = 2.198950,  R(&alpha;&#770;) = 1.569331</div>
+
+    <div class="note mg">
+      <b>Why R is blind here &mdash; structurally, not empirically</b>
+      Condition A is <i>defined</i> as Dir(&alpha;&#770;), the best single-Dirichlet fit to the mixture.
+      The Dirichlet MLE matches E[log&nbsp;x], so both conditions share the same aggregate mean
+      <i>and</i> the same sufficient statistic. IGAD's score is a deterministic function of
+      &alpha;&#770;, and so is MLE-&alpha;<sub>0</sub>. Two populations with the same best-fit
+      &alpha;&#770; are <b style="display:inline;font-family:inherit;font-size:inherit;letter-spacing:0;text-transform:none;color:var(--mg)">exactly indistinguishable</b>
+      to either. Curvature is a scalar compression of the fit &mdash; it cannot recover what
+      the fit discards.
+    </div>
+
+    <table>
+      <caption>Measured detection &mdash; coherent vs multimodal, identical aggregate load</caption>
+      <thead><tr><th>Detector</th><th>w = 50</th><th>w = 100</th><th>w = 200</th><th>w = 400</th></tr></thead>
+      <tbody>
+        <tr><td>IGAD (R)</td><td class="lose">0.3715</td><td class="lose">0.3875</td><td class="lose">0.3958</td><td class="lose">0.3715</td></tr>
+        <tr><td>MLE-&alpha;<sub>0</sub></td><td class="lose">0.3787</td><td class="lose">0.3919</td><td class="lose">0.3919</td><td class="lose">0.3790</td></tr>
+        <tr><td>Entropy</td><td class="win">0.9969</td><td class="win">1.0000</td><td class="win">1.0000</td><td class="win">1.0000</td></tr>
+        <tr><td>MMD</td><td>0.7523</td><td>0.7748</td><td>0.7702</td><td>0.7931</td></tr>
+      </tbody>
+    </table>
+
+    <div class="note ok">
+      <b>What the numbers say</b>
+      IGAD and MLE-&alpha;<sub>0</sub> track each other to within 0.008 at every window &mdash; the
+      signature of two functions of one statistic. Both land <i>below</i> chance: multimodal
+      batches produce a <i>smaller</i> |&Delta;R| than coherent ones, so the detector is not merely
+      blind, it is anti-correlated. Entropy, which is a direct empirical statistic and not a
+      function of &alpha;&#770;, reaches 1.0000. MMD, also outside &sigma;(&alpha;&#770;), reaches 0.77&ndash;0.79.
+      The structure lives precisely in what the single-Dirichlet fit throws away.
+    </div>
+
+    <div class="verdict">
+      <div class="k">The caveat that turned out to be the answer</div>
+      <div class="v">A mixture of Dirichlets is not itself a Dirichlet. Because the fitted family is
+      wrong, the scalar curvature of a single fitted Dirichlet smears out the very structure
+      the test was built to detect.</div>
+    </div>
+  </div>
+</section>
+
+<!-- ══ CAVEAT ══ -->
+<section class="stage" style="margin-top:52px">
+  <div class="stage-hd">
+    <div class="num" style="-webkit-text-stroke-color:var(--am)">&Delta;</div>
+    <div>
+      <h2>The identifiability constraint</h2>
+      <p>Why stages 2 and 3 exhaust the options for a single Dirichlet.</p>
+    </div>
+  </div>
+  <div class="body">
+    <div class="eq">Within one Dirichlet family:   &alpha;<sub>i</sub> = &alpha;<sub>0</sub> &middot; E[x<sub>i</sub>]
+
+<span class="c">therefore</span>   same mean  +  same &alpha;<sub>0</sub>   &rArr;   <b>same Dirichlet distribution</b>
+
+<span class="c">verified numerically: &alpha;<sub>0</sub> recovered from (mean&#8320;, var&#8320;) of Dir(1.5,4,6.5) = 12.000000000</span></div>
+    <p style="margin:0;max-width:74ch">You cannot hold both the Dirichlet mean and &alpha;<sub>0</sub> fixed
+    and still obtain a different single-Dirichlet shape. So within the family there are only two
+    moves: change &alpha;<sub>0</sub> &mdash; which stage&nbsp;1 shows curvature merely re-encodes &mdash; or
+    change direction, which stage&nbsp;2 shows necessarily moves the mean and is therefore already
+    visible to a first-moment monitor. To test whether geometry adds information you must leave
+    the family, and stage&nbsp;3 shows that when you do, curvature computed from a misspecified
+    fit goes with it.</p>
+  </div>
+</section>
+
+<div class="caps">
+  <div class="cap c1"><div class="n">01</div><p>&alpha;<sub>0</sub> measures cloud tightness. On a symmetric slice R is <i>exactly</i> a function of it &mdash; and a non-invertible one.</p></div>
+  <div class="cap c2"><div class="n">02</div><p>R does depend on how geometry is distributed across simplex directions: a measured 17.2% spread at fixed &alpha;<sub>0</sub>.</p></div>
+  <div class="cap c3"><div class="n">03</div><p>But every such directional shift also moves the mean, so mean load catches it too, at AUC 1.0000.</p></div>
+  <div class="cap c4"><div class="n">04</div><p>Under balanced load with real multimodal structure, R is a function of a fit that has already discarded the signal.</p></div>
+</div>
+
+<div class="final">
+  The proposed criterion was that <i>if R beats MLE-&alpha;<sub>0</sub> only when routing becomes
+  genuinely multidimensional, that is evidence for geometry rather than concentration.</i>
+  Measured: R beats MLE-&alpha;<sub>0</sub> in the anisotropic case &mdash; where mean load beats it too &mdash;
+  and <span class="hl">ties it at 0.39 in the multimodal case, both below chance</span>.
+  The criterion is met in the one place it does not discriminate, and fails in the one place it would.
+</div>
+
+<footer>
+  Curvature computed with the exact O(k&sup2;) structured route
+  (T<sub>ijk</sub> = c + d<sub>i</sub>&delta;<sub>ijk</sub>), cross-checked against the naive
+  O(k&#8310;) contraction to a relative error of 1e&minus;13 across eight parameter points.<br>
+  Simplex clouds, parallel-coordinate bundles and both curves are drawn from sampled or
+  directly evaluated data &mdash; no illustrative geometry.<br>
+  AUC figures are means over seeds 11/23/42, 40 normal vs 40 anomalous batches per cell;
+  standard deviations shown where reported.<br>
+  Produced with a standard-library implementation: numpy could not be installed in the
+  authoring environment, so these results have not been through a CI run.
+</footer>
+</div>
