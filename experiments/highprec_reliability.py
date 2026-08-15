@@ -60,6 +60,7 @@ from experiments._highprec import (
 )
 
 EPS = 2.0 ** -53          # unit roundoff for binary64
+SAFETY_FACTOR = 8.0       # the factor curvature_reliability actually ships
 
 F64_ROUTES = [
     ("dense-inverse", dir_curvature_dense_inverse),
@@ -107,7 +108,21 @@ def build_cases():
     # mixed: concentrated but unequal
     for a in (50.0, 500.0, 5000.0):
         cases.append(("mixed k=4 a=%g" % a, [a, a * 1.05, a * 0.95, a * 1.10]))
+    # anisotropy sweep: alpha_0 and k both held fixed, only the *shape* of the
+    # concentration profile varies. Neither cond(g) nor rho is being steered
+    # directly here, which is what makes it a useful third axis.
+    for k in (4, 8):
+        for t in (0.0, 0.5, 1.0, 2.0, 4.0, 8.0):
+            cases.append(("aniso k=%d t=%g" % (k, t), anisotropic(k, t, 8.0)))
     return cases
+
+
+def anisotropic(k, t, alpha0):
+    """alpha with sum alpha0, tilted by t: t=0 symmetric, large t very uneven."""
+    span = [(i - (k - 1) / 2.0) / max(k - 1, 1) for i in range(k)]
+    weights = [math.exp(t * s) for s in span]
+    total = sum(weights)
+    return [alpha0 * v / total for v in weights]
 
 
 def build_size_cases(ks=(3, 4, 6, 8, 12, 16, 24, 32, 48, 64, 96, 128, 192, 256)):
@@ -461,6 +476,54 @@ def _bound(rec, route, safety):
         rec["input_rounding_floor"], rec["special_function_error"], EPS)
 
 
+# ─────────────────────────────────────────────────────────────────────────────
+# C6 -- is the runtime digit estimate calibrated?
+# ─────────────────────────────────────────────────────────────────────────────
+
+def run_c6(records, route="sm-closed"):
+    """`curvature_reliability` reports -log10(8 * eps * rho_hat * k) digits.
+
+    That is only worth shipping if it is a *conservative* estimate: the number
+    of digits that actually survive should be at least the number promised. A
+    diagnostic that over-promises is worse than none.
+
+    Everything here uses the float64 rho_hat a caller would actually have, not
+    the exact rho, because that is what the shipped estimate consumes.
+    """
+    rows, shortfalls = [], []
+    for rec in records:
+        rho_hat = rec["rho_hat_float64"]
+        k = rec["k"]
+        bound = SAFETY_FACTOR * EPS * rho_hat * k
+        promised = 0.0 if bound >= 1.0 else max(-math.log10(max(bound, EPS)), 0.0)
+        err = max(rec["total_error"][route], FLOOR)
+        actual = -math.log10(err)
+        shortfalls.append(actual - promised)
+        rows.append([rec["case"], k, "%.1e" % rho_hat, "%.1f" % promised,
+                     "%.1f" % actual, "%+.1f" % (actual - promised),
+                     "ok" if actual >= promised else "OVER-PROMISED"])
+
+    over = [r for r, s in zip(records, shortfalls) if s < 0]
+    print_table("C6 -- calibration of the shipped digit estimate "
+                "(-log10(%g * eps * rho_hat * k))" % SAFETY_FACTOR,
+                ["case", "k", "rho_hat", "digits promised", "digits actual",
+                 "margin", "verdict"], rows)
+    n = len(shortfalls)
+    ordered = sorted(shortfalls)
+    print("  conservative on %d / %d points; worst over-promise %.2f digits"
+          % (n - len(over), n, -min(ordered) if ordered[0] < 0 else 0.0))
+    print("  margin (actual - promised): min %.2f, median %.2f, max %.2f"
+          % (ordered[0], ordered[n // 2], ordered[-1]))
+    print("  a large positive margin is fine -- it means the estimate is "
+          "pessimistic,\n  which is the safe direction for a guard rail.")
+    print()
+    return {"route": route, "n": n, "n_conservative": n - len(over),
+            "worst_over_promise_digits": max(0.0, -ordered[0]),
+            "margin_min": ordered[0], "margin_median": ordered[n // 2],
+            "margin_max": ordered[-1],
+            "over_promised_cases": [r["case"] for r in over]}
+
+
 def main():
     p = argparse.ArgumentParser(description=__doc__)
     p.add_argument("--digits", type=int, default=120)
@@ -476,6 +539,7 @@ def main():
                         title="C5 inputs -- expert-count sweep at alpha_i = 2")
     c5 = run_c5(c5_records)
     c4 = run_c4(c2 + c5_records, a.route)
+    c6 = run_c6(c2 + c5_records, a.route)
 
     print("=" * 78)
     print("PART 1.2 VERDICT")
@@ -494,6 +558,9 @@ def main():
           % (c5[a.route]["slope_vs_k"], a.route))
     print("  C4  bound held for %d / %d cases"
           % (c4["cases_within_bound"], c4["n_cases"]))
+    print("  C6  digit estimate conservative on %d / %d cases "
+          "(worst over-promise %.2f digits)"
+          % (c6["n_conservative"], c6["n"], c6["worst_over_promise_digits"]))
     print()
 
     save_results("highprec_reliability",
@@ -502,6 +569,7 @@ def main():
                   "C3_predictors": c3,
                   "C4_boundary": c4,
                   "C5_size_dependence": c5,
+                  "C6_digit_calibration": c6,
                   "C5_size_records": c5_records,
                   "config": {"digits": a.digits, "check_digits": a.check_digits,
                              "eps": EPS, "route": a.route,

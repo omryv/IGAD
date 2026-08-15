@@ -7,14 +7,17 @@ and produce a documented reliability boundary.
 Reproduce everything here:
 
 ```bash
-python -m experiments.highprec_reliability   # 68 parameter points, 120 digits
+python -m experiments.highprec_reliability   # 80 parameter points, 120 digits
 ```
 
 Raw output: `experiments/results/highprec_reliability.json`.
 
-Sections C1–C3 use 54 parameter points that hold `k <= 8`, so that expert count
-cannot confound the rho-versus-cond(g) comparison; C5 adds a 14-point sweep that
-varies `k` from 3 to 256 and nothing else. C4 checks the bound on all 68.
+Sections C1–C3 use 66 parameter points that hold `k <= 8`, so that expert count
+cannot confound the rho-versus-cond(g) comparison — a concentration sweep, a
+spread sweep that drives cond(g) to 1e28, and an anisotropy sweep that holds
+both `k` and `alpha_0` fixed and varies only the shape of the concentration
+profile. C5 adds a 14-point sweep that varies `k` from 3 to 256 and nothing
+else. C4 and C6 check the bound and the digit estimate on all 80.
 
 ---
 
@@ -41,7 +44,7 @@ first two know nothing about the tensor's structure.
 
 ## 2. Result C1 — dense and structured are the same number
 
-| route | worst disagreement vs Sherman–Morrison, over 54 parameter points |
+| route | worst disagreement vs Sherman–Morrison, over 66 parameter points |
 | --- | --- |
 | literal six-index contraction | 5.2e-145 |
 | pairwise dense contraction | 5.2e-145 |
@@ -62,7 +65,7 @@ could establish.
 Because every route accepts its polygamma inputs explicitly, the error splits
 three ways and each part is measured:
 
-| component | what it is | worst over 54 points |
+| component | what it is | worst over 66 points |
 | --- | --- | --- |
 | input-rounding floor | exact evaluation of psi values already rounded to double — the floor no float64 pipeline can beat | 2.0e-09 |
 | special functions | what the float64 psi'/psi'' add on top | 7.0e-09 |
@@ -92,9 +95,14 @@ compared to each other.** Structured-vs-dense agreed to 1e-14 while both were
 6e-11 from the truth. That is the concrete reason the brief forbids arbitrating
 between two float64 implementations with a third float64 implementation.
 
-Raising the shift target to 30 and carrying six Bernoulli terms brings all
-three functions to **within 4 ulp** (measured against the 120-digit reference
-at 19 arguments spanning 1e-6 to 1e6; pinned by `tests/test_highprec.py`).
+Raising the shift target to 30 and carrying six Bernoulli terms fixes it.
+Measured against the 120-digit reference at 86 arguments spanning 1e-6 to
+7e6 (`experiments/special_function_accuracy.py`): worst relative error
+7.9e-16 for psi, 9.3e-16 for psi', 3.9e-16 for psi''. One documented
+exception -- psi has a root at x ~ 1.4616321, where the recurrence sum and
+the asymptotic tail cancel 93x; raw ulp error reaches 118 at x = 1.5 while
+absolute error stays at 8.2e-16, and no recurrence-based psi avoids that.
+psi is not on the curvature path.
 
 ---
 
@@ -108,14 +116,14 @@ rho = max( |S^2|, |T^2|, |term_a|, |term_b|, |term_c| ) / |S^2 - T^2|
 
 — the largest intermediate magnitude divided by the final difference, where
 `R = (S^2 - T^2)/4`. Regressing `log10(arithmetic error)` on each candidate
-predictor across all 54 points:
+predictor across all 66 points:
 
 | predictor | slope | intercept | R² | Pearson | Spearman |
 | --- | --- | --- | --- | --- | --- |
-| **log10 rho** | **0.997** | **−16.075** | **0.986** | 0.993 | 0.976 |
-| log10 cond(g) | 0.456 | −14.050 | 0.673 | 0.820 | 0.861 |
+| **log10 rho** | **0.998** | **−16.092** | **0.985** | 0.993 | 0.964 |
+| log10 cond(g) | 0.476 | −14.574 | 0.657 | 0.810 | 0.793 |
 
-The rho fit has **slope 1.00 and intercept −16.08**, and `log10(eps) = −15.95`
+The rho fit has **slope 1.00 and intercept −16.09**, and `log10(eps) = −15.95`
 for binary64. So the fitted law is
 
 ```
@@ -127,9 +135,9 @@ in the exponent.
 
 Partial correlations settle the attribution:
 
-- correlation of `log10 cond(g)` with the residual after rho: **+0.077** —
+- correlation of `log10 cond(g)` with the residual after rho: **+0.067** —
   once rho is known, cond(g) explains essentially nothing;
-- correlation of `log10 rho` with the residual after cond(g): **+0.565** —
+- correlation of `log10 rho` with the residual after cond(g): **+0.576** —
   once cond(g) is known, rho still explains a great deal.
 
 Two controlled pairs make it concrete:
@@ -177,9 +185,9 @@ barely moves (13.0 down to 1.30):
 
 | route | error / (eps · rho) at k=256 | fitted growth |
 | --- | ---: | --- |
-| dense-inverse | 13 481 | k^2.02 |
-| sm-matrix | 13 573 | k^2.16 |
-| **sm-closed** | **227** | **k^1.11** |
+| dense-inverse | 13 481 | k^2.05 |
+| sm-matrix | 13 573 | k^2.14 |
+| **sm-closed** | **227** | **k^1.15** |
 
 **The O(k) route is also the most accurate route**, by about a factor of k. It
 touches O(k) intermediate values where the others touch O(k²) or run O(k³)
@@ -213,15 +221,15 @@ relative error  <=  8 * max( eps * rho * k^p,
 ```
 
 with `p = 1` for `sm-closed` and `p = 2` for the two matrix routes,
-**held on 68 of 68 points** for all three routes (worst ratio 0.131, 0.090 and
-0.086 respectively).
+**held on 80 of 80 points** for all three routes (worst error/bound ratio
+0.143, 0.086 and 0.086 respectively).
 
-Surviving digits, banded by rho (each of the 68 points counted once):
+Surviving digits, banded by rho (each of the 80 points counted once):
 
 | rho | points | worst relative error | significant digits of R that survive |
 | --- | ---: | --- | --- |
-| 1 – 10² | 37 | 3.0e-14 | ~13.5 |
-| 10² – 10⁴ | 6 | 3.1e-13 | ~12.5 |
+| 1 – 10² | 48 | 3.0e-14 | ~13.5 |
+| 10² – 10⁴ | 7 | 3.1e-13 | ~12.5 |
 | 10⁴ – 10⁶ | 8 | 7.2e-11 | ~10.1 |
 | 10⁶ – 10⁸ | 7 | 3.0e-09 | ~8.5 |
 | 10⁸ – 10¹⁰ | 6 | 9.5e-07 | ~6.0 |
@@ -240,14 +248,36 @@ psi'' cannot be represented exactly as doubles.
 `(R, rho_hat)` from the same single pass. Measured against the exact
 120-digit rho:
 
-**`rho_hat` is within 2× on 68 of 68 points (worst ratio 1.27).**
+**`rho_hat` is within 2× on 80 of 80 points.**
 
 So the guard rail is usable at runtime, not just in hindsight:
 
 ```python
-R, rho_hat = dir_curvature_sm_closed_diagnostic(tri, tri0, tet, tet0)
-trustworthy_digits = 16 - math.log10(rho_hat)
+from igad import curvature_reliability
+
+info = curvature_reliability(tri, tri0, tet, tet0)
+info["R"]                     # identical to scalar_curvature_dirichlet
+info["cancellation_ratio"]    # rho
+info["trusted_digits"]        # -log10(8 * eps * rho * k), clipped at 0
+info["relative_error_bound"]
+info["sm_denominator"]        # w; small exactly when the router is concentrated
 ```
+
+It is **read-only**: the `R` it returns is bit-identical to the plain route,
+and nothing about the computation changes because the diagnostic was asked
+for. `tests/test_sherman_morrison.py` pins both that identity and the
+conservatism below.
+
+### Is the digit estimate calibrated? (C6)
+
+A guard rail that over-promises is worse than none, so the estimate uses the
+same safety factor 8 that section C4 validated. Measured against the digits
+that actually survive, using the float64 `rho_hat` a caller would really have:
+
+**Conservative on 80 of 80 points; worst over-promise 0.00 digits.** Margins
+(actual minus promised): minimum 0.39, median 1.42, maximum 3.05 digits. A
+large positive margin is the safe direction — the estimate is pessimistic by
+about one to three digits, and never optimistic.
 
 ---
 

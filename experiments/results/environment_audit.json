@@ -459,11 +459,6 @@
         "bytes": 31,
         "path": "/usr/local/lib/python3.11/dist-packages/uno.pth",
         "plausible": false
-      },
-      {
-        "bytes": 151,
-        "path": "/home/user/IGAD/.venv/lib/python3.11/site-packages/distutils-precedence.pth",
-        "plausible": false
       }
     ],
     "meshes": [
@@ -570,11 +565,11 @@
     ],
     "min_checkpoint_bytes": 10485760,
     "n_ambiguous": 11,
-    "n_checkpoints": 80,
+    "n_checkpoints": 79,
     "n_checkpoints_plausible": 0,
     "n_meshes": 20,
     "n_meshes_plausible": 0,
-    "scanned_dirs": 20077,
+    "scanned_dirs": 19873,
     "truncated": false
   },
   "gate": {
@@ -595,7 +590,7 @@
           "huggingface.co unreachable"
         ],
         "condition": "a real checkpoint",
-        "evidence": "91 files carry a weight suffix but only 0 are larger than 10 MiB; the rest are package-manager caches and toolchain fixtures, not model weights",
+        "evidence": "90 files carry a weight suffix but only 0 are larger than 10 MiB; the rest are package-manager caches and toolchain fixtures, not model weights",
         "id": 2,
         "met": false
       },
@@ -727,9 +722,9 @@
   },
   "resources": {
     "cpu_count": 4,
-    "disk_free_bytes": 32169144320,
+    "disk_free_bytes": 32196050944,
     "disk_total_bytes": 270553174016,
-    "mem_available_bytes": 16043945984,
+    "mem_available_bytes": 16098848768,
     "mem_total_bytes": 16856068096,
     "platform": "Linux-6.18.5-fc-v20-x86_64-with-glibc2.39",
     "python": "3.11.15"

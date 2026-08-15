@@ -223,37 +223,53 @@ class DirichletFamily:
 
     @staticmethod
     def fisher_metric_inverse_analytical(theta: np.ndarray) -> np.ndarray:
-        """g^{-1} in closed form via Sherman-Morrison. O(k^2), no elimination."""
+        """g^{-1} in closed form via Sherman-Morrison. O(k^2), no elimination.
+
+        Provided for callers that genuinely need the matrix. The curvature path
+        does not: it uses the factored form and never materialises this.
+        """
         tri, tri0, _, _ = DirichletFamily.polygamma_inputs(theta)
         return dirichlet_fisher_inverse(tri, tri0)
 
     @staticmethod
     def scalar_curvature_analytical(theta: np.ndarray) -> float:
         """
-        Exact scalar curvature via the analytical metric and the structural
-        third cumulant tensor. Mathematically identical to
-        ``curvature.scalar_curvature`` on this family.
+        Exact scalar curvature. **This is the preferred Dirichlet route.**
 
-        The contraction is O(k^2), but ``np.linalg.inv`` inside
-        ``scalar_curvature_structured`` makes the complete path O(k^3).
-        ``scalar_curvature_fast`` removes that bottleneck.
+        O(k) in time and O(k) in memory: the Dirichlet Fisher metric is
+        diagonal-plus-rank-one, so Sherman-Morrison supplies g^{-1} in factored
+        form and every contraction in R collapses to a single pass over the
+        experts. Nothing k x k is allocated. See
+        ``curvature.scalar_curvature_dirichlet`` for the algebra and
+        ``docs/sherman_morrison.md`` for the derivation.
+
+        The name is unchanged so that ``IGADDetector`` and every existing
+        caller pick up the faster route without modification. The number is
+        identical -- ``scalar_curvature_via_inverse`` below computes the same
+        quantity through an explicit inverse, and
+        ``tests/test_sherman_morrison.py`` pins the two together and both
+        against a 120-digit reference.
+        """
+        return scalar_curvature_dirichlet(*DirichletFamily.polygamma_inputs(theta))
+
+    # Kept as the name introduced alongside the O(k) route, so callers written
+    # against either spelling work.
+    scalar_curvature_fast = scalar_curvature_analytical
+
+    @staticmethod
+    def scalar_curvature_via_inverse(theta: np.ndarray) -> float:
+        """
+        Same number as ``scalar_curvature_analytical``, reached by forming
+        g^{-1} explicitly and contracting. O(k^3) because of the inverse.
+
+        Retained as an independent implementation to cross-check the O(k)
+        route, not as a route anything should call in anger. It is also the
+        less accurate of the two: measured error grows as k^2.02 against
+        k^1.11 for the closed form (docs/numerical_reliability.md, section C5).
         """
         g = DirichletFamily.fisher_metric_analytical(theta)
         c, d = DirichletFamily.third_cumulant_structure(theta)
         return scalar_curvature_structured(g, c, d)
-
-    @staticmethod
-    def scalar_curvature_fast(theta: np.ndarray) -> float:
-        """
-        Exact scalar curvature in O(k) time and O(k) memory.
-
-        Same number as ``scalar_curvature_analytical``, reached without ever
-        forming a k x k matrix: the Dirichlet Fisher metric is diagonal-plus-
-        rank-one, so Sherman-Morrison supplies g^{-1} in factored form and
-        every contraction in R collapses to a single pass over the experts.
-        See ``curvature.scalar_curvature_dirichlet``.
-        """
-        return scalar_curvature_dirichlet(*DirichletFamily.polygamma_inputs(theta))
 
     @staticmethod
     def mle(data: np.ndarray, max_iter: int = 1000, tol: float = 1e-8) -> np.ndarray:

@@ -130,7 +130,10 @@ evaluated, and no amount of geometric machinery downstream can recover it.
    eight cells, both by less than one seed-standard-deviation; `MLE-a0` leads
    in the other six. Tracking the fitted concentration `alpha_0_hat` and
    discarding the curvature tensor entirely is as good or better, and it is
-   `O(k)` after the MLE rather than `O(k^2)` with a matrix inverse.
+   `O(k)` after the MLE. (Curvature is now also `O(k)` after the MLE -- the
+   matrix inverse this sentence originally weighed against has been removed;
+   see `docs/sherman_morrison.md`. That closes the cost gap but does not
+   change the conclusion, which was about signal, not speed.)
 
    This is the predictable consequence of `R` being a near-monotone function
    of `alpha_0` for uniform `alpha` in this regime: `|dR|` and `|d alpha_0|`
@@ -142,8 +145,8 @@ evaluated, and no amount of geometric machinery downstream can recover it.
 
 The honest recommendation is a Dirichlet-MLE router monitor tracking
 `alpha_0_hat`. Curvature is worth keeping as a secondary channel only
-because `scalar_curvature_structured` made it nearly free — not because it
-was shown to carry signal the concentration does not.
+because the closed form made it nearly free — not because it was shown to
+carry signal the concentration does not.
 
 ---
 
@@ -155,11 +158,19 @@ was shown to carry signal the concentration does not.
 - **Window must exceed expert count.** A `k`-parameter Dirichlet fit from
   `n < k` rows is underdetermined. With 64 experts the useful floor is well
   above the 50–300 batch range the rest of the repository validates.
-- **Conditioning tracks confidence, not width.** `cond(g)` runs ~1.7 at
+- **Confident routers are the numerically awkward case, and the quantity to
+  watch is cancellation, not `cond(g)`.** `cond(g)` runs ~1.7 at
   `alpha_i = 0.5`, ~8.5 at `alpha_i = 4`, ~102 at `alpha_i = 50`, and is
-  essentially independent of `k`. Wide expert counts are fine; very confident
-  routers are the numerically awkward case. The determinant scale factor is
-  `1 - psi'(alpha_0) * sum_i 1/psi'(alpha_i)`.
+  essentially independent of `k`, so wide expert counts are fine. But
+  `cond(g)` does **not** order the numerical error in `R` -- holding the
+  cancellation ratio fixed while moving `cond(g)` fifteen orders of magnitude
+  changes the error by 9% (`docs/numerical_reliability.md`). The quantity that
+  does order it is `rho`, and the same
+  `w = 1 - psi'(alpha_0) * sum_i 1/psi'(alpha_i)` named here is what drives
+  it: `1/w` multiplies every intermediate in the contraction, and `w` shrinks
+  as the router concentrates. `curvature_reliability(...)` returns `rho`, `w`
+  and an estimate of the surviving digits from the same `O(k)` pass that
+  produces `R`.
 - **`R` saturates and is non-monotonic above `alpha_i ~ 2`.** For k=32,
   `alpha_0` from 64 to 512 — an eightfold change in decisiveness — maps into a
   ~3.5% band of `R`. Sparse routers (`alpha_i < 1`) sit in the steep,

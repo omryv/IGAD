@@ -45,22 +45,32 @@ Measured wall clock (standard-library Python, minimum over repeats):
 
 | k | dense-inverse O(k³) | sm-matrix O(k²) | sm-closed O(k) |
 | ---: | ---: | ---: | ---: |
-| 8 | 0.000089 s | 0.000022 s | 0.000003 s |
-| 64 | 0.025820 s | 0.000928 s | 0.000021 s |
-| 256 | 1.426388 s | 0.015634 s | 0.000083 s |
-| 512 | 11.108448 s | 0.067341 s | 0.000166 s |
-| 1024 | 105.050579 s | 0.293489 s | 0.000331 s |
-| 2048 | — | 1.278177 s | 0.000685 s |
-| 131072 | — | — | 0.052921 s |
+| 8 | 0.000084 s | 0.000021 s | 0.000003 s |
+| 64 | 0.024537 s | 0.000885 s | 0.000019 s |
+| 256 | 1.469273 s | 0.016562 s | 0.000082 s |
+| 512 | 11.197104 s | 0.067070 s | 0.000161 s |
+| 1024 | 101.670723 s | 0.317043 s | 0.000340 s |
+| 2048 | — | 1.326370 s | 0.000679 s |
+| 131072 | — | — | 0.047238 s |
 
 | route | predicted | measured slope (k ≥ 64) | memory slope | k reached |
 | --- | --- | ---: | ---: | ---: |
 | dense-inverse | O(k³) | 2.99 | 2.01 | 1 024 |
-| sm-matrix | O(k²) | 2.10 | 2.03 | 2 048 |
-| **sm-closed** | **O(k)** | **1.03** | **1.01** | **131 072** |
+| sm-matrix | O(k²) | 2.12 | 2.03 | 2 048 |
+| **sm-closed** | **O(k)** | **1.02** | **1.01** | **131 072** |
 
-At k = 1024 that is **105 s → 0.33 ms**, a 317 000× speedup; peak allocation at
-k = 512 drops from 20.9 MiB to 14.3 KiB.
+At k = 1024 that is **101.7 s → 0.34 ms**, a 299 000× speedup; peak allocation
+at k = 512 drops from 20.9 MiB to 14.3 KiB.
+
+**Exactness holds at those sizes too**, against the 120-digit reference — and
+the accuracy gap is visible directly:
+
+| case | dense-inverse | sm-matrix | **sm-closed** |
+| --- | --- | --- | --- |
+| symmetric k=256 | 4.24e−12 | 4.26e−12 | **3.54e−15** |
+| symmetric k=1024 | 9.08e−12 | 9.08e−12 | **3.37e−14** |
+
+All 21 exactness cases pass their measured `64·eps·ρ·kᵖ` bound, up to k = 1024.
 
 Part 1.1 asked for O(k²) end-to-end. `sm-matrix` delivers exactly that;
 `sm-closed` never allocates anything k × k and does better.
@@ -90,12 +100,13 @@ recomputed at 200 digits. Every float64 disagreement is therefore numerical.
    `symmetric k=3`. Corrected, that case is now accurate to 9.4e-16.
 
 2. *What remains is cancellation, not conditioning.* Regressing
-   `log10(error)` across 54 parameter points:
+   `log10(error)` across 66 parameter points, with sweeps over concentration,
+   spread, anisotropy and conditioning:
 
    | predictor | slope | intercept | R² |
    | --- | ---: | ---: | ---: |
-   | **log10 ρ** (cancellation ratio) | **1.00** | **−16.08** | **0.986** |
-   | log10 cond(g) | 0.46 | −14.05 | 0.673 |
+   | **log10 ρ** (cancellation ratio) | **1.00** | **−16.09** | **0.985** |
+   | log10 cond(g) | 0.48 | −14.57 | 0.657 |
 
    The fitted intercept recovers `log10(eps) = −15.95`, so the law is
    `error = eps · ρ` with no free parameter. Holding ρ fixed and moving cond(g)
@@ -103,21 +114,76 @@ recomputed at 200 digits. Every float64 disagreement is therefore numerical.
    — "do not trust R beyond 1e-11 when cond(g) ≳ 1e3" — **is withdrawn**.
 
 **The boundary.** `8 · max(eps·ρ·kᵖ, input-rounding floor, special-function
-error)` held on **68 of 68** points for all three routes. Surviving digits are
-`16 − log10(ρ)`; past ρ ≈ 1e15 nothing survives, and no float64 implementation
-can do better — the input-rounding floor alone is 2.0e-09 there.
+error)` held on **80 of 80** points for all three routes. Surviving digits are
+`16 − log10(ρ·k)`; past ρ ≈ 1e15 nothing survives, and no float64
+implementation can do better — the input-rounding floor alone is 2.0e-09 there.
 
-**The guard rail is computable.** `dir_curvature_sm_closed_diagnostic` returns
-`(R, ρ̂)` from the same O(k) pass; ρ̂ is within 2× of the exact ρ on **68 of 68**
-points.
+**The guard rail is computable and read-only.** `curvature_reliability(...)`
+returns R, ρ̂, the surviving-digit estimate and the Sherman–Morrison denominator
+from the same O(k) pass, without changing R. ρ̂ is within 2× of the exact ρ on
+**80 of 80** points, and the digit estimate was **conservative on 80 of 80**
+(worst over-promise 0.00 digits, minimum margin 0.39).
 
 **Unplanned bonus:** the O(k) route is also the *most accurate* route. Error
-grows as k^1.11 for `sm-closed` against k^2.02 for `dense-inverse` — a 60×
+grows as k^1.15 for `sm-closed` against k^2.05 for `dense-inverse` — a 60×
 accuracy advantage at k = 256. The literal six-index contraction is worst of
 all, accumulating as **k^7.67**.
 
 ![error vs cancellation](docs/figures/error_vs_cancellation.svg)
 ![error vs conditioning](docs/figures/error_vs_condition.svg)
+
+---
+
+## Part 1.3 — special functions, measured against the oracle
+
+`python -m experiments.special_function_accuracy` →
+`experiments/results/special_function_accuracy.json`
+
+86 arguments spanning 1e−6 to 7e6, including dense coverage either side of the
+recurrence/asymptotic junction at 30, against the 120-digit reference:
+
+| function | worst abs | worst rel | worst adjusted ulp |
+| --- | --- | --- | ---: |
+| digamma | 4.00e−14 | 7.91e−16 | 4.96 |
+| trigamma | 3.71e−05 | 9.27e−16 | 4.86 |
+| tetragamma | 7.54e−17 | 3.89e−16 | 2.72 |
+
+"Adjusted ulp" divides out the cancellation the evaluation itself incurs,
+measured from the implementation's own intermediates. ψ′ and ψ″ accumulate
+terms of one sign, so their factor is 1 everywhere and adjusted equals raw.
+
+**One documented exception.** ψ has a root at x ≈ 1.4616321; there the
+recurrence sum and the asymptotic tail cancel 185×, and raw ulp error reaches
+118 at x = 1.5 while absolute error stays at 8.2e−16. That is under 1 ulp of
+the pre-cancellation magnitude — no recurrence-based ψ can do better without a
+root-centred expansion, and relative and ulp error are simply not meaningful
+measures of a function near its zero. ψ is not on the curvature path; it
+enters only `inv_digamma` and the Dirichlet MLE gate, whose tolerance is 1e−4.
+
+---
+
+## Phase B — the experiment, prepared but not run
+
+Everything here consumes real traces and generates none. Unit tests use
+hand-built fixtures with analytically known answers.
+
+| component | what it provides |
+| --- | --- |
+| `experiments/trace_schema.py` | router-trace contract; rejects a post-top-k capture (exactly `k − top_k` hard zeros is the signature) |
+| `experiments/quality_schema.py` | 3D-quality contract; rejects a failure label whose provenance is router-derived, and a manifest whose thresholds were not registered before the router analysis |
+| `experiments/router_stats.py` | §6 baselines (load, imbalance, entropy, max-prob, top-1/top-2 margin, routing variance) and §7 structure-aware statistics (covariance spectrum, λ_max, spectral entropy, effective rank, anisotropy, covariance/correlation drift, affine-invariant distance), plus the window → reference → drift-score pipeline for §9's per-layer/per-timestep references |
+| `experiments/evaluation.py` | ROC/PR AUC, sensitivity at fixed FPR with an achievable-FPR grid, Spearman/Pearson, cross-validated R², earliest-warning time with the "and stays there" rule, and the §3 object-level protocol: bootstrap CI, train/test split, k-fold, paired detector test — all resampling **objects**, with group-aware splitting so two seeds of one conditioning image cannot straddle a split |
+| `docs/experiment_plan.md` | the experiment itself, step by step, calling only the functions above |
+
+Two design decisions worth stating, because both prevent a plausible-looking
+wrong answer:
+
+- **`drift_scores` always requires a reference.** "Mean entropy is 1.31" is not
+  a detection. Building the API so a bare statistic cannot be mistaken for a
+  score keeps the cheap baselines honest competitors.
+- **`aggregate_object_scores` is the only path from windows to observations.**
+  After it, one object is one row. There is no function in the module that can
+  resample rows.
 
 ---
 

@@ -55,9 +55,16 @@ from experiments._router_common import (
     dir_fisher_from, dir_polygamma_inputs, mat_inv, print_table, save_results,
 )
 from experiments._highprec import (
-    hp_condition_number, hp_curvature_sherman_morrison, hp_dirichlet_inputs,
-    hp_fisher, precision, rel_error, to_decimal,
+    cancellation_ratio, hp_condition_number, hp_curvature_sherman_morrison,
+    hp_dirichlet_inputs, hp_fisher, precision, rel_error, to_decimal,
 )
+
+EPS = 2.0 ** -53
+SAFETY = 64.0
+# Measured in experiments/highprec_reliability.py, section C5: the error in
+# units of eps*rho grows as k^1.15 for the closed form and k^2.0-2.2 for the
+# routes that build a k x k matrix. Next integer up.
+SIZE_EXPONENT = {"sm-closed": 1, "sm-matrix": 2, "dense-inverse": 2}
 
 ROUTES = [
     ("dense-inverse", dir_curvature_dense_inverse, "O(k^3)"),
@@ -83,7 +90,22 @@ B1_CASES = [
     ("near-degenerate k=5",      [1e-5] * 5),
     ("realistic router k=8",     [0.6, 0.9, 1.4, 0.3, 2.1, 0.8, 1.1, 0.5]),
     ("realistic router k=16",    [0.4 + 0.1 * i for i in range(16)]),
+    # large k -- the regime the O(k) route exists for, and the one no earlier
+    # exactness check reached. The dense route is still evaluated here; it is
+    # slow, not infeasible, at these sizes.
+    ("symmetric k=64",           [2.0] * 64),
+    ("symmetric k=256",          [0.5] * 256),
+    ("symmetric k=1024",         [1.0] * 1024),
+    ("sparse router k=64",       [0.05 + 0.9 * ((i * 37) % 64) / 64.0
+                                  for i in range(64)]),
+    ("wide spread k=128",        [10.0 ** (-3.0 + 6.0 * i / 127.0)
+                                  for i in range(128)]),
+    ("concentrated k=256",       [50.0] * 256),
 ]
+
+# Jacobi over Decimal is O(k^3) per sweep; above this the condition number
+# costs far more than the curvature it annotates, and nothing depends on it.
+MAX_K_COND = 24
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -100,22 +122,37 @@ def run_b1(digits):
 
         with precision(digits):
             hp_inputs = hp_dirichlet_inputs(alpha)
-            ref = hp_curvature_sherman_morrison(*hp_inputs)["R"]
-            cond = hp_condition_number(hp_fisher(hp_inputs[0], hp_inputs[1]))
+            parts = hp_curvature_sherman_morrison(*hp_inputs)
+            ref = parts["R"]
+            rho = cancellation_ratio(parts)
+            cond = (hp_condition_number(hp_fisher(hp_inputs[0], hp_inputs[1]))
+                    if len(alpha) <= MAX_K_COND else None)
             errs = {route: rel_error(to_decimal(v), ref) for route, v in f64.items()}
             ref_float = float(ref)
 
-        rec = {"case": name, "k": len(alpha), "alpha": alpha,
+        k = len(alpha)
+        # measured accuracy law: eps * rho * k^p, p from highprec_reliability C5
+        bounds = {route: max(SAFETY * EPS * rho * k ** SIZE_EXPONENT[route],
+                             SAFETY * EPS)
+                  for route, _, _ in ROUTES}
+        ratios = {route: errs[route] / bounds[route] for route, _, _ in ROUTES}
+
+        rec = {"case": name, "k": k, "alpha": alpha,
                "R_reference_hp": repr(ref), "R_reference_float": ref_float,
-               "cond_g": cond,
-               "R_float64": f64, "rel_err_vs_hp": errs}
+               "cond_g": cond, "cancellation_rho": rho,
+               "R_float64": f64, "rel_err_vs_hp": errs,
+               "bounds": bounds, "error_over_bound": ratios,
+               "pass": all(v < 1.0 for v in ratios.values())}
         records.append(rec)
-        rows.append([name, len(alpha), "%.12f" % ref_float, "%.1e" % cond]
-                    + ["%.2e" % errs[r] for r, _, _ in ROUTES])
+        rows.append([name, k, "%.12f" % ref_float, "%.1e" % rho]
+                    + ["%.2e" % errs[r] for r, _, _ in ROUTES]
+                    + ["%.3f" % max(ratios.values()),
+                       "PASS" if rec["pass"] else "FAIL"])
 
     print_table("B1 EXACTNESS -- float64 routes vs a %d-digit reference" % digits,
-                ["case", "k", "R (reference)", "cond(g)"]
-                + ["rel err %s" % r for r, _, _ in ROUTES], rows)
+                ["case", "k", "R (reference)", "rho"]
+                + ["rel err %s" % r for r, _, _ in ROUTES]
+                + ["worst err/bound", "verdict"], rows)
 
     worst = {r: max(rec["rel_err_vs_hp"][r] for rec in records)
              for r, _, _ in ROUTES}
@@ -127,9 +164,17 @@ def run_b1(digits):
         abs(rec["R_float64"][a] - rec["R_float64"][b]) / max(abs(rec["R_reference_float"]), 1e-300)
         for rec in records for a, _, _ in ROUTES for b, _, _ in ROUTES)
     print("  worst route-to-route spread                %.2e" % spread)
+    print("  bound = %.0f * eps * rho * k^p, p = %s"
+          % (SAFETY, ", ".join("%s %d" % (r, p)
+                               for r, p in sorted(SIZE_EXPONENT.items()))))
+    print("  all pass: %s  (largest k verified: %d)"
+          % (all(r["pass"] for r in records), max(r["k"] for r in records)))
     print()
     return {"digits": digits, "cases": records, "worst_rel_err": worst,
-            "worst_route_spread": spread}
+            "worst_route_spread": spread,
+            "all_pass": all(r["pass"] for r in records),
+            "max_k_verified": max(r["k"] for r in records),
+            "size_exponents": SIZE_EXPONENT, "safety": SAFETY}
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -268,11 +313,19 @@ def main():
     p.add_argument("--budget", type=float, default=25.0)
     p.add_argument("--fit-from", type=int, default=64,
                    help="smallest k included in the asymptotic slope fit")
+    p.add_argument("--max-memory-k", type=int, default=512,
+                   help="largest k measured under tracemalloc. tracemalloc "
+                        "records every allocation, and the O(k^3) elimination "
+                        "makes O(k) list allocations per pivot column, so "
+                        "tracing it past this costs orders of magnitude more "
+                        "than the untraced run. k=8..512 is seven points, "
+                        "enough to fit the memory slope.")
     p.add_argument("--digits", type=int, default=120)
     a = p.parse_args()
 
     b1 = run_b1(a.digits)
-    b2 = run_b2(sorted(set(a.ks + a.extended_ks)), a.budget, set(a.ks))
+    mem_ks = {k for k in a.ks if k <= a.max_memory_k}
+    b2 = run_b2(sorted(set(a.ks + a.extended_ks)), a.budget, mem_ks)
     b4 = run_b4(b2, a.fit_from)
 
     print("=" * 78)
@@ -288,10 +341,12 @@ def main():
                  a.fit_from,
                  "%.2f" % f["memory_slope"] if f["memory_slope"] is not None else "-",
                  f["k_max_measured"]))
-    print("  B1 exactness: worst relative error vs the %d-digit reference"
-          % a.digits)
+    print("  B1 exactness: %s up to k=%d, vs the %d-digit reference"
+          % ("PASS" if b1["all_pass"] else "FAIL", b1["max_k_verified"],
+             a.digits))
     for route, _, _ in ROUTES:
-        print("      %-14s %.2e" % (route, b1["worst_rel_err"][route]))
+        print("      %-14s worst relative error %.2e"
+              % (route, b1["worst_rel_err"][route]))
     print()
 
     save_results("sherman_morrison_benchmark",

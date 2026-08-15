@@ -18,11 +18,6 @@ It should be cited by commit hash and release tag. Later repository changes do n
   <img src="https://img.shields.io/badge/release-IGAD--Ver1.0.0-blue?logo=git&logoColor=white"
        alt="Release IGAD-Ver1.0.0">
 
-  <a href="PASTE_EXACT_GITHUB_ACTIONS_RUN_URL_HERE">
-    <img src="https://img.shields.io/badge/GitHub%20validated-54%2F54%20tests-brightgreen?logo=github&logoColor=white"
-         alt="GitHub validated: 54/54 tests passed">
-  </a>
-
   <a href="https://github.com/Visigence/IGAD/commit/81dd1eb4540643083854232d9645f6add4150512">
     <img src="https://img.shields.io/badge/verified%20commit-81dd1eb-6e40c9?logo=github&logoColor=white"
          alt="Verified commit 81dd1eb">
@@ -65,9 +60,11 @@ pip install igad
 * [Experimental Results](../RESULTS.md)
 * [Operational Envelope](operational_envelope.md)
 * [Mathematical Proof](proof.md)
+* [Handoff](handoff.md) — **what is proven here, what needs external resources, and the next action**
 * [O(k) Dirichlet curvature](sherman_morrison.md) — Sherman–Morrison derivation and measured scaling
 * [Numerical reliability](numerical_reliability.md) — when `R(θ)` can be trusted, from a 120-digit reference
 * [Acquisition checklist](acquisition_checklist.md) — what the MoE-router / 3D-quality benchmark needs before it can run
+* [Experiment plan](experiment_plan.md) — the early-warning experiment, specified step by step
 * [Validation report](validation_report.md) — router structure vs cheap diagnostics (synthetic scope)
 
 ---

@@ -28,10 +28,11 @@ from experiments._highprec import (
     hp_fisher, hp_mat_inv, precision, rel_error, to_decimal,
 )
 from experiments._router_common import (
-    SingularMatrix, dir_curvature_dense_inverse, dir_curvature_sm_closed,
-    dir_curvature_sm_closed_diagnostic, dir_curvature_sm_matrix,
-    dir_fisher_from, dir_fisher_inverse_sm, dir_polygamma_inputs,
-    dir_scalar_curvature, dir_scalar_curvature_sm, mat_inv, trigamma,
+    SingularMatrix, dir_curvature_dense_inverse, dir_curvature_reliability,
+    dir_curvature_sm_closed, dir_curvature_sm_closed_diagnostic,
+    dir_curvature_sm_matrix, dir_fisher_from, dir_fisher_inverse_sm,
+    dir_polygamma_inputs, dir_scalar_curvature, dir_scalar_curvature_sm,
+    mat_inv, trigamma,
 )
 
 EPS = 2.0 ** -53
@@ -161,11 +162,35 @@ def test_alpha_level_entrypoints_agree(alpha):
 @pytest.mark.parametrize("alpha", ALPHAS)
 def test_diagnostic_rho_matches_the_exact_cancellation_ratio(alpha):
     """The float64 guard rail has to be right to within an order of magnitude,
-    or `16 - log10(rho_hat)` is not a usable digit count."""
+    or the reported digit count is not usable."""
     r, rho_hat = dir_curvature_sm_closed_diagnostic(*dir_polygamma_inputs(alpha))
     ref, rho = _reference(alpha)
     assert 0.1 <= rho_hat / rho <= 10.0, "rho_hat %.3e vs rho %.3e" % (rho_hat, rho)
     assert r == dir_curvature_sm_closed(*dir_polygamma_inputs(alpha))
+
+
+@pytest.mark.parametrize("alpha", ALPHAS)
+def test_reliability_diagnostic_is_read_only_and_conservative(alpha):
+    """Two properties the diagnostic must have to be worth shipping:
+
+    1. it does not change R -- the value it returns is bit-identical to the
+       one the plain route returns;
+    2. it does not over-promise -- the digits it claims are actually there.
+    """
+    inputs = dir_polygamma_inputs(alpha)
+    info = dir_curvature_reliability(*inputs)
+    assert info["R"] == dir_curvature_sm_closed(*inputs)
+
+    ref, _ = _reference(alpha)
+    with precision(120):
+        err = rel_error(to_decimal(info["R"]), ref)
+    actual_digits = -math.log10(max(err, 1e-17))
+    assert actual_digits >= info["trusted_digits"] - 1e-9, (
+        "promised %.2f digits, delivered %.2f"
+        % (info["trusted_digits"], actual_digits))
+    assert err <= info["relative_error_bound"]
+    assert info["sm_denominator"] > 0.0
+    assert info["cancellation_ratio"] >= 1.0
 
 
 def test_sm_closed_allocates_nothing_quadratic():
@@ -244,7 +269,7 @@ def test_package_matches_stdlib_mirror(alpha):
 
 @pytest.mark.parametrize("alpha", [[4.0, 4.0, 4.0], [1.5, 4.0, 6.5], [1.0] * 5])
 def test_package_matches_the_generic_dense_contraction(alpha):
-    """The O(k) route against the fully generic O(k^6) route in `igad`."""
+    """The O(k) route against the fully generic contraction in `igad`."""
     np = _numpy()
     from igad.curvature import scalar_curvature
     from igad.families import DirichletFamily
@@ -255,3 +280,52 @@ def test_package_matches_the_generic_dense_contraction(alpha):
     generic = scalar_curvature(DirichletFamily.log_partition, theta, g=g, T=T)
     fast = DirichletFamily.scalar_curvature_fast(theta)
     assert abs(fast - generic) <= 1e-10 * max(abs(generic), 1.0)
+
+
+@pytest.mark.parametrize("alpha", [[4.0, 4.0, 4.0], [0.5] * 8, [2.0] * 16])
+def test_the_preferred_dirichlet_route_is_the_O_k_one(alpha):
+    """`scalar_curvature_analytical` is the name every existing caller uses,
+    including IGADDetector. It must now dispatch to the O(k) route, and the
+    O(k^3) route must still be reachable for cross-checking."""
+    np = _numpy()
+    from igad.curvature import scalar_curvature_dirichlet
+    from igad.families import DirichletFamily
+
+    theta = DirichletFamily.to_natural(np.array(alpha))
+    preferred = DirichletFamily.scalar_curvature_analytical(theta)
+    closed = scalar_curvature_dirichlet(*DirichletFamily.polygamma_inputs(theta))
+    assert preferred == closed          # bit-identical: same code path
+    assert DirichletFamily.scalar_curvature_fast(theta) == closed
+
+    via_inverse = DirichletFamily.scalar_curvature_via_inverse(theta)
+    _, rho = _reference(alpha)
+    assert abs(preferred - via_inverse) <= max(
+        _tolerance(rho, len(alpha), 2) * abs(via_inverse), 1e-13)
+
+
+def test_detector_uses_the_O_k_route_without_modification():
+    """The detector prefers `family.scalar_curvature_analytical`; since that
+    name now points at the O(k) implementation, the detector picks it up with
+    no change to its own code."""
+    np = _numpy()
+    from igad.detector import IGADDetector
+    from igad.families import DirichletFamily
+
+    d = IGADDetector(family=DirichletFamily, k_neighbors=5)
+    theta = DirichletFamily.to_natural(np.array([2.0] * 12))
+    assert d._scalar_curvature(theta) == DirichletFamily.scalar_curvature_analytical(theta)
+
+
+@pytest.mark.parametrize("alpha", ALPHAS)
+def test_package_reliability_matches_the_stdlib_mirror(alpha):
+    np = _numpy()
+    from igad.curvature import curvature_reliability
+    from igad.families import DirichletFamily
+
+    theta = DirichletFamily.to_natural(np.array(alpha))
+    pkg = curvature_reliability(*DirichletFamily.polygamma_inputs(theta))
+    mirror = dir_curvature_reliability(*dir_polygamma_inputs(alpha))
+    for key in ("cancellation_ratio", "trusted_digits", "relative_error_bound",
+                "sm_denominator"):
+        assert pkg[key] == pytest.approx(mirror[key], rel=1e-9), key
+    assert pkg["R"] == pytest.approx(mirror["R"], rel=1e-9)
