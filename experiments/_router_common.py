@@ -46,8 +46,8 @@ import random
 SHIFT = 30.0
 
 
-def digamma(x):
-    """psi(x) = d/dx log Gamma(x), for x > 0."""
+def _digamma_parts(x):
+    """(recurrence sum, asymptotic tail) -- psi(x) is their sum."""
     r = 0.0
     while x < SHIFT:
         r -= 1.0 / x
@@ -55,13 +55,13 @@ def digamma(x):
     i = 1.0 / x
     i2 = i * i
     # log x - 1/(2x) - sum_{n>=1} B_{2n} / (2n x^{2n})
-    return r + math.log(x) - 0.5 * i - i2 * (
+    tail = math.log(x) - 0.5 * i - i2 * (
         1/12. - i2 * (1/120. - i2 * (1/252. - i2 * (
             1/240. - i2 * (1/132. - i2 * (691/32760.))))))
+    return r, tail
 
 
-def trigamma(x):
-    """psi'(x) = sum_{n>=0} 1/(x+n)^2, for x > 0."""
+def _trigamma_parts(x):
     r = 0.0
     while x < SHIFT:
         r += 1.0 / (x * x)
@@ -69,27 +69,78 @@ def trigamma(x):
     i = 1.0 / x
     i2 = i * i
     # 1/x + 1/(2x^2) + sum_{n>=1} B_{2n} x^{-(2n+1)}
-    return r + i * (1 + i * (0.5 + i * (
+    tail = i * (1 + i * (0.5 + i * (
         1/6. - i2 * (1/30. - i2 * (1/42. - i2 * (
             1/30. - i2 * (5/66. - i2 * (691/2730.))))))))
+    return r, tail
 
 
-def tetragamma(x):
-    """psi''(x) = -2 sum_{n>=0} 1/(x+n)^3, for x > 0.
-
-    The series is the term-by-term derivative of trigamma's:
-    -1/x^2 - 1/x^3 - sum_{n>=1} (2n+1) B_{2n} x^{-(2n+2)}.
-    """
+def _tetragamma_parts(x):
     r = 0.0
     while x < SHIFT:
         r -= 2.0 / (x ** 3)
         x += 1.0
     i = 1.0 / x
     i2 = i * i
-    tail = i2 * i2 * (
+    # -1/x^2 - 1/x^3 - sum_{n>=1} (2n+1) B_{2n} x^{-(2n+2)}
+    tail = -i2 - i2 * i - i2 * i2 * (
         0.5 - i2 * (1/6. - i2 * (1/6. - i2 * (
             0.3 - i2 * (5/6. - i2 * (691/210.))))))
-    return r - i2 - i2 * i - tail
+    return r, tail
+
+
+def digamma(x):
+    """psi(x) = d/dx log Gamma(x), for x > 0."""
+    r, tail = _digamma_parts(x)
+    return r + tail
+
+
+def trigamma(x):
+    """psi'(x) = sum_{n>=0} 1/(x+n)^2, for x > 0."""
+    r, tail = _trigamma_parts(x)
+    return r + tail
+
+
+def tetragamma(x):
+    """psi''(x) = -2 sum_{n>=0} 1/(x+n)^3, for x > 0.
+
+    The series is the term-by-term derivative of trigamma's.
+    """
+    r, tail = _tetragamma_parts(x)
+    return r + tail
+
+
+_POLYGAMMA_PARTS = {"digamma": _digamma_parts, "trigamma": _trigamma_parts,
+                    "tetragamma": _tetragamma_parts}
+
+
+def polygamma_cancellation(name, x):
+    """(|recurrence| + |tail|) / |result| -- the condition number of the sum.
+
+    This is exactly 1 when the two halves share a sign and grows without bound
+    as they cancel. psi' and psi'' accumulate terms of a single sign, so their
+    factor is 1 everywhere and their relative accuracy is uniform. psi
+    subtracts a recurrence sum from an asymptotic tail, and psi has a root at
+    x ~ 1.4616321: the two halves cancel there, the factor reaches ~185 at
+    x = 1.5, and no recurrence-based evaluation of psi can avoid it. Relative
+    and ulp error are therefore not meaningful measures for psi in that
+    neighbourhood; absolute error is, and
+    `experiments/special_function_accuracy.py` reports both.
+
+    Note the convention differs from `_highprec.cancellation_ratio`, which
+    divides the *largest* of R's five intermediates by the final difference.
+    Both measure magnitude-relative-to-result; the constants in front are
+    calibrated separately, and R's was fitted against measured error with an
+    intercept that recovers log10(eps).
+
+    Computed from the implementation's own intermediates, not from a second
+    copy of the series.
+    """
+    r, tail = _POLYGAMMA_PARTS[name](x)
+    total = r + tail
+    if total == 0.0:
+        return float("inf")
+    return (abs(r) + abs(tail)) / abs(total)
 
 
 def inv_digamma(y):
@@ -381,6 +432,32 @@ def dir_curvature_sm_closed(tri, tri0, tet, tet0):
     term_b = 2.0 * c * term_b / (w ** 3)          # r_a^3 = u_a^3 / w^3
     term_c = beta ** 3 * (du3_sum * du3_sum - du3_sq) + diag
     return 0.25 * (S_sq - (term_a + term_b + term_c))
+
+
+EPS = 2.0 ** -53
+SIZE_EXPONENT_CLOSED_FORM = 1
+RELIABILITY_SAFETY = 8.0
+
+
+def dir_curvature_reliability(tri, tri0, tet, tet0):
+    """Diagnostic: how many digits of R are trustworthy here.
+
+    Mirrors `igad.curvature.curvature_reliability`. **Read-only** -- it does
+    not change R, and R is not computed differently because of it.
+
+    Returns a dict with R, the cancellation ratio rho, the estimated number of
+    correct significant decimal digits (16 - log10(rho * k)), the implied
+    relative-error bound, and the Sherman-Morrison denominator w.
+    """
+    R, rho = dir_curvature_sm_closed_diagnostic(tri, tri0, tet, tet0)
+    k = len(tri)
+    u_sum = sum(1.0 / t for t in tri)
+    w = 1.0 - tri0 * u_sum
+    bound = RELIABILITY_SAFETY * EPS * rho * k ** SIZE_EXPONENT_CLOSED_FORM
+    digits = 0.0 if bound >= 1.0 else -math.log10(max(bound, EPS))
+    return {"R": R, "cancellation_ratio": rho,
+            "trusted_digits": max(digits, 0.0),
+            "relative_error_bound": bound, "sm_denominator": w}
 
 
 def dir_curvature_sm_closed_diagnostic(tri, tri0, tet, tet0):
