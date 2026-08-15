@@ -149,6 +149,73 @@ def scalar_curvature(
     S_norm_sq = np.einsum("mn,m,n->", g_inv, S, S)
 
     # ||T||^2_g = g^{ia} g^{jb} g^{kc} T_{ijk} T_{abc}
-    T_norm_sq = np.einsum("ia,jb,kc,ijk,abc->", g_inv, g_inv, g_inv, T, T)
+    # optimize=True contracts pairwise (O(d^4)) instead of the naive
+    # six-index loop (O(d^6)); the value is unchanged.
+    T_norm_sq = np.einsum(
+        "ia,jb,kc,ijk,abc->", g_inv, g_inv, g_inv, T, T, optimize=True
+    )
+
+    return 0.25 * (S_norm_sq - T_norm_sq)
+
+
+def scalar_curvature_structured(
+    g: np.ndarray,
+    c: float,
+    d: np.ndarray,
+) -> float:
+    """
+    Scalar curvature for families whose third cumulant tensor has the form
+
+        T_{ijk} = c + d_i * delta_{ijk}
+
+    i.e. a constant offset plus a correction carried only on the triple
+    diagonal. The Dirichlet family has exactly this structure; see
+    ``families.DirichletFamily.third_cumulant_structure``.
+
+    Writing M = g^{-1}, r_a = sum_i M_{ia} and s = sum_a r_a, the two
+    contractions in R = 1/4 * (||S||^2_g - ||T||^2_g) collapse to
+
+        S_m       = c * s + M_{mm} * d_m
+        ||S||^2_g = S^T M S
+        ||T||^2_g = c^2 * s^3
+                    + 2c * sum_a d_a r_a^3
+                    + sum_{i,a} d_i d_a M_{ia}^3
+
+    This is O(k^2) rather than the O(k^6) contraction in
+    :func:`scalar_curvature`, and it is exact -- not an approximation.
+    Materialising T at all is avoided, which matters once k reaches the
+    dozens (a k=64 evaluation is ~6.9e10 einsum operations otherwise).
+
+    Parameters
+    ----------
+    g : ndarray of shape (k, k)
+        Fisher metric at the parameter point.
+    c : float
+        Constant offset of the third cumulant tensor.
+    d : ndarray of shape (k,)
+        Triple-diagonal correction, T_{iii} = c + d_i.
+
+    Returns
+    -------
+    float
+        Scalar curvature R(theta).
+    """
+    g = np.asarray(g, dtype=np.float64)
+    d = np.asarray(d, dtype=np.float64)
+
+    M = np.linalg.inv(g)
+    r = M.sum(axis=0)            # r_a = sum_i M_{ia}
+    s = float(r.sum())           # s   = sum_{ia} M_{ia}
+
+    # S_m = g^{ab} T_{abm} = c*s + M_{mm} d_m
+    S = c * s + np.diag(M) * d
+    S_norm_sq = float(S @ M @ S)
+
+    # ||T||^2_g, expanded over T = c*E + D with E_{ijk}=1, D_{ijk}=d_i delta_{ijk}
+    T_norm_sq = (
+        c * c * s ** 3
+        + 2.0 * c * float(d @ r ** 3)
+        + float(d @ (M ** 3) @ d)
+    )
 
     return 0.25 * (S_norm_sq - T_norm_sq)

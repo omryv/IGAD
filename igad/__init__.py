@@ -3,8 +3,13 @@ __version__ = "1.0.0"
 
 
 from .detector import IGADDetector
-from .curvature import scalar_curvature, fisher_metric, third_cumulant_tensor
+from .curvature import (
+    scalar_curvature,
+    scalar_curvature_structured,
+    fisher_metric,
+    third_cumulant_tensor,
+)
 from .exceptions import ConvergenceError
 
-__all__ = ["IGADDetector", "scalar_curvature", "fisher_metric", "third_cumulant_tensor",
-           "ConvergenceError"]
+__all__ = ["IGADDetector", "scalar_curvature", "scalar_curvature_structured",
+           "fisher_metric", "third_cumulant_tensor", "ConvergenceError"]

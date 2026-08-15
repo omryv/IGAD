@@ -39,7 +39,18 @@ class IGADDetector:
         self.X_train_ = None
 
     def _scalar_curvature(self, theta: np.ndarray) -> float:
-        """Compute scalar curvature, using analytical T if available and requested."""
+        """
+        Compute scalar curvature, preferring the cheapest exact route available:
+
+        1. ``family.scalar_curvature_analytical`` — O(k^2), never builds T.
+        2. ``family.third_cumulant_analytical``   — exact T, O(k^4) contraction.
+        3. finite differences                     — fully generic fallback.
+
+        All three are the same quantity; ``use_analytical_T=False`` forces (3).
+        """
+        if self.use_analytical_T and hasattr(self.family, "scalar_curvature_analytical"):
+            return self.family.scalar_curvature_analytical(theta)
+
         T: Optional[np.ndarray] = None
         if self.use_analytical_T and hasattr(self.family, "third_cumulant_analytical"):
             T = self.family.third_cumulant_analytical(theta)

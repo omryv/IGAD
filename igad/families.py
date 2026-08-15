@@ -5,6 +5,8 @@ Concrete exponential families with analytical log-partition functions.
 import numpy as np
 from scipy.special import gammaln, digamma, polygamma
 
+from .curvature import scalar_curvature_structured
+
 
 class GammaFamily:
     """
@@ -181,6 +183,42 @@ class DirichletFamily:
         idx = np.arange(k)
         T[idx, idx, idx] += polygamma(2, alpha)
         return T
+
+    @staticmethod
+    def third_cumulant_structure(theta: np.ndarray):
+        """
+        The third cumulant tensor in structural form, without materialising it.
+
+        ``third_cumulant_analytical`` builds a dense (k, k, k) array whose
+        entries are a single constant plus a triple-diagonal correction:
+
+            T[i, j, k] = c + d_i * delta_{ijk}
+            c   = -polygamma(2, alpha_0)
+            d_i =  polygamma(2, alpha_i)
+
+        Returning (c, d) lets ``curvature.scalar_curvature_structured``
+        evaluate R in O(k^2) instead of O(k^6).
+
+        Returns
+        -------
+        c : float
+        d : ndarray of shape (k,)
+        """
+        alpha = np.asarray(theta, dtype=np.float64) + 1.0
+        c = float(-polygamma(2, float(alpha.sum())))
+        d = np.asarray(polygamma(2, alpha), dtype=np.float64)
+        return c, d
+
+    @staticmethod
+    def scalar_curvature_analytical(theta: np.ndarray) -> float:
+        """
+        Exact scalar curvature via the analytical metric and the structural
+        third cumulant tensor. Mathematically identical to
+        ``curvature.scalar_curvature`` on this family, but O(k^2).
+        """
+        g = DirichletFamily.fisher_metric_analytical(theta)
+        c, d = DirichletFamily.third_cumulant_structure(theta)
+        return scalar_curvature_structured(g, c, d)
 
     @staticmethod
     def mle(data: np.ndarray, max_iter: int = 1000, tol: float = 1e-8) -> np.ndarray:
