@@ -40,7 +40,7 @@ curvature geometry is doing real work, not just MLE efficiency.
 Mathematical reason: The Fisher-Rao metric of the multivariate Gaussian is the
 Siegel upper half-space metric, a symmetric space of constant negative curvature
 (hyperbolic geometry). Specifically, for the n-dimensional Gaussian family,
-scalar curvature R = -n(n+1)/2, a constant depending only on dimension, not on
+scalar curvature R = -d(d+1)^2/4, a constant depending only on dimension, not on
 the specific parameters (mean, covariance). No matter how the mean or covariance
 changes between reference and anomaly, R_ref = R_local identically, so the IGAD
 score is zero.

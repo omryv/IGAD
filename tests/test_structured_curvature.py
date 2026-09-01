@@ -170,8 +170,8 @@ class TestDetectorFastPath:
         """IGADDetector picks the fast path but reports the same curvature."""
         theta = DirichletFamily.to_natural(np.array([2.0, 3.0, 5.0]))
 
-        fast = IGADDetector(family=DirichletFamily, use_analytical_T=True)
-        slow = IGADDetector(family=DirichletFamily, use_analytical_T=False)
+        fast = IGADDetector(family=DirichletFamily, use_analytical=True)
+        slow = IGADDetector(family=DirichletFamily, use_analytical=False)
 
         R_fast = fast._scalar_curvature(theta)
         R_slow = slow._scalar_curvature(theta)
@@ -179,15 +179,17 @@ class TestDetectorFastPath:
 
     def test_gamma_family_unaffected(self):
         """
-        GammaFamily exposes no scalar_curvature_analytical, so it must still
-        route through the dense-T path exactly as before.
+        GammaFamily exposes no scalar_curvature_analytical, so it routes
+        through the dense-T path -- now supplying the exact Fisher metric
+        too, rather than re-deriving it by finite differences.
         """
         assert not hasattr(GammaFamily, "scalar_curvature_analytical")
         theta = GammaFamily.to_natural(5.0, 2.0)
-        det = IGADDetector(family=GammaFamily, use_analytical_T=True)
+        det = IGADDetector(family=GammaFamily, use_analytical=True)
         expected = scalar_curvature(
             GammaFamily.log_partition,
             theta,
+            g=GammaFamily.fisher_metric_analytical(theta),
             T=GammaFamily.third_cumulant_analytical(theta),
         )
         assert abs(det._scalar_curvature(theta) - expected) < 1e-12

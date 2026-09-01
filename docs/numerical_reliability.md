@@ -111,11 +111,11 @@ psi is not on the curvature path.
 Define the **cancellation ratio**
 
 ```
-rho = max( |S^2|, |T^2|, |term_a|, |term_b|, |term_c| ) / |S^2 - T^2|
+rho = max( |S^2|, |T^2|, |term_a|, |term_b|, |term_c| ) / |T^2 - S^2|
 ```
 
 — the largest intermediate magnitude divided by the final difference, where
-`R = (S^2 - T^2)/4`. Regressing `log10(arithmetic error)` on each candidate
+`R = (T^2 - S^2)/4`. Regressing `log10(arithmetic error)` on each candidate
 predictor across all 66 points:
 
 | predictor | slope | intercept | R² | Pearson | Spearman |

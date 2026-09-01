@@ -1,9 +1,11 @@
 """
 Scalar curvature of Fisher-Rao manifolds for exponential families.
 
-Background identity (known in Hessian geometry; restated for completeness):
+Background identity (known in Hessian geometry; restated for completeness).
+Sign convention: the Levi-Civita scalar curvature, in which the unit 2-sphere
+has R = +2 and the univariate Gaussian Fisher-Rao manifold has R = -1.
 
-    R(theta) = 1/4 * ( ||grad log det g||^2_g  -  ||T||^2_g )
+    R(theta) = 1/4 * ( ||T||^2_g  -  ||grad log det g||^2_g )
 
 where:
     g_{ij}(theta)   = d^2 A / d theta_i d theta_j          (Fisher metric)
@@ -129,7 +131,7 @@ def scalar_curvature(
     """
     Compute scalar curvature R(theta) of the Fisher-Rao manifold.
 
-        R = 1/4 * ( ||S||^2_g - ||T||^2_g )
+        R = 1/4 * ( ||T||^2_g - ||S||^2_g )
 
     where S_m = g^{ab} T_{abm}.
     """
@@ -155,7 +157,7 @@ def scalar_curvature(
         "ia,jb,kc,ijk,abc->", g_inv, g_inv, g_inv, T, T, optimize=True
     )
 
-    return 0.25 * (S_norm_sq - T_norm_sq)
+    return 0.25 * (T_norm_sq - S_norm_sq)
 
 
 def scalar_curvature_structured(
@@ -173,7 +175,7 @@ def scalar_curvature_structured(
     ``families.DirichletFamily.third_cumulant_structure``.
 
     Writing M = g^{-1}, r_a = sum_i M_{ia} and s = sum_a r_a, the two
-    contractions in R = 1/4 * (||S||^2_g - ||T||^2_g) collapse to
+    contractions in R = 1/4 * (||T||^2_g - ||S||^2_g) collapse to
 
         S_m       = c * s + M_{mm} * d_m
         ||S||^2_g = S^T M S
@@ -218,7 +220,7 @@ def scalar_curvature_structured(
         + float(d @ (M ** 3) @ d)
     )
 
-    return 0.25 * (S_norm_sq - T_norm_sq)
+    return 0.25 * (T_norm_sq - S_norm_sq)
 
 
 def dirichlet_fisher_inverse(tri: np.ndarray, tri0: float) -> np.ndarray:
@@ -333,7 +335,7 @@ def scalar_curvature_dirichlet(
         + float((d * du3 * (1.0 + beta * u) ** 3).sum())
     )
 
-    return 0.25 * (S_norm_sq - T_norm_sq)
+    return 0.25 * (T_norm_sq - S_norm_sq)
 
 
 # Measured size exponent p in the accuracy law eps * rho * k^p, from
@@ -362,10 +364,10 @@ def curvature_reliability(
     :func:`scalar_curvature_dirichlet` when you need to know whether the answer
     is worth acting on.
 
-    ``R = (||S||^2_g - ||T||^2_g) / 4`` is a difference of quantities that can
+    ``R = (||T||^2_g - ||S||^2_g) / 4`` is a difference of quantities that can
     each be enormously larger than the result. The cancellation ratio
 
-        rho = max(|intermediate|) / |S^2 - T^2|
+        rho = max(|intermediate|) / |T^2 - S^2|
 
     measures that, and the measured accuracy law is ``eps * rho * k^p`` -- see
     ``docs/numerical_reliability.md``, where the regression of log10(error) on
@@ -431,7 +433,7 @@ def curvature_reliability(
               + float((d * du3 * (1.0 + beta * u) ** 3).sum()))
     T_norm_sq = term_a + term_b + term_c
 
-    gap = S_norm_sq - T_norm_sq
+    gap = T_norm_sq - S_norm_sq
     biggest = max(abs(S_norm_sq), abs(T_norm_sq),
                   abs(term_a), abs(term_b), abs(term_c))
     rho = float("inf") if gap == 0.0 else biggest / abs(gap)

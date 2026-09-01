@@ -362,7 +362,7 @@ def _curvature_from_inverse(M, c, d):
     T_sq = (c * c * s ** 3
             + 2.0 * c * sum(d[a] * r[a] ** 3 for a in range(k))
             + sum(d[i] * (M[i][a] ** 3) * d[a] for i in range(k) for a in range(k)))
-    return 0.25 * (S_sq - T_sq)
+    return 0.25 * (T_sq - S_sq)
 
 
 def dir_curvature_dense_inverse(tri, tri0, tet, tet0):
@@ -431,7 +431,7 @@ def dir_curvature_sm_closed(tri, tri0, tet, tet0):
         diag += d[i] * du3 * (1.0 + beta * u[i]) ** 3
     term_b = 2.0 * c * term_b / (w ** 3)          # r_a^3 = u_a^3 / w^3
     term_c = beta ** 3 * (du3_sum * du3_sum - du3_sq) + diag
-    return 0.25 * (S_sq - (term_a + term_b + term_c))
+    return 0.25 * ((term_a + term_b + term_c) - S_sq)
 
 
 EPS = 2.0 ** -53
@@ -506,7 +506,7 @@ def dir_curvature_sm_closed_diagnostic(tri, tri0, tet, tet0):
     term_c = beta ** 3 * (du3_sum * du3_sum - du3_sq) + diag
     T_sq = term_a + term_b + term_c
 
-    gap = S_sq - T_sq
+    gap = T_sq - S_sq
     biggest = max(abs(S_sq), abs(T_sq), abs(term_a), abs(term_b), abs(term_c))
     rho_hat = float("inf") if gap == 0.0 else biggest / abs(gap)
     return 0.25 * gap, rho_hat

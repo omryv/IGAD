@@ -22,19 +22,36 @@ Reference: Amari and Nagaoka (2000), Chapter 2.
 
 ## 3. Fourth Cumulant Cancellation (Known)
 
-The Riemann tensor R^l_{ijk} involves fourth cumulant terms from d_i Gamma^l_{jk}.
-These are symmetric in (i,j), but R is antisymmetric in (i,j).
-Therefore they cancel exactly. R is purely quadratic in T.
+Expand the derivative-of-Christoffel term in the Riemann tensor:
+
+    d_i Gamma^l_{jk} = 1/2 (d_i g^{lm}) T_{jkm}  +  1/2 g^{lm} Q_{ijkm}
+
+where Q_{ijkm} = d^4 A / d theta_i d theta_j d theta_k d theta_m is the
+fourth cumulant. Only the **second** term is symmetric in (i,j): Q is fully
+symmetric, and R^l_{ijk} is antisymmetric in (i,j), so that term cancels
+exactly. R therefore contains no fourth cumulant and is purely quadratic in T.
+
+The **first** term does not cancel. Using d_i g^{lm} = -g^{la} g^{mb} T_{iab},
+it is itself quadratic in T and antisymmetrises to a non-zero contribution.
+Dropping it along with the Q term is the classic error here: it flips the
+sign of R.
 
 Reference: Standard property of Hessian metrics. See Ruppeiner (1995).
 
 ## 4. Scalar Curvature Formula (Known)
 
-    R(theta) = 1/4 * ( ||S||^2_g - ||T||^2_g )
+    R(theta) = 1/4 * ( ||T||^2_g - ||S||^2_g )
 
 where S_m = g^{ab} T_{abm} = d_m log det g.
 
-When det g = const: R = -1/4 ||T||^2_g <= 0.
+When det g = const: R = +1/4 ||T||^2_g >= 0.
+
+**Sign convention.** This is the Levi-Civita scalar curvature, in which the
+unit 2-sphere has R = +2 and hyperbolic space has R < 0. Two checks pin it:
+the univariate Gaussian Fisher-Rao manifold is the Poincare half-plane scaled
+by 2, so K = -1/2 and R = 2K = -1; the full mean-and-covariance Gaussian
+family in dimension d has R = -d(d+1)^2/4. `tests/test_curvature_ground_truth.py`
+asserts both against this formula.
 
 ## 5. IGAD Score (Novel Contribution)
 

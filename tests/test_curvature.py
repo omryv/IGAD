@@ -51,7 +51,14 @@ class TestGammaFamily:
                 assert np.isfinite(R), "Non-finite at alpha=%s beta=%s" % (alpha, beta)
 
     def test_curvature_formula_consistency(self):
-        """Verify R = 1/4*(||S||^2 - ||T||^2) by checking components."""
+        """Verify R = 1/4*(||T||^2 - ||S||^2) by checking components.
+
+        This test re-implements the identity inline, so it pins the
+        contraction bookkeeping only -- it cannot detect an error in the
+        identity itself, since both sides would move together. The sign and
+        magnitude of R are pinned externally in
+        tests/test_curvature_ground_truth.py.
+        """
         theta = GammaFamily.to_natural(5.0, 2.0)
         g = fisher_metric(GammaFamily.log_partition, theta)
         T = third_cumulant_tensor(GammaFamily.log_partition, theta)
@@ -59,7 +66,7 @@ class TestGammaFamily:
         S = np.einsum("ab,abm->m", g_inv, T)
         S_sq = np.einsum("mn,m,n->", g_inv, S, S)
         T_sq = np.einsum("ia,jb,kc,ijk,abc->", g_inv, g_inv, g_inv, T, T)
-        R_manual = 0.25 * (S_sq - T_sq)
+        R_manual = 0.25 * (T_sq - S_sq)
         R_func = scalar_curvature(GammaFamily.log_partition, theta, g=g, T=T)
         assert abs(R_manual - R_func) < 1e-10, "Inconsistent: %s vs %s" % (R_manual, R_func)
 

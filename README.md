@@ -61,30 +61,31 @@ IGAD(batch) = |R(\theta_{ref}) - R(\theta_{local})|
 
 ---
 
-## Release ver1.0.0
+## Release 1.0.3
 
-IGAD is packaged as `igad` version `1.0.0`.
+IGAD is packaged as `visigence-igad` version `1.0.3`. The import name is
+`igad`; the distribution name on PyPI is `visigence-igad`.
 
 ```text
-Name: igad
-Version: 1.0.0
+Name: visigence-igad
+Version: 1.0.3
 Author: Omry Damari
 Author email: omryv@pm.me
 License: MIT
-Python: >=3.10,<3.13
+Python: >=3.10
 ```
 
 Build artifacts:
 
 ```text
-igad-1.0.0.tar.gz
-igad-1.0.0-py3-none-any.whl
+visigence_igad-1.0.3.tar.gz
+visigence_igad-1.0.3-py3-none-any.whl
 ```
 
 Install from the built wheel:
 
 ```bash
-python -m pip install dist/igad-1.0.0-py3-none-any.whl
+python -m pip install dist/visigence_igad-1.0.3-py3-none-any.whl
 ```
 
 Install from source for development:
@@ -107,7 +108,7 @@ python - <<'PY'
 import igad
 
 print(igad.__version__)
-assert igad.__version__ == "1.0.0"
+assert igad.__version__ == "1.0.3"
 PY
 ```
 
@@ -179,7 +180,7 @@ For an exponential family with log-partition `A(θ)`:
 Fisher metric:          gᵢⱼ(θ)   = ∂²A / ∂θᵢ∂θⱼ
 Third cumulant tensor:  Tᵢⱼₖ(θ)  = ∂³A / ∂θᵢ∂θⱼ∂θₖ
 Christoffel symbols:    Γᵢⱼ,ₖ    = ½ · Tᵢⱼₖ
-Scalar curvature:       R(θ)      = ¼ · ( ‖S‖²_g − ‖T‖²_g )
+Scalar curvature:       R(θ)      = ¼ · ( ‖T‖²_g − ‖S‖²_g )
 ```
 
 where:

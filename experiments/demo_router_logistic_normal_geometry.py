@@ -181,7 +181,7 @@ def scalar_curvature_fd(A, v, h=1e-3):
            for b in range(n)] for a in range(n)]
     T_sq = sum(U3[a][b][c] * T[a][b][c]
                for a in range(n) for b in range(n) for c in range(n))
-    return 0.25 * (S_sq - T_sq)
+    return 0.25 * (T_sq - S_sq)
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -203,8 +203,10 @@ CASES = {
 
 
 def gauss_R_closed(d):
-    """Empirical closed form for the Gaussian family under this sign convention."""
-    return d * (d + 1) ** 2 / 4.0
+    """Closed form for the Gaussian family: R = -d(d+1)^2/4.
+
+    Pinned independently in tests/test_curvature_ground_truth.py."""
+    return -d * (d + 1) ** 2 / 4.0
 
 
 def check1(dims, steps=(1e-3, 2e-3)):

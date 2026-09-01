@@ -31,7 +31,7 @@ T_ijk = c + d_i delta_ijk ,   c = -psi''(alpha_0) ,   d_i = psi''(alpha_i)
 structure, collapsing the O(k⁶) contraction
 
 ```
-R = 1/4 ( ||S||^2_g - ||T||^2_g ) ,     S_m = g^{ab} T_{abm}
+R = 1/4 ( ||T||^2_g - ||S||^2_g ) ,     S_m = g^{ab} T_{abm}
 ```
 
 to O(k²) *given* `M = g^{-1}`. The first structure was not exploited, so `M`
