@@ -475,7 +475,7 @@ def hp_curvature_dense_naive(tri, tri0, tet, tet0):
                         mjb = M[j][b]
                         for cc in range(k):
                             T_sq += mia * mjb * M[kk][cc] * t * T[a][b][cc]
-    return {"R": (S_sq - T_sq) / 4, "S_sq": S_sq, "T_sq": T_sq}
+    return {"R": (T_sq - S_sq) / 4, "S_sq": S_sq, "T_sq": T_sq}
 
 
 def hp_curvature_dense_pairwise(tri, tri0, tet, tet0):
@@ -502,7 +502,7 @@ def hp_curvature_dense_pairwise(tri, tri0, tet, tet0):
              for a in range(k) for b in range(k) for cc in range(k)]
     T_sq = sum(terms)
     abs_mass = sum(abs(t) for t in terms)
-    return {"R": (S_sq - T_sq) / 4, "S_sq": S_sq, "T_sq": T_sq,
+    return {"R": (T_sq - S_sq) / 4, "S_sq": S_sq, "T_sq": T_sq,
             "dense_abs_mass": abs_mass}
 
 
@@ -521,7 +521,7 @@ def hp_curvature_structured(tri, tri0, tet, tet0):
     term_c = sum(d[i] * (M[i][a] ** 3) * d[a]
                  for i in range(k) for a in range(k))
     T_sq = term_a + term_b + term_c
-    return {"R": (S_sq - T_sq) / 4, "S_sq": S_sq, "T_sq": T_sq,
+    return {"R": (T_sq - S_sq) / 4, "S_sq": S_sq, "T_sq": T_sq,
             "term_a": term_a, "term_b": term_b, "term_c": term_c,
             "s": s, "c": c}
 
@@ -564,7 +564,7 @@ def hp_curvature_sherman_morrison(tri, tri0, tet, tet0):
                for i in range(k))
     term_c = off + diag
     T_sq = term_a + term_b + term_c
-    return {"R": (S_sq - T_sq) / 4, "S_sq": S_sq, "T_sq": T_sq,
+    return {"R": (T_sq - S_sq) / 4, "S_sq": S_sq, "T_sq": T_sq,
             "term_a": term_a, "term_b": term_b, "term_c": term_c,
             "s": s, "c": c, "w": w, "beta": beta, "U": U}
 

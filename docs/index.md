@@ -32,25 +32,42 @@ It should be cited by commit hash and release tag. Later repository changes do n
 
 ---
 
-## Verified Release Evidence
+## Release Evidence
+
+**Current status: CI is not executing, and the figures below are historical.**
+Since 2026-05-08 every Actions run on this repository — `main` included —
+has ended within a few seconds with `runner_id: 0` and no executed steps.
+That is infrastructure unavailability rather than a code result, but it means
+no run since then has validated anything, and the badge above reports the
+state of the runner, not of the tests.
+
+What is verified, and where:
+
+| Field | Value |
+|------|-------|
+| Latest local run | 470 passed, 2 failed |
+| Failing tests | `test_mle_agrees[alpha7]`, `test_package_reliability_matches_the_stdlib_mirror[alpha8]` — both assert tolerances tighter than the quantities they compare can support; see `experiments/results/test_status.json` |
+| Environment | Python 3.12, numpy 2.5, scipy 1.18 |
+| Regenerate with | `python -m experiments.report_test_status` |
+
+The historical validation run below predates the current code by 24 commits
+and a different test suite (54 tests, against 472 today). It is retained as
+provenance for release `IGAD-Ver1.0.0`, not as a statement about `main`:
 
 | Field | Value |
 |------|-------|
 | Release | `IGAD-Ver1.0.0` |
-| Verified commit | [`81dd1eb4540643083854232d9645f6add4150512`](https://github.com/Visigence/IGAD/commit/81dd1eb4540643083854232d9645f6add4150512) |
-| Validation environment | GitHub-hosted Linux Actions runners |
+| Pinned commit | [`81dd1eb4540643083854232d9645f6add4150512`](https://github.com/Visigence/IGAD/commit/81dd1eb4540643083854232d9645f6add4150512) |
 | Python versions | 3.10, 3.11, 3.12 |
-| Test result | 54/54 tests passed |
-| Evidence | [GitHub Actions validation run](https://github.com/Visigence/IGAD/actions/runs/25236119831) |
-
-The validation run produced separate test-report artifacts for each Python runtime.
+| Test result at that commit | 54/54 tests passed |
+| Run | [GitHub Actions](https://github.com/Visigence/IGAD/actions/runs/25236119831) |
 
 ---
 
 ## Install
 
 ```bash
-pip install igad
+pip install visigence-igad
 ````
 
 ---

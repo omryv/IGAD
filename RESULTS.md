@@ -2,6 +2,14 @@
 
 All results are reproducible via the scripts in `experiments/`.
 
+> **Sign convention (changed in 1.0.3).** `R` is the Levi-Civita scalar
+> curvature, so the values below are negative; the univariate Gaussian
+> Fisher–Rao manifold returns the textbook `R = -1`. Earlier releases
+> returned `-R`. **Every AUC in this document is unchanged**, because the
+> IGAD score is `|R_ref - R_local|`, in which a global sign cancels — the
+> tables were re-run after the correction and reproduce to four decimals.
+> See `CHANGELOG.md` and `docs/proof.md` section 3.
+
 ---
 
 ## Current phase: does router structure predict 3D quality?
@@ -234,8 +242,8 @@ empirical, and both **narrow** what a future benchmark should test:
 | Batch mean shift | 0.8150 |
 
 Curvature diagnostics:
-- R(reference) = 1.002497
-- R(anomaly)   = 0.953274
+- R(reference) = -1.002497
+- R(anomaly)   = -0.953274
 - |ΔR|         = 0.049223
 
 **Conclusion**: IGAD achieves perfect separation, but so does variance shift
@@ -308,8 +316,8 @@ misspecification degrades the curvature signal and model-free methods dominate.
 - Only correlation differs: 0.2 vs 0.8
 
 Curvature diagnostics:
-- R(reference rho=0.2) = 2.000008
-- R(anomaly rho=0.8)   = 1.996700
+- R(reference rho=0.2) = -2.000008
+- R(anomaly rho=0.8)   = -1.996700
 - |ΔR|                 = 0.003308
 
 | Method | Mean AUC | ± Std |

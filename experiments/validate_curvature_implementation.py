@@ -82,7 +82,7 @@ def R_dense_naive(alpha):
                         Mjb = M[j][b]
                         for c in range(k):
                             T_sq += Mia * Mjb * M[kk][c] * t * T[a][b][c]
-    return 0.25 * (S_sq - T_sq)
+    return 0.25 * (T_sq - S_sq)
 
 
 def R_dense_pairwise(alpha):
@@ -101,7 +101,7 @@ def R_dense_pairwise(alpha):
            for b in range(k)] for a in range(k)]
     T_sq = sum(U3[a][b][c] * T[a][b][c]
                for a in range(k) for b in range(k) for c in range(k))
-    return 0.25 * (S_sq - T_sq)
+    return 0.25 * (T_sq - S_sq)
 
 
 # ─────────────────────────────────────────────────────────────────────────────

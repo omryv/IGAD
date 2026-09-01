@@ -17,7 +17,7 @@ detectors it would have to displace.
 | Image / text conditioning | Marginally | Positive-support stats via `GammaFamily` |
 | Noised latents | **No** | Gaussian by construction |
 | **Router weights** | **Yes** | Simplex-valued, `k >= 3`, non-constant `R` |
-| Latent tokens | **No — provably** | Gaussian manifold, `R = -n(n+1)/2` is constant |
+| Latent tokens | **No — provably** | Gaussian manifold, `R = -d(d+1)^2/4` is constant |
 | Decoded 3D output | Yes | Positive-support mesh stats via `GammaFamily` |
 
 Latent-token drift is the most tempting thing to monitor and the one IGAD
@@ -192,8 +192,8 @@ answers this numerically, and the answer closes the route:
 1. **Scalar curvature is constant.** The affine group `y -> Ay + b` acts
    transitively on `(mu, Sigma)` and acts by isometries of the Fisher metric,
    so the manifold is homogeneous and every curvature invariant is
-   parameter-independent. Measured with the repository's own formula,
-   `R = d(d+1)^2/4` — depending only on the data dimension, never on the
+   parameter-independent. The closed form is
+   `R = -d(d+1)^2/4` — depending only on the data dimension, never on the
    parameters. Residual scatter across parameter points scales as `h^2` with
    the finite-difference step (ratios 3.92, 3.95, 2.88 for a doubled step),
    which is truncation error rather than parameter dependence. A detector built

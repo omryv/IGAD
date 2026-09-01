@@ -228,8 +228,9 @@ def test_large_k_is_reachable():
     assert math.isfinite(r)
     tri = trigamma(2.0)
     assert tri > 0
-    # R grows with k on the symmetric subfamily; a sanity floor, not a claim
-    assert r > 0.0
+    # |R| grows with k on the symmetric subfamily; a sanity floor, not a claim.
+    # R is negative under the Levi-Civita convention (see docs/proof.md section 4).
+    assert r < 0.0
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -311,7 +312,7 @@ def test_detector_uses_the_O_k_route_without_modification():
     from igad.detector import IGADDetector
     from igad.families import DirichletFamily
 
-    d = IGADDetector(family=DirichletFamily, k_neighbors=5)
+    d = IGADDetector(family=DirichletFamily)
     theta = DirichletFamily.to_natural(np.array([2.0] * 12))
     assert d._scalar_curvature(theta) == DirichletFamily.scalar_curvature_analytical(theta)
 
