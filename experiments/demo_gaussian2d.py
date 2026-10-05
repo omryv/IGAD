@@ -14,7 +14,7 @@ from igad.curvature import scalar_curvature
 # log-partition: A(theta) = -1/2 * log(t0*t2 - t1^2) + log(2*pi)
 #
 # This is a d=3 family. Mean+marginal_variance do NOT determine theta uniquely.
-# The correlation rho is a free parameter — this is where IGAD has an edge.
+# The correlation rho is a free parameter - this is where IGAD has an edge.
 
 def _log_partition(theta):
     t0, t1, t2 = theta
@@ -104,7 +104,7 @@ def _scores_one_seed(seed, batch_size, n_normal=100, n_anomaly=50):
             igad_scores.append(abs(R_ref - R_local))
 
             # ── MLE correlation [CONTROL] ──────────────────────────────────
-            # Extracts rho from the SAME MLE theta_local — no curvature used.
+            # Extracts rho from the SAME MLE theta_local - no curvature used.
             # If IGAD ≈ this: geometry adds nothing.
             # If IGAD > this: curvature tensor is doing real work.
             rho_mle = _rho_from_theta(theta_local)
@@ -159,7 +159,7 @@ def run_gaussian2d_demo():
 
     print()
     print("─" * 65)
-    print("Part 1 — AUC-ROC over %d seeds  (batch_size=%d)"
+    print("Part 1 - AUC-ROC over %d seeds  (batch_size=%d)"
           % (len(SEEDS), BATCH_SIZE))
     print("─" * 65)
     print("%-30s  %6s  %6s  %6s  %6s  %6s"
@@ -205,7 +205,7 @@ def run_gaussian2d_demo():
     # ── Part 2: scaling ────────────────────────────────────────────────────
     print()
     print("─" * 65)
-    print("Part 2 — Scaling with batch size  (seed=42)")
+    print("Part 2 - Scaling with batch size  (seed=42)")
     print("─" * 65)
     print("%-6s  %8s  %10s  %10s  %8s"
           % ("n", "IGAD", "MLE-corr", "Raw-corr", "gap"))
@@ -244,7 +244,7 @@ def run_gaussian2d_demo():
 
     fig, axes = plt.subplots(1, 3, figsize=(15, 4))
     fig.suptitle(
-        "Gaussian-2D: rho=0.2 (normal) vs rho=0.8 (anomaly) — mean+var BLIND",
+        "Gaussian-2D: rho=0.2 (normal) vs rho=0.8 (anomaly) - mean+var BLIND",
         fontsize=11)
 
     for ax, n_s, a_s, title, xlabel in [

@@ -37,7 +37,7 @@ ALPHAS = [
 
 
 # ─────────────────────────────────────────────────────────────────────────────
-# Class 1 — the structural form reproduces the dense tensor
+# Class 1 - the structural form reproduces the dense tensor
 # ─────────────────────────────────────────────────────────────────────────────
 
 class TestThirdCumulantStructure:
@@ -65,7 +65,7 @@ class TestThirdCumulantStructure:
 
 
 # ─────────────────────────────────────────────────────────────────────────────
-# Class 2 — exactness against the general contraction
+# Class 2 - exactness against the general contraction
 # ─────────────────────────────────────────────────────────────────────────────
 
 class TestStructuredMatchesGeneral:
@@ -131,7 +131,7 @@ class TestStructuredMatchesGeneral:
 
 
 # ─────────────────────────────────────────────────────────────────────────────
-# Class 3 — the point of the change: it scales
+# Class 3 - the point of the change: it scales
 # ─────────────────────────────────────────────────────────────────────────────
 
 class TestScaling:
@@ -149,7 +149,7 @@ class TestScaling:
         elapsed = time.perf_counter() - t0
 
         assert np.isfinite(R), "non-finite R at k=%d" % k
-        assert elapsed < 10.0, "k=%d took %.2fs — dense path regression?" % (k, elapsed)
+        assert elapsed < 10.0, "k=%d took %.2fs - dense path regression?" % (k, elapsed)
 
     def test_curvature_grows_with_expert_count(self):
         """R scales roughly linearly in k for a uniform Dirichlet."""
@@ -161,7 +161,7 @@ class TestScaling:
 
 
 # ─────────────────────────────────────────────────────────────────────────────
-# Class 4 — detector wiring
+# Class 4 - detector wiring
 # ─────────────────────────────────────────────────────────────────────────────
 
 class TestDetectorFastPath:

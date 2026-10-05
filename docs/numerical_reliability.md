@@ -13,7 +13,7 @@ python -m experiments.highprec_reliability   # 80 parameter points, 120 digits
 Raw output: `experiments/results/highprec_reliability.json`.
 
 Sections C1–C3 use 66 parameter points that hold `k <= 8`, so that expert count
-cannot confound the rho-versus-cond(g) comparison — a concentration sweep, a
+cannot confound the rho-versus-cond(g) comparison - a concentration sweep, a
 spread sweep that drives cond(g) to 1e28, and an anisotropy sweep that holds
 both `k` and `alpha_0` fixed and varies only the shape of the concentration
 profile. C5 adds a 14-point sweep that varies `k` from 3 to 256 and nothing
@@ -29,7 +29,7 @@ argument past 350, then Euler–Maclaurin with 50 exact Bernoulli terms
 (computed as `Fraction`). The first omitted term of that asymptotic series is
 below 1e-180.
 
-The implementation is checked against **45 identities it does not use** —
+The implementation is checked against **45 identities it does not use** -
 the recurrence, Legendre duplication, the reflection formula, psi'(1) = pi²/6
 and psi'(1/2) = pi²/2 (with pi from Machin), and self-consistency under raising
 both the term count and the shift target. **Worst residual: 1.6e-157.**
@@ -42,7 +42,7 @@ first two know nothing about the tensor's structure.
 
 ---
 
-## 2. Result C1 — dense and structured are the same number
+## 2. Result C1 - dense and structured are the same number
 
 | route | worst disagreement vs Sherman–Morrison, over 66 parameter points |
 | --- | --- |
@@ -55,19 +55,19 @@ first two know nothing about the tensor's structure.
 `igad.curvature.scalar_curvature_structured` is not an approximation of the
 dense contraction, and neither is the O(k) Sherman–Morrison form. Every
 disagreement observed in float64 is therefore purely numerical, and one of the
-two float64 answers is simply wrong — a fact that no comparison *between* them
+two float64 answers is simply wrong - a fact that no comparison *between* them
 could establish.
 
 ---
 
-## 3. Result C2 — where the float64 error actually comes from
+## 3. Result C2 - where the float64 error actually comes from
 
 Because every route accepts its polygamma inputs explicitly, the error splits
 three ways and each part is measured:
 
 | component | what it is | worst over 66 points |
 | --- | --- | --- |
-| input-rounding floor | exact evaluation of psi values already rounded to double — the floor no float64 pipeline can beat | 2.0e-09 |
+| input-rounding floor | exact evaluation of psi values already rounded to double - the floor no float64 pipeline can beat | 2.0e-09 |
 | special functions | what the float64 psi'/psi'' add on top | 7.0e-09 |
 | arithmetic | what each route's own operations add | 2.7e-01 |
 
@@ -80,7 +80,7 @@ diagnosis missed a larger, simpler problem.
 
 The stdlib `trigamma`/`tetragamma` lifted their argument only to 12 and
 truncated after three or four Bernoulli terms, leaving a relative error near
-**1e-12** — roughly 4500 ulp. That propagated into `R(alpha)` as ~6e-11 on
+**1e-12** - roughly 4500 ulp. That propagated into `R(alpha)` as ~6e-11 on
 *well-conditioned* points, including several the report listed as passing:
 
 | case | cond(g) | error vs truth, old psi | error vs truth, corrected psi |
@@ -106,7 +106,7 @@ psi is not on the curvature path.
 
 ---
 
-## 4. Result C3 — it is cancellation, not conditioning
+## 4. Result C3 - it is cancellation, not conditioning
 
 Define the **cancellation ratio**
 
@@ -114,7 +114,7 @@ Define the **cancellation ratio**
 rho = max( |S^2|, |T^2|, |term_a|, |term_b|, |term_c| ) / |T^2 - S^2|
 ```
 
-— the largest intermediate magnitude divided by the final difference, where
+That is, the largest intermediate magnitude divided by the final difference, where
 `R = (T^2 - S^2)/4`. Regressing `log10(arithmetic error)` on each candidate
 predictor across all 66 points:
 
@@ -130,14 +130,14 @@ for binary64. So the fitted law is
 relative error  =  eps * rho
 ```
 
-with no free parameter — the intercept recovers machine epsilon to within 0.12
+with no free parameter - the intercept recovers machine epsilon to within 0.12
 in the exponent.
 
 Partial correlations settle the attribution:
 
-- correlation of `log10 cond(g)` with the residual after rho: **+0.067** —
+- correlation of `log10 cond(g)` with the residual after rho: **+0.067** -
   once rho is known, cond(g) explains essentially nothing;
-- correlation of `log10 rho` with the residual after cond(g): **+0.576** —
+- correlation of `log10 rho` with the residual after cond(g): **+0.576** -
   once cond(g) is known, rho still explains a great deal.
 
 Two controlled pairs make it concrete:
@@ -153,8 +153,8 @@ Moving cond(g) by **fifteen orders of magnitude** at fixed rho changes the
 error by 9%. Moving rho by six orders at fixed cond(g) changes the error by six
 orders.
 
-**The operational caveat in the previous report — "do not trust R beyond ~1e-11
-relative when cond(g) >~ 1e3" — is withdrawn.** It is simultaneously too
+**The operational caveat in the previous report - "do not trust R beyond ~1e-11
+relative when cond(g) >~ 1e3" - is withdrawn.** It is simultaneously too
 strict (well-conditioned-by-rho points at cond(g) = 5.8e4 are accurate to
 2e-14) and too permissive (`conc k=3 a=10000` has cond(g) = 3.0e4 and is only
 accurate to 7e-8).
@@ -168,15 +168,15 @@ w = 1 - psi'(alpha_0) * sum_i 1/psi'(alpha_i)
 ```
 
 equals `det(g) / prod_i psi'(alpha_i)` and is strictly positive. For large
-alpha it behaves like `(1/2a)(1 - 1/k)`, so `1/w` — which multiplies every
-intermediate in the contraction — grows linearly with concentration. The
+alpha it behaves like `(1/2a)(1 - 1/k)`, so `1/w` - which multiplies every
+intermediate in the contraction - grows linearly with concentration. The
 resulting terms are large and nearly cancel. Conditioning of `g` and this
 cancellation are related but not the same quantity, and it is the cancellation
 that the arithmetic sees.
 
 ---
 
-## 5. Result C5 — the second factor: how much the contraction order costs
+## 5. Result C5 - the second factor: how much the contraction order costs
 
 `eps * rho` accounts for the cancellation in the *expression*. It does not
 account for the rounding that accumulates across the route's own operations.
@@ -206,11 +206,11 @@ k up to 16):
 
 The literal contraction sums k⁶ terms into a single accumulator, with heavy
 cancellation among them. It is the least accurate route as well as the
-slowest — a second, independent reason to prefer the closed form.
+slowest - a second, independent reason to prefer the closed form.
 
 ---
 
-## 6. Result C4 — the boundary, and a guard rail a caller can evaluate
+## 6. Result C4 - the boundary, and a guard rail a caller can evaluate
 
 The bound
 
@@ -239,7 +239,7 @@ Surviving digits, banded by rho (each of the 80 points counted once):
 The rule of thumb is exactly `16 - log10(rho)` significant digits. Past
 rho ≈ 10¹⁵ there is nothing left: at `alpha = (1e-7, 1, 1e7)` the float64 value
 of R is wrong in the first digit, and **no float64 implementation can do
-better** — the input-rounding floor alone is 2.0e-09 there, because psi' and
+better** - the input-rounding floor alone is 2.0e-09 there, because psi' and
 psi'' cannot be represented exactly as doubles.
 
 ### rho is computable in float64, in O(k), alongside R
@@ -276,7 +276,7 @@ that actually survive, using the float64 `rho_hat` a caller would really have:
 
 **Conservative on 80 of 80 points; worst over-promise 0.00 digits.** Margins
 (actual minus promised): minimum 0.39, median 1.42, maximum 3.05 digits. A
-large positive margin is the safe direction — the estimate is pessimistic by
+large positive margin is the safe direction - the estimate is pessimistic by
 about one to three digits, and never optimistic.
 
 ---
@@ -298,6 +298,6 @@ Generated from the committed JSON by `python -m experiments.make_figures`:
 
 | figure | shows |
 | --- | --- |
-| `figures/error_vs_cancellation.svg` | measured error against rho, with the `eps * rho` line — Spearman +0.960 |
-| `figures/error_vs_condition.svg` | the same errors against cond(g) — the null result |
+| `figures/error_vs_cancellation.svg` | measured error against rho, with the `eps * rho` line - Spearman +0.960 |
+| `figures/error_vs_condition.svg` | the same errors against cond(g) - the null result |
 | `figures/error_decomposition.svg` | the three error components, ordered by rho: only the arithmetic term tracks it |

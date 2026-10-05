@@ -2,19 +2,21 @@
 
 All notable changes to IGAD are documented in this file.
 
-## 1.0.3 — Hard Case result withdrawn, curvature sign corrected, Apache-2.0
+## 1.0.3 - Hard Case result withdrawn, curvature sign corrected, Apache-2.0
 
 The first release after 1.0.2. Its changes were drafted in this file as 1.0.3
 and 1.0.4; neither was published to PyPI, so they ship together as 1.0.3.
 
 ### CI
 
-- **Publish workflow restored to the pinned single-job form** that released
-  1.0.0–1.0.2. The two-job version on `main` used unpinned actions and never
-  started (`startup_failure` on the GitHub releases v2.0.0 and v1.0.4; the
-  latter was created before the version was settled as 1.0.3). A manual
-  `workflow_dispatch` trigger is added, so a release can be published from a
-  branch.
+- **Publishing moved into the Tests workflow.** `publish.yml` used unpinned
+  actions and never started (`startup_failure` on the GitHub releases v2.0.0
+  and v1.0.4; the latter was created before the version was settled as
+  1.0.3). PyPI's trusted publisher for `visigence-igad` names
+  `omryv/IGAD` and `test.yml`, so `test.yml` now has a `publish` job: it runs
+  on a published release or a manual run, only after all three test jobs
+  pass, with every action pinned to a full commit SHA. `publish.yml` is
+  removed.
 - **Tests workflow upgrades setuptools** before `pip-audit`: the hosted
   Python 3.10 and 3.11 images ship setuptools 79.0.1 (PYSEC-2026-3447).
 - **The two long-standing test failures fixed.**
@@ -124,7 +126,7 @@ Section 3 now derives both halves.
 
 **What changes for callers.** Every reported `R` changes sign: the univariate
 Gaussian Fisher-Rao manifold now returns the textbook `-1` instead of `+1`,
-and Dirichlet curvatures are negative. Anomaly scores are **unaffected** —
+and Dirichlet curvatures are negative. Anomaly scores are **unaffected** -
 `score_batch` returns `|R_ref - R_local|`, in which a global sign cancels.
 
 The sign is now pinned by `tests/test_curvature_ground_truth.py` against
@@ -155,7 +157,7 @@ point-level detector:
   finite-difference metric that is sign-wrong at large concentration;
 - `k_neighbors > len(X_train)` raised an uncaught `IndexError`;
 - an `np.inf` failure sentinel made `np.percentile` return `NaN`, so
-  `predict()` reported zero anomalies — the guard failed open;
+  `predict()` reported zero anomalies - the guard failed open;
 - `fit()` validated nothing: `n=0` produced a `NaN` reference silently;
 - attributes initialised to `None` carried no `Optional` annotation.
 
@@ -175,7 +177,7 @@ the closed-form route is still preferred where a family provides it.
 a release from this tree could not have been published. The version now
 moves past the published one.
 
-## 1.0.2 — Detector API alignment
+## 1.0.2 - Detector API alignment
 
 ### Breaking change
 

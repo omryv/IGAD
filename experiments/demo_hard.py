@@ -80,13 +80,13 @@ def _scores_one_seed(seed, batch_size, n_normal=100, n_anomaly=50):
     Run one seed. Returns a dict of AUCs.
 
     Baselines:
-      igad      — |R_ref - R_local|, exact curvature (the shipped detector)
-      igad_fd   — |R_ref - R_local|, finite-difference curvature (pre-1.0.3)
-      skew_mle  — |skew_mle(batch) - skew_ref|, skew_mle = 2/sqrt(alpha_mle)
+      igad - |R_ref - R_local|, exact curvature (the shipped detector)
+      igad_fd - |R_ref - R_local|, finite-difference curvature (pre-1.0.3)
+      skew_mle - |skew_mle(batch) - skew_ref|, skew_mle = 2/sqrt(alpha_mle)
                   *** KEY CONTROL: same MLE, no geometry ***
-      skew_raw  — |scipy.stats.skew(batch) - skew_ref|
-      mean      — |mean(batch) - ref_mean| / sqrt(ref_var)
-      var       — |var(batch)  - ref_var|
+      skew_raw - |scipy.stats.skew(batch) - skew_ref|
+      mean - |mean(batch) - ref_mean| / sqrt(ref_var)
+      var - |var(batch)  - ref_var|
     """
     rng = np.random.default_rng(seed)
 
@@ -138,7 +138,7 @@ def run_hard_demo():
     ln_mean, ln_var, ln_skew = _verify_lognormal()
 
     print("=" * 72)
-    print("IGAD Hard Test: Matched Mean AND Variance — Geometry vs MLE")
+    print("IGAD Hard Test: Matched Mean AND Variance - Geometry vs MLE")
     print("=" * 72)
     print("Reference : Gamma(%.0f, %.0f)  mean=%.3f  var=%.3f  skew=%.3f"
           % (ALPHA_REF, BETA_REF, REF_MEAN, REF_VAR, REF_SKEW))
@@ -229,7 +229,7 @@ def run_hard_demo():
 
     axes[1].hist(skm_n, bins=25, alpha=0.6, label="Normal",  density=True)
     axes[1].hist(skm_a, bins=12, alpha=0.6, label="Anomaly", density=True)
-    axes[1].set_title("MLE skewness — CONTROL  (AUC=%.3f)" % auc_skm)
+    axes[1].set_title("MLE skewness - CONTROL  (AUC=%.3f)" % auc_skm)
     axes[1].set_xlabel("|skew_MLE − skew_ref|")
     axes[1].legend()
 

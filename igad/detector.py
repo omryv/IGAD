@@ -64,10 +64,10 @@ class IGADDetector:
         Compute scalar curvature, preferring the cheapest exact route
         available:
 
-        1. ``family.scalar_curvature_analytical`` — O(k), never builds T.
+        1. ``family.scalar_curvature_analytical`` - O(k), never builds T.
         2. exact ``g`` and ``T`` when the family supplies them, contracted
            by :func:`~igad.curvature.scalar_curvature`.
-        3. finite differences — fully generic fallback.
+        3. finite differences - fully generic fallback.
 
         All three are the same quantity mathematically. They are *not*
         interchangeable numerically: route 3 loses accuracy rapidly as the

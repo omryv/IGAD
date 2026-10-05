@@ -39,7 +39,7 @@ variable cannot be fitted to the detector.
    generation timestep. `trace_schema.verify_pre_topk_capture` must pass on a
    sample before the full run; a post-top-k capture carries exactly
    `k - top_k` hard zeros and is rejected.
-4. **Measure real 3D quality** from the finished output —
+4. **Measure real 3D quality** from the finished output -
    `quality_schema.QUALITY_FIELDS`. At least one quantitative metric is
    required; a record carrying only labels is rejected.
 5. **Derive failure labels** from the pre-registered thresholds, with
@@ -49,7 +49,7 @@ Only then does any router statistic get computed.
 
 ---
 
-## 2. Prefix evaluation — the forecasting constraint
+## 2. Prefix evaluation - the forecasting constraint
 
 For prefix fraction `f`, a detector may read router information from steps
 `0 .. floor(f * n_steps)` and nothing later. Prefixes:
@@ -84,12 +84,12 @@ observation. After it, one object is one row, and n is the object count.
 
 ## 3. Detectors
 
-Cheap operational baselines (brief §6) — these are the controls the monitor
+Cheap operational baselines (brief §6) - these are the controls the monitor
 must beat, not decoration:
 
 | statistic | note |
 | --- | --- |
-| mean expert load / imbalance | **degenerate under expert-choice routing** — uniform by construction. Report `routing_mode` beside it or the comparison is meaningless. |
+| mean expert load / imbalance | **degenerate under expert-choice routing** - uniform by construction. Report `routing_mode` beside it or the comparison is meaningless. |
 | mean entropy | |
 | mean max probability | |
 | top-1/top-2 margin | |
@@ -110,7 +110,7 @@ Structure-aware candidates (brief §7), on log-ratio coordinates
 window in the previous pass and is close to a relabelling of concentration
 (`rho(R, alpha_0) = 0.841`). It stays in `igad` as a validated numerical
 routine. If a future fit makes it non-constant *and* it survives a same-fit
-control, that is the moment to reconsider — not before.
+control, that is the moment to reconsider - not before.
 
 ---
 
@@ -136,7 +136,7 @@ evaluation.pearson(scores, quality)
 evaluation.cross_validated_r2(scores, quality, folds=evaluation.object_kfold(...))
 ```
 
-Earliest reliable warning (brief §11) — the headline comparison:
+Earliest reliable warning (brief §11) - the headline comparison:
 
 ```python
 evaluation.warning_time_table(detector_aucs, prefix_fractions, threshold=0.80)
@@ -147,13 +147,13 @@ later one**. A detector that touches 0.80 at 10%, collapses at 20% and recovers
 at 80% has not warned at 10%.
 
 Layer localisation (brief §12): the same table computed per MoE layer, giving a
-layer × prefix matrix. `moe_layer_ids` is not `range(n_layers)` in general —
-some architectures keep early blocks dense — so the matrix has structural
+layer × prefix matrix. `moe_layer_ids` is not `range(n_layers)` in general -
+some architectures keep early blocks dense - so the matrix has structural
 holes, not missing data.
 
 ---
 
-## 5. Uncertainty — object level, always
+## 5. Uncertainty - object level, always
 
 ```python
 evaluation.object_bootstrap_ci(objects, labels, scores)      # resamples objects
@@ -204,7 +204,7 @@ if the logistic-normal is. Each step has to earn itself on held-out objects.
 | **A** | load/entropy match structure-aware statistics on both final AUC and warning time | router structure adds no operational value. **Stop the direction.** |
 | **B** | covariance/spectral statistics beat load and entropy on final AUC, on held-out objects, with a paired test | hidden router organisation is a useful health signal. Product-worthy. No curvature involved. |
 | **C** | same final AUC, but `T_structure << T_entropy` | valuable as an early-warning monitor, possibly more so than a final-AUC gain |
-| **D** | a richer geometric statistic beats controls derived from the *same fitted model* | information geometry adds incremental value — and only then. Requires replication across layers, checkpoints, categories, seeds and quality measures. |
+| **D** | a richer geometric statistic beats controls derived from the *same fitted model* | information geometry adds incremental value - and only then. Requires replication across layers, checkpoints, categories, seeds and quality measures. |
 
 Outcome A is a real result and gets written up as one. The brief's §17 list of
 non-results applies throughout: beating random is not success, beating entropy
@@ -227,5 +227,5 @@ experiments/results/
 
 Every result preserves the checkpoint hash, model configuration, expert count,
 top-k, routing mode, MoE layer IDs, seed, generator settings and quality-metric
-versions — the manifest schemas in `trace_schema.py` and `quality_schema.py`
+versions - the manifest schemas in `trace_schema.py` and `quality_schema.py`
 require all of them, and reject a record set that omits any.

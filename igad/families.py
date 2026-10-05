@@ -299,7 +299,7 @@ class DirichletFamily:
         n, k = data.shape
 
         data = np.clip(data, 1e-15, 1.0)
-        mean_log_x = np.mean(np.log(data), axis=0)   # shape (k,) — sufficient stats
+        mean_log_x = np.mean(np.log(data), axis=0)   # shape (k,) - sufficient stats
 
         # Moment-matching initialization
         mean_x = np.mean(data, axis=0)
@@ -325,7 +325,7 @@ class DirichletFamily:
 
         # ── Constraint 1: MLE Convergence Gate ──────────────────────────────
         # Verify the fitted alpha reproduces the sufficient statistics E[log x_k].
-        # If not, raise ConvergenceError — a silent bad fit corrupts all downstream
+        # If not, raise ConvergenceError - a silent bad fit corrupts all downstream
         # experiments.
         alpha0_hat = alpha.sum()
         expected_log = digamma(alpha) - digamma(alpha0_hat)

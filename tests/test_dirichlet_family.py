@@ -1,7 +1,7 @@
 """
 tests/test_dirichlet_family.py
 
-Unit tests for DirichletFamily — 34 tests across 6 classes.
+Unit tests for DirichletFamily - 34 tests across 6 classes.
 """
 
 import numpy as np
@@ -14,7 +14,7 @@ from igad.families import DirichletFamily, PoissonFamily
 
 
 # ─────────────────────────────────────────────────────────────────────────────
-# Class 1 — Log-partition function
+# Class 1 - Log-partition function
 # ─────────────────────────────────────────────────────────────────────────────
 
 class TestDirichletLogPartition:
@@ -64,7 +64,7 @@ class TestDirichletLogPartition:
 
 
 # ─────────────────────────────────────────────────────────────────────────────
-# Class 2 — Fisher metric
+# Class 2 - Fisher metric
 # ─────────────────────────────────────────────────────────────────────────────
 
 class TestDirichletFisherMetric:
@@ -138,7 +138,7 @@ class TestDirichletFisherMetric:
 
 
 # ─────────────────────────────────────────────────────────────────────────────
-# Class 3 — Scalar curvature
+# Class 3 - Scalar curvature
 # ─────────────────────────────────────────────────────────────────────────────
 
 class TestDirichletCurvature:
@@ -156,7 +156,7 @@ class TestDirichletCurvature:
         assert np.isfinite(R), "Non-finite R for alpha=%s" % alpha
 
     def test_curvature_varies_with_concentration(self):
-        """R([4,4,4]) != R([1,1,1]) — curvature is non-constant."""
+        """R([4,4,4]) != R([1,1,1]) - curvature is non-constant."""
         R_444 = scalar_curvature(DirichletFamily.log_partition,
                                  DirichletFamily.to_natural(np.array([4.0, 4.0, 4.0])))
         R_111 = scalar_curvature(DirichletFamily.log_partition,
@@ -166,7 +166,7 @@ class TestDirichletCurvature:
         )
 
     def test_curvature_asymmetric_params(self):
-        """R([1.5,4,6.5]) != R([4,4,4]) — anomaly pair has different curvature."""
+        """R([1.5,4,6.5]) != R([4,4,4]) - anomaly pair has different curvature."""
         R_ref  = scalar_curvature(DirichletFamily.log_partition,
                                   DirichletFamily.to_natural(np.array([4.0, 4.0, 4.0])))
         R_anom = scalar_curvature(DirichletFamily.log_partition,
@@ -184,7 +184,7 @@ class TestDirichletCurvature:
 
 
 # ─────────────────────────────────────────────────────────────────────────────
-# Class 3b — Third cumulant tensor (analytical)
+# Class 3b - Third cumulant tensor (analytical)
 # ─────────────────────────────────────────────────────────────────────────────
 
 class TestDirichletThirdCumulantAnalytical:
@@ -246,7 +246,7 @@ class TestDirichletThirdCumulantAnalytical:
 
 
 # ─────────────────────────────────────────────────────────────────────────────
-# Class 4 — MLE
+# Class 4 - MLE
 # ─────────────────────────────────────────────────────────────────────────────
 
 class TestDirichletMLE:
@@ -308,7 +308,7 @@ class TestDirichletMLE:
 
 
 # ─────────────────────────────────────────────────────────────────────────────
-# Class 5 — IGAD sample efficiency
+# Class 5 - IGAD sample efficiency
 # ─────────────────────────────────────────────────────────────────────────────
 
 class TestIGADSampleEfficiency:
@@ -342,12 +342,12 @@ class TestIGADSampleEfficiency:
         assert auc > 0.65, "AUC=%.4f expected > 0.65" % auc
 
     def test_igad_beats_random_n50(self):
-        """IGAD AUC > 0.55 at n=50 — early detection capability."""
+        """IGAD AUC > 0.55 at n=50 - early detection capability."""
         auc = self._auc_for_n(50)
         assert auc > 0.55, "AUC=%.4f expected > 0.55" % auc
 
     def test_igad_auc_increases_with_n(self):
-        """AUC at n=200 > AUC at n=50 — documents monotone behavior."""
+        """AUC at n=200 > AUC at n=50 - documents monotone behavior."""
         auc50  = self._auc_for_n(50)
         auc200 = self._auc_for_n(200)
         assert auc200 > auc50, (
@@ -366,7 +366,7 @@ class TestIGADSampleEfficiency:
 
 
 # ─────────────────────────────────────────────────────────────────────────────
-# Class 6 — Failure modes
+# Class 6 - Failure modes
 # ─────────────────────────────────────────────────────────────────────────────
 
 class TestFailureModes:
@@ -413,7 +413,7 @@ class TestFailureModes:
 
     def test_dirichlet_1d_is_degenerate(self):
         """
-        k=2 Dirichlet is a Beta — 1-parameter family after fixing α₀.
+        k=2 Dirichlet is a Beta - 1-parameter family after fixing α₀.
         Scalar curvature should be effectively zero or constant.
         """
         # For k=2, the Fisher-Rao manifold of Beta is 2D but the constrained

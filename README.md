@@ -37,11 +37,11 @@ directs it:
 | [`docs/experiment_plan.md`](docs/experiment_plan.md) | the experiment itself, specified step by step, calling only functions that are already written and tested |
 | `experiments/trace_schema.py`, `experiments/quality_schema.py` | tested record contracts: one rejects a post-top-k capture, the other rejects a failure label derived from routing |
 | `experiments/router_stats.py`, `experiments/evaluation.py` | the baselines, the structure-aware statistics, and the object-level statistical protocol |
-| [`docs/sherman_morrison.md`](docs/sherman_morrison.md) | Dirichlet curvature reduced from O(k³) to **O(k)** — 105 s → 0.33 ms at k=1024 |
+| [`docs/sherman_morrison.md`](docs/sherman_morrison.md) | Dirichlet curvature reduced from O(k³) to **O(k)**: 105 s → 0.33 ms at k=1024 |
 | [`docs/numerical_reliability.md`](docs/numerical_reliability.md) | 120-digit arbitration; `error = eps · ρ`, the old cond(g) caveat withdrawn, and a read-only runtime diagnostic |
 
 Every entry in the brief's decision table that depends on real routers or real
-3D quality reads **Untested** — not "No", and not a number.
+3D quality reads **Untested**: not "No", and not a number.
 **[`docs/handoff.md`](docs/handoff.md) is the summary**: what is proven here,
 what needs external resources, and the single next action.
 
@@ -66,7 +66,7 @@ IGAD detects distributional shape shifts using scalar curvature deviation on the
 IGAD(batch) = |R(\theta_{ref}) - R(\theta_{local})|
 ````
 
-> **Correction (1.0.3) — the Hard Case result is withdrawn.** Earlier versions
+> **Correction (1.0.3): the Hard Case result is withdrawn.** Earlier versions
 > of this README reported that IGAD beats a same-fit MLE-skewness control by
 > +0.053 AUC on Gamma vs LogNormal, and concluded that `‖T‖²_g` extracts shape
 > information no single moment captures. That result came from finite-difference
@@ -74,7 +74,7 @@ IGAD(batch) = |R(\theta_{ref}) - R(\theta_{local})|
 > uses, IGAD scores **below** the control at every batch size, and it must: for
 > the Gamma family `R` is a monotone function of the fitted shape α̂ alone, so
 > the IGAD score is a re-scaling of the MLE skewness `2/√α̂`. Details:
-> [Experiment 2](#experiment-2--hard-case) and `RESULTS.md`.
+> [Experiment 2](#experiment-2-hard-case) and `RESULTS.md`.
 
 ---
 
@@ -207,7 +207,7 @@ Sₘ      = gᵃᵇ Tₐᵦₘ
 ‖T‖²_g  = gⁱᵃ gʲᵇ gᵏᶜ Tᵢⱼₖ Tₐᵦᶜ
 ```
 
-The critical quantity is `‖T‖²_g`: a three-index contraction of the third cumulant tensor against the inverse metric. It gives a geometrically weighted measure of total skewness content. Unlike `scipy.stats.skew`, it uses the full parametric structure of the family — which also means it is a function of the fitted parameters only. For a two-parameter scale family such as Gamma, `R` depends on the fitted shape alone, and so carries the same information as the MLE shape estimate.
+The critical quantity is `‖T‖²_g`: a three-index contraction of the third cumulant tensor against the inverse metric. It gives a geometrically weighted measure of total skewness content. Unlike `scipy.stats.skew`, it uses the full parametric structure of the family, which also means it is a function of the fitted parameters only. For a two-parameter scale family such as Gamma, `R` depends on the fitted shape alone, and so carries the same information as the MLE shape estimate.
 
 ---
 
@@ -299,7 +299,7 @@ pytest tests/ -v
 
 ## Experimental Results
 
-### Experiment 1 — Easy Case
+### Experiment 1: Easy Case
 
 **Gamma(9, 3) vs Gamma(1.5, 0.5)** · same mean, different variance and skewness
 
@@ -316,7 +316,7 @@ IGAD achieves perfect separation. Variance baseline also reaches 1.0 because var
 
 ---
 
-### Experiment 2 — Hard Case
+### Experiment 2: Hard Case
 
 **Gamma(8, 2) vs LogNormal** · `mean = 4.0` and `var = 2.0` are identical for both.
 
@@ -340,7 +340,7 @@ the reference, the IGAD score and the control rank batches identically; they
 differ only in how `|·|` weighs one side against the other.
 `tests/test_gamma_reduction.py` pins this.
 
-#### Results — 40 seeds, exact curvature (`python -m experiments.demo_hard`)
+#### Results: 40 seeds, exact curvature (`python -m experiments.demo_hard`)
 
 ```text
 n       IGAD     MLE-skew   Raw-skew   Gap (IGAD − MLE) ± SE
@@ -368,7 +368,7 @@ advantage at n = 200 / 500 came from the same error.
 
 ---
 
-### Experiment 3 — Gaussian Failure Mode
+### Experiment 3: Gaussian Failure Mode
 
 Bivariate Gaussian, `ρ_ref = 0.2` vs `ρ_anom = 0.8`. Mean and marginal variances are identical.
 
@@ -377,7 +377,7 @@ Bivariate Gaussian, `ρ_ref = 0.2` vs `ρ_anom = 0.8`. Mean and marginal varianc
 ρ_ref=0.50, ρ_anom=0.55   →   |ΔR| = 0.000049
 ```
 
-All methods reached **AUC = 1.0** — not because of curvature, but because the correlation difference is large enough for any method to detect. IGAD adds no unique value here.
+All methods reached **AUC = 1.0**, not because of curvature, but because the correlation difference is large enough for any method to detect. IGAD adds no unique value here.
 
 **Reason:** the Gaussian manifold has constant scalar curvature. IGAD is not applicable to Gaussian families.
 
@@ -385,7 +385,7 @@ The nonzero `|ΔR|` values above are themselves finite-difference error: this fa
 
 ---
 
-### Experiment 4 — Dirichlet Family
+### Experiment 4: Dirichlet Family
 
 IGAD extends to **Dirichlet(α₁, …, αₖ)** with `k ≥ 3`. Note that the mean vector and any one marginal variance determine α uniquely, so a Dirichlet has no "same mean and variance, different shape" alternative.
 
@@ -453,7 +453,7 @@ Potential applications (none has been tested on real data):
 
 ---
 
-## Validation — Automated Tests
+## Validation: Automated Tests
 
 **Current status is measured, not transcribed.** Run:
 
@@ -461,8 +461,8 @@ Potential applications (none has been tested on real data):
 python -m experiments.report_test_status
 ```
 
-It classifies every test into three exclusive buckets — *verified locally*
-(executed here and passed), *skipped, no dependency*, and *not collected* —
+It classifies every test into three exclusive buckets: *verified locally*
+(executed here and passed), *skipped, no dependency*, and *not collected*,
 and writes `experiments/results/test_status.json`. Only the first bucket may
 be described as verified.
 
@@ -473,7 +473,7 @@ be described as verified.
 | Workflow | [`Tests`](https://github.com/omryv/IGAD/actions/workflows/test.yml) (`.github/workflows/test.yml`) |
 | Commit | [`3b5c822b2f12acc5178d9ad66196775fa9af880b`](https://github.com/omryv/IGAD/commit/3b5c822b2f12acc5178d9ad66196775fa9af880b) |
 | Run | [37272023848](https://github.com/omryv/IGAD/actions/runs/37272023848), 2026-10-05 |
-| Python | 3.10, 3.11, 3.12 — all three jobs passed |
+| Python | 3.10, 3.11, 3.12, all three jobs passed |
 | Tests | **480 passed**, 0 failed |
 | Dependency audit | `pip-audit`: no known vulnerabilities |
 | Test reports | HTML and JSON artifacts attached to the run, one per Python version |

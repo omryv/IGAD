@@ -66,13 +66,13 @@ def _scores_one_seed(seed, batch_size, n_normal=100, n_anomaly=50):
     Run one seed. Returns dict of AUC values.
 
     Methods:
-      igad      — |R_ref - R_local| (curvature deviation)
-      skew_mle  — |skew_mle(batch) - skew_ref|  [CONTROL: same MLE, no geometry]
-      mmd       — MMD^2 between batch and fixed reference sample
-      wass      — Wasserstein_1 between batch and fixed reference sample
-      skew_raw  — |scipy.stats.skew(batch) - skew_ref|
-      mean      — |mean(batch) - ref_mean| / sqrt(ref_var)
-      var       — |var(batch)  - ref_var|
+      igad - |R_ref - R_local| (curvature deviation)
+      skew_mle - |skew_mle(batch) - skew_ref|  [CONTROL: same MLE, no geometry]
+      mmd - MMD^2 between batch and fixed reference sample
+      wass - Wasserstein_1 between batch and fixed reference sample
+      skew_raw - |scipy.stats.skew(batch) - skew_ref|
+      mean - |mean(batch) - ref_mean| / sqrt(ref_var)
+      var - |var(batch)  - ref_var|
     """
     rng     = np.random.default_rng(seed)
     rng_ref = np.random.default_rng(seed + 10000)  # independent RNG for reference pool

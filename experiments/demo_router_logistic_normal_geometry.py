@@ -185,7 +185,7 @@ def scalar_curvature_fd(A, v, h=1e-3):
 
 
 # ─────────────────────────────────────────────────────────────────────────────
-# CHECK 1 — is scalar curvature constant on the Gaussian manifold?
+# CHECK 1 - is scalar curvature constant on the Gaussian manifold?
 # ─────────────────────────────────────────────────────────────────────────────
 
 CASES = {
@@ -222,7 +222,7 @@ def check1(dims, steps=(1e-3, 2e-3)):
     while the centre stays pinned at the closed form.
     """
     print("=" * 78)
-    print("CHECK 1 — scalar curvature of the Gaussian family")
+    print("CHECK 1 - scalar curvature of the Gaussian family")
     print("=" * 78)
     out = {}
     for d in dims:
@@ -259,7 +259,7 @@ def check1(dims, steps=(1e-3, 2e-3)):
 
 
 # ─────────────────────────────────────────────────────────────────────────────
-# CHECK 2 — Fisher metric block structure, via the KL divergence
+# CHECK 2 - Fisher metric block structure, via the KL divergence
 # ─────────────────────────────────────────────────────────────────────────────
 
 def kl_gauss(m0, S0, m1, S1):
@@ -274,7 +274,7 @@ def kl_gauss(m0, S0, m1, S1):
 def check2(d=2, h=1e-4):
     """KL(p_t0 || p_t0+dt) ~ 1/2 dt^T g dt recovers g in the (mu, Sigma) chart."""
     print("=" * 78)
-    print("CHECK 2 — Fisher metric block structure in (mu, Sigma) coordinates")
+    print("CHECK 2 - Fisher metric block structure in (mu, Sigma) coordinates")
     print("=" * 78)
     mu = [0.3, -0.7]
     S = [[1.4, 0.5], [0.5, 0.9]]
@@ -350,7 +350,7 @@ def check2(d=2, h=1e-4):
 
 
 # ─────────────────────────────────────────────────────────────────────────────
-# CHECK 3 — Fisher-Rao geodesic length on the fixed-mean submanifold
+# CHECK 3 - Fisher-Rao geodesic length on the fixed-mean submanifold
 # ─────────────────────────────────────────────────────────────────────────────
 
 def affine_invariant_distance(S0, S1):
@@ -361,7 +361,7 @@ def affine_invariant_distance(S0, S1):
 
 def check3(steps=2000):
     print("=" * 78)
-    print("CHECK 3 — Fisher-Rao geodesic length vs the affine-invariant control")
+    print("CHECK 3 - Fisher-Rao geodesic length vs the affine-invariant control")
     print("=" * 78)
     pairs = [
         ([[1.0, 0.0], [0.0, 1.0]], [[3.0, 0.0], [0.0, 0.4]]),

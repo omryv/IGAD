@@ -129,7 +129,7 @@ def run(k, a_ref, a_anom, windows, n_batches, seeds, mmd_pool):
     methods = ["IGAD", "MLE-a0", "Entropy", "MMD"]
 
     print("=" * 78)
-    print("MoE router monitor — uniform mean load throughout, window sweep")
+    print("MoE router monitor - uniform mean load throughout, window sweep")
     print("=" * 78)
     print("  experts k         : %d" % k)
     print("  alpha_i           : %.3f -> %.3f  (alpha_0 %.1f -> %.1f)"
@@ -138,7 +138,7 @@ def run(k, a_ref, a_anom, windows, n_batches, seeds, mmd_pool):
         DirichletFamily.to_natural(np.full(k, a_ref))))
     print("  batches           : %d vs %d per (window, seed)" % (n_batches, n_batches))
     print("  seeds             : %s" % seeds)
-    print("  mean expert load  : 1/%d in EVERY condition — load-balance loss is blind"
+    print("  mean expert load  : 1/%d in EVERY condition - load-balance loss is blind"
           % k)
     print()
     print("  mean AUC over seeds (std in parentheses)")

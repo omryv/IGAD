@@ -40,14 +40,14 @@ to contain the structure being detected. It is evidence that a structure-aware
 detector *can* separate distributions that entropy cannot; it is not evidence
 about a real router, and it is not evidence about 3D quality at all.
 
-Repeating it with new statistics would add nothing. The brief's rule —
-*real checkpoint first, real quality target second* — is the correct one, so
+Repeating it with new statistics would add nothing. The brief's rule -
+*real checkpoint first, real quality target second* - is the correct one, so
 the remainder of this document is the list of what has to be true before
 sections 2–19 of the brief become executable.
 
 ---
 
-## 3. Blocking item A — compute and software
+## 3. Blocking item A - compute and software
 
 | requirement | why | acceptance test |
 | --- | --- | --- |
@@ -62,23 +62,23 @@ None of these is a research risk. They are a procurement item.
 
 ---
 
-## 4. Blocking item B — the model. This is the hard one.
+## 4. Blocking item B - the model. This is the hard one.
 
 The brief needs a generator that is **simultaneously** (a) 3D and (b)
 token-level MoE with accessible pre-top-k router outputs. A literature and
 model-hub search on 2026-08-15 did not find one with released weights.
 The facts below came from web search summaries and **must be re-verified at
-acquisition time** — this environment cannot reach the model hub to confirm
+acquisition time** - this environment cannot reach the model hub to confirm
 them directly.
 
 **What exists, and why each falls short:**
 
 | candidate | 3D? | token-level MoE? | weights released? |
 | --- | --- | --- | --- |
-| [TRELLIS.2-4B](https://huggingface.co/microsoft/TRELLIS.2-4B) (MIT) | yes — image-to-3D, two flow stages (Sparse Structure Flow for geometry, SLAT Flow for appearance) | **no** — dense flow-matching transformer | yes |
-| [Nucleus-Image](https://huggingface.co/NucleusAI/Nucleus-Image) (Apache 2.0) | **no** — text-to-image | yes — 29 of 32 blocks are sparse MoE, 64 routed experts + 1 shared, ~2B of 17B active | yes; described as the first fully open MoE diffusion model at this quality tier |
-| [3D-MoE](https://arxiv.org/abs/2501.16698) | partly — 3D vision + pose diffusion MLLM | yes | no release found |
-| [FastDiT-3D](https://arxiv.org/abs/2312.07231) | yes — point clouds | yes — MoE for multi-category generation | no usable release found |
+| [TRELLIS.2-4B](https://huggingface.co/microsoft/TRELLIS.2-4B) (MIT) | yes - image-to-3D, two flow stages (Sparse Structure Flow for geometry, SLAT Flow for appearance) | **no** - dense flow-matching transformer | yes |
+| [Nucleus-Image](https://huggingface.co/NucleusAI/Nucleus-Image) (Apache 2.0) | **no** - text-to-image | yes - 29 of 32 blocks are sparse MoE, 64 routed experts + 1 shared, ~2B of 17B active | yes; described as the first fully open MoE diffusion model at this quality tier |
+| [3D-MoE](https://arxiv.org/abs/2501.16698) | partly - 3D vision + pose diffusion MLLM | yes | no release found |
+| [FastDiT-3D](https://arxiv.org/abs/2312.07231) | yes - point clouds | yes - MoE for multi-category generation | no usable release found |
 
 ### The two halves exist separately, and neither half is the experiment
 
@@ -107,16 +107,16 @@ number.
 In increasing order of cost and decreasing order of risk that the answer will
 be uninterpretable.
 
-### Path A — find one (cheapest, may simply fail)
+### Path A - find one (cheapest, may simply fail)
 
 Re-run the search at acquisition time against the model hub directly. The
 field is moving fast enough that this table may be stale. Accept only a
 checkpoint where the router is **token-choice or expert-choice over a routed
 expert set**, not a "mixture of expert denoisers" that switches whole networks
-per timestep — the latter has no per-token distribution and section 7 has
+per timestep - the latter has no per-token distribution and section 7 has
 nothing to compute.
 
-### Path B — upcycle a real 3D generator (recommended)
+### Path B - upcycle a real 3D generator (recommended)
 
 Take TRELLIS.2-4B (or the current best open image-to-3D model), replace the
 FFN in the transformer blocks with an MoE layer, and continue training.
@@ -131,8 +131,8 @@ The recipe is established:
 - [Sparse MoE routing in visual diffusion transformers](https://arxiv.org/abs/2605.19378)
   applies exactly this to a ~5B dense visual DiT (routed experts clone the
   original FFN, shared experts start at near-zero noise, only the gates are
-  random) and catalogues the failure modes — routing collapse and selective
-  deadlock — that this brief's monitor would be trying to detect early.
+  random) and catalogues the failure modes - routing collapse and selective
+  deadlock - that this brief's monitor would be trying to detect early.
 
 **This path has a large advantage the others do not**: routing collapse can be
 *induced*. Train two or three variants with deliberately different
@@ -144,7 +144,7 @@ the difference between a correlational study and one that can answer
 Cost: this is a continued-pretraining job, not an afternoon. Budget it as
 such, and treat any smaller version as a pilot.
 
-### Path C — MoE language backbone + mesh tokens
+### Path C - MoE language backbone + mesh tokens
 
 Autoregressive mesh generators tokenise geometry and generate it like text
 ([MeshAnything](https://buaacyw.github.io/mesh-anything/), LLaMA-Mesh). Swap
@@ -154,12 +154,12 @@ the routers are unambiguous and the 3D output is a real mesh that all of
 brief §4's geometry metrics apply to directly. Requires a fine-tune, not a
 pretrain.
 
-### Path D — rehearse the methodology on Nucleus-Image, and label it as such
+### Path D - rehearse the methodology on Nucleus-Image, and label it as such
 
 Nucleus-Image gives real routers from a real generative checkpoint today. It
 produces images, not 3D. Running the full pipeline against 2D quality metrics
-validates the *machinery* — hooks, schema, object-level bootstrap, detector
-implementations, early-warning curves — and would surface every engineering
+validates the *machinery* - hooks, schema, object-level bootstrap, detector
+implementations, early-warning curves - and would surface every engineering
 bug before GPU time is spent on the real question.
 
 It does **not** answer the brief's question, and any result from it must be
@@ -201,7 +201,7 @@ baselines from brief §6.
 
 ---
 
-## 6. Blocking item C — instrumentation
+## 6. Blocking item C - instrumentation
 
 ### Where to hook
 
@@ -225,7 +225,7 @@ in log-ratio coordinates `y_i = log(p_i / p_k)`; recovering those from a
 float16 probability costs precision exactly where `p_k` is small, which is
 where the log-ratio is largest.
 
-### Volume budget — plan for this, it is the practical blocker
+### Volume budget - plan for this, it is the practical blocker
 
 A TRELLIS-scale run at 50 steps × ~24 MoE layers × ~4096 tokens × 64 experts
 is 4.9 × 10⁶ router vectors per object; at float16 that is **~0.6 GB per
@@ -235,12 +235,12 @@ Recommended split:
 
 - **Sufficient statistics for every object.** Per `(object, layer, step)`
   accumulate the mean log-ratio vector and its second-moment matrix:
-  `(k-1) + (k-1)k/2` numbers, ~2.1 × 10³ floats instead of 2.6 × 10⁵ — a 126×
+  `(k-1) + (k-1)k/2` numbers, ~2.1 × 10³ floats instead of 2.6 × 10⁵ - a 126×
   reduction that loses nothing the covariance, spectral, affine-invariant or
   Fisher-Rao detectors need.
 - **Full raw traces for an audit subset** (~10% of objects, chosen by seed
   before generation, not after seeing quality). Brief §14's higher-order
-  controls — "preserve covariance while perturbing higher-order structure" —
+  controls - "preserve covariance while perturbing higher-order structure" -
   cannot be run on second moments alone.
 
 Record which objects are in the audit subset in the manifest, before
@@ -248,7 +248,7 @@ generating.
 
 ---
 
-## 7. Blocking item D — real 3D quality outcomes
+## 7. Blocking item D - real 3D quality outcomes
 
 The target variable must be measured from the output, never from the router.
 Minimum viable set, in the order they should be added:
@@ -266,7 +266,7 @@ reference; SDF/occupancy IoU.
 **Conditioning alignment (image-to-3D)**
 render the generated asset from the conditioning viewpoint and score
 image–render similarity; multi-view consistency across renders. Only include
-CLIP/DINO variants if the project already depends on them — a new pretrained
+CLIP/DINO variants if the project already depends on them - a new pretrained
 scorer is a new dependency and a new failure mode.
 
 **Failure labels.** Brief §13 needs categorical outcomes, and no single scalar
@@ -281,7 +281,7 @@ validator rejects a manifest without it.
 
 ---
 
-## 8. Blocking item E — statistical protocol
+## 8. Blocking item E - statistical protocol
 
 The independent unit is the **generated object**, not the token. One object
 contributes ~10⁶ router vectors; treating them as independent inflates every
@@ -291,8 +291,8 @@ confidence interval by roughly the square root of that. Concretely:
   comparisons all resample **objects**;
 - token windows may be used to *construct* a detector score for an object, but
   never to *count* toward n;
-- objects sharing a `conditioning_id` across seeds are not independent either
-  — group by conditioning when splitting, or report both groupings;
+- objects sharing a `conditioning_id` across seeds are not independent either -
+group by conditioning when splitting, or report both groupings;
 - **minimum n:** distinguishing AUC 0.85 from AUC 0.70 at 80% power needs on
   the order of 100 failures and 100 successes. At a realistic 10–20% failure
   rate that is 600–2000 generated objects. Size the generation run from the
@@ -322,8 +322,8 @@ objects only, and per-timestep references must use step ≤ *s* data.
 | numerical reliability boundary + runtime diagnostic | `igad/curvature.py::curvature_reliability`, `docs/numerical_reliability.md` | built, measured |
 | the experiment itself, step by step | `docs/experiment_plan.md` | specified |
 
-Not built, deliberately: `capture_router_traces.py` and `evaluate_3d_quality.py`
-— the two scripts that must call a model and a mesh library. Writing those
+Not built, deliberately: `capture_router_traces.py` and `evaluate_3d_quality.py` -
+the two scripts that must call a model and a mesh library. Writing those
 against a runtime that cannot be imported produces code that has never executed
 a single line, and no test could tell you whether the hook is attached to the
 right module. Everything they would *call* is built and tested; what is missing
@@ -344,7 +344,7 @@ is the twenty lines that bind them to a specific checkpoint's module names.
    fitted family makes it non-constant.** It lost to `AffineInv` at every
    window in the previous pass and is a near-relabelling of concentration
    (`rho(R, alpha_0) = 0.841`). It remains in the repository as a validated,
-   now O(k), numerical routine — not as a candidate monitor.
+   now O(k), numerical routine - not as a candidate monitor.
 
 ---
 

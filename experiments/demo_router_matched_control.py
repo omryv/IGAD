@@ -1,7 +1,7 @@
 """
 experiments/demo_router_matched_control.py
 
-Parts B, C, D1 and F — does synthetic router structure survive cheap controls,
+Parts B, C, D1 and F - does synthetic router structure survive cheap controls,
 can a richer model measure it, and does curvature add anything?
 
 SCOPE LIMIT, STATED UP FRONT

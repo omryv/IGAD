@@ -1,6 +1,6 @@
 # IGAD Operational Envelope
 
-## Where IGAD Detects — and How It Compares
+## Where IGAD Detects - and How It Compares
 
 ### Condition 1: Correct exponential family, k >= 3 parameters, small-to-moderate n
 
@@ -59,7 +59,7 @@ ratio tests) for Gaussian anomaly detection.
 Mathematical reason: For a 1-dimensional exponential family (Poisson, Exponential,
 Bernoulli, any single-parameter family), the Fisher-Rao manifold is a 1D Riemannian
 manifold. The Riemann curvature tensor of a 1D manifold is identically zero by
-definition — you cannot have intrinsic curvature in one dimension. Therefore
+definition - you cannot have intrinsic curvature in one dimension. Therefore
 R = 0 for all parameter values, and the IGAD score |R_ref - R_local| = 0 always.
 
 **Consequence:** IGAD is completely blind to shifts in Poisson rate, Exponential
@@ -116,7 +116,7 @@ For a correctly-specified k-dimensional exponential family:
   power, because their test statistics converge at the slower rate of the
   empirical distribution (no parametric structure exploited).
 
-- The advantage is O(n^{1/2}) — a sub-linear sample-efficiency gain from parametric
+- The advantage is O(n^{1/2}) - a sub-linear sample-efficiency gain from parametric
   structure.
 
 (The O(n^{1/2}) claim is empirically derived from the sweep in Experiment 4,
@@ -135,6 +135,6 @@ For the canonical Dirichlet detection pair:
 | Reference             | [4.0, 4.0, 4.0] | (see exp) |
 | Anomaly               | [1.5, 4.0, 6.5] | (see exp) |
 
-`|R_ref - R_anom| > 0.01` — verified in unit tests and Part 4 of
+`|R_ref - R_anom| > 0.01` - verified in unit tests and Part 4 of
 `experiments/demo_dirichlet.py`. This non-zero separation is the mathematical
 foundation that makes IGAD work for this family.

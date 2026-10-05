@@ -1,7 +1,7 @@
 """
 experiments/validate_curvature_implementation.py
 
-Part A — validate the O(k^2) structured curvature route before asking whether
+Part A - validate the O(k^2) structured curvature route before asking whether
 curvature is useful for anything.
 
 A1 EXACTNESS
@@ -105,7 +105,7 @@ def R_dense_pairwise(alpha):
 
 
 # ─────────────────────────────────────────────────────────────────────────────
-# A1 — exactness
+# A1 - exactness
 # ─────────────────────────────────────────────────────────────────────────────
 
 A1_CASES = [
@@ -203,7 +203,7 @@ def run_a1(_unused_tol=None):
 
 
 # ─────────────────────────────────────────────────────────────────────────────
-# A3 — how much accuracy each contraction order costs
+# A3 - how much accuracy each contraction order costs
 # ─────────────────────────────────────────────────────────────────────────────
 
 def run_a3(ks=(3, 4, 5, 6, 7, 8, 10, 12, 14, 16)):
@@ -270,7 +270,7 @@ def condition_number(M):
 
 
 # ─────────────────────────────────────────────────────────────────────────────
-# A2 — measured complexity
+# A2 - measured complexity
 # ─────────────────────────────────────────────────────────────────────────────
 
 def timed(fn, alpha, budget):

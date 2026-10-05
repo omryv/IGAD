@@ -15,13 +15,13 @@ This document derives that, and records what was measured.
 For `Dirichlet(alpha)` in natural parameters `theta_i = alpha_i - 1`, with
 `A(theta) = sum_i lgamma(alpha_i) - lgamma(alpha_0)` and `alpha_0 = sum_i alpha_i`:
 
-**Fisher metric** — diagonal plus rank one:
+**Fisher metric** - diagonal plus rank one:
 
 ```
 g = D - c_g 1 1^T ,      D_ii = psi'(alpha_i) ,   c_g = psi'(alpha_0)
 ```
 
-**Third cumulant tensor** — constant plus triple diagonal:
+**Third cumulant tensor** - constant plus triple diagonal:
 
 ```
 T_ijk = c + d_i delta_ijk ,   c = -psi''(alpha_0) ,   d_i = psi''(alpha_i)
@@ -64,7 +64,7 @@ A zero or negative `w` at runtime means the inputs are not a
 `(psi'(alpha), psi'(alpha_0))` pair, and both implementations raise rather than
 return a number.
 
-Building the matrix in (1) is O(k²) — optimal for an explicit inverse, since
+Building the matrix in (1) is O(k²) - optimal for an explicit inverse, since
 the result has k² entries. That alone answers Part 1.1: `sm-matrix` below is
 O(k²) time and memory end to end. The rest of this section removes the matrix.
 
@@ -126,7 +126,7 @@ Together with `sum_a d_a r_a^3 = (1/w^3) sum_a d_a u_a^3` from (2):
 ```
 
 Every sum in (2)–(6) is a single pass over the k experts. **The complete
-curvature path is O(k) time and O(k) memory**, and exact — no approximation
+curvature path is O(k) time and O(k) memory**, and exact - no approximation
 enters at any step.
 
 ---
@@ -167,11 +167,11 @@ implementation-independent.
 ## 6. Numerical caveat
 
 `sm-closed` is not more accurate than `dense-inverse`; it is faster.
-Both evaluate the same expression, and that expression cancels — see
+Both evaluate the same expression, and that expression cancels - see
 `docs/numerical_reliability.md`. The Sherman–Morrison route makes one
 cancellation explicit that elimination hides: `w = 1 - c_g U` is computed as a
 difference of two nearly equal positive numbers whenever `alpha_0` is large,
 and `1/w` is exactly the factor by which the intermediates in (2)–(6) are
-inflated. That is a feature for diagnosis — `w` is available in O(k) and tells
-the caller how many digits of `R` survive — not a defect introduced by the
+inflated. That is a feature for diagnosis - `w` is available in O(k) and tells
+the caller how many digits of `R` survive - not a defect introduced by the
 rearrangement.

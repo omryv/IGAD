@@ -97,7 +97,7 @@ Verified experimentally (experiments/demo_gaussian2d.py):
     rho_ref=0.50, rho_anom=0.55  →  |R_diff| = 0.000049
 
 All baselines (IGAD, MLE-correlation, raw correlation) reached AUC=1.0
-at n=200 for rho=0.2 vs rho=0.8 — not because of curvature, but because
+at n=200 for rho=0.2 vs rho=0.8 - not because of curvature, but because
 the correlation difference (0.6) is large enough for any method to detect.
 IGAD contributed nothing unique in this setting.
 
@@ -105,7 +105,7 @@ IGAD contributed nothing unique in this setting.
 
 IGAD requires families where R(theta) varies meaningfully with parameters.
 This holds when the third cumulant tensor T_{ijk} changes substantially
-across the parameter space — which is the case for Gamma but not Gaussian.
+across the parameter space - which is the case for Gamma but not Gaussian.
 
 ### Families Where IGAD Is Applicable
 
@@ -171,7 +171,7 @@ This is O(k^3) memory, O(1) arithmetic operations beyond the fill.
 
 ### Properties
 
-- **Full symmetry**: T_{ijk} = T_{perm(i,j,k)} for all 6 permutations — manifest
+- **Full symmetry**: T_{ijk} = T_{perm(i,j,k)} for all 6 permutations - manifest
   from the definition as a mixed third derivative.
 - **Off-diagonal uniformity**: all non-pure-diagonal entries equal -polygamma(2, alpha_0).
 - **Discretization note**: finite-difference approximation of the diagonal entries

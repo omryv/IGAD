@@ -272,7 +272,7 @@ def cholesky(M):
 
 
 # ─────────────────────────────────────────────────────────────────────────────
-# Dirichlet family — mirrors igad.families.DirichletFamily
+# Dirichlet family - mirrors igad.families.DirichletFamily
 # ─────────────────────────────────────────────────────────────────────────────
 
 def dir_fisher(alpha):

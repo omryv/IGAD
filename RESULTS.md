@@ -6,15 +6,15 @@ All results are reproducible via the scripts in `experiments/`.
 > curvature, so the values below are negative; the univariate Gaussian
 > Fisher–Rao manifold returns the textbook `R = -1`. Earlier releases
 > returned `-R`. **Every AUC in this document is unchanged**, because the
-> IGAD score is `|R_ref - R_local|`, in which a global sign cancels — the
+> IGAD score is `|R_ref - R_local|`, in which a global sign cancels - the
 > tables were re-run after the correction and reproduce to four decimals.
 > See `CHANGELOG.md` and `docs/proof.md` section 3.
 
 > **Hard Case retracted (1.0.3).** The Gamma experiments previously computed
 > curvature by finite differences, whose error near α = 8 (2–9 × 10⁻³, and
 > dependent on the rate β) is 10–30× the true curvature difference between
-> the classes (3 × 10⁻⁴). With the exact Fisher metric and cumulant tensor —
-> the route `IGADDetector` uses — **IGAD scores below the MLE-skewness control
+> the classes (3 × 10⁻⁴). With the exact Fisher metric and cumulant tensor -
+> the route `IGADDetector` uses - **IGAD scores below the MLE-skewness control
 > at every batch size.** The reason is structural: for Gamma, `R` depends on
 > α alone and is strictly monotone in it, so the IGAD score is a re-scaling of
 > the MLE skewness `2/√α̂` and cannot carry more information. The claim that
@@ -26,12 +26,12 @@ All results are reproducible via the scripts in `experiments/`.
 
 ## Current phase: does router structure predict 3D quality?
 
-**Part 0 — hard gate: FAILED. The real-data benchmark was not run, and no
+**Part 0 - hard gate: FAILED. The real-data benchmark was not run, and no
 synthetic substitute was published in its place.**
 
 `python -m experiments.audit_environment` (exits non-zero) checks the five
 preconditions the brief requires. All five are unmet: no tensor runtime, no
-model weights (91 weight-suffixed files on disk, 0 over 10 MiB — they are
+model weights (91 weight-suffixed files on disk, 0 over 10 MiB - they are
 package-manager caches), no MoE module to hook, no accelerator, no mesh
 library. `huggingface.co`, `pypi.org` and `archive.ubuntu.com` all return 403
 from the egress proxy, so none of it can be repaired from inside.
@@ -41,9 +41,9 @@ Consequences, stated plainly:
 - Every question in the brief's final decision table that depends on real
   routers or real 3D quality reads **Untested**. Not "No", and not a number.
 - The section-19 figures that need quality data were not produced.
-- What was produced instead: `docs/acquisition_checklist.md` — what to acquire,
+- What was produced instead: `docs/acquisition_checklist.md` - what to acquire,
   which candidate models exist, where to hook, what to record, and the
-  statistical protocol — plus `experiments/trace_schema.py`, a tested record
+  statistical protocol - plus `experiments/trace_schema.py`, a tested record
   contract with a check that rejects a post-top-k capture.
 
 The engineering work the brief asked for *before* touching a model was
@@ -51,7 +51,7 @@ completed, and is below.
 
 ---
 
-## Part 1.1 — Dirichlet curvature in O(k)
+## Part 1.1 - Dirichlet curvature in O(k)
 
 `python -m experiments.benchmark_sherman_morrison` →
 `experiments/results/sherman_morrison_benchmark.json`
@@ -70,8 +70,8 @@ Measured wall clock (standard-library Python, minimum over repeats):
 | 256 | 1.469273 s | 0.016562 s | 0.000082 s |
 | 512 | 11.197104 s | 0.067070 s | 0.000161 s |
 | 1024 | 101.670723 s | 0.317043 s | 0.000340 s |
-| 2048 | — | 1.326370 s | 0.000679 s |
-| 131072 | — | — | 0.047238 s |
+| 2048 | - | 1.326370 s | 0.000679 s |
+| 131072 | - | - | 0.047238 s |
 
 | route | predicted | measured slope (k ≥ 64) | memory slope | k reached |
 | --- | --- | ---: | ---: | ---: |
@@ -82,7 +82,7 @@ Measured wall clock (standard-library Python, minimum over repeats):
 At k = 1024 that is **101.7 s → 0.34 ms**, a 299 000× speedup; peak allocation
 at k = 512 drops from 20.9 MiB to 14.3 KiB.
 
-**Exactness holds at those sizes too**, against the 120-digit reference — and
+**Exactness holds at those sizes too**, against the 120-digit reference - and
 the accuracy gap is visible directly:
 
 | case | dense-inverse | sm-matrix | **sm-closed** |
@@ -99,7 +99,7 @@ Part 1.1 asked for O(k²) end-to-end. `sm-matrix` delivers exactly that;
 
 ---
 
-## Part 1.2 — high-precision arbitration and the reliability boundary
+## Part 1.2 - high-precision arbitration and the reliability boundary
 
 `python -m experiments.highprec_reliability` →
 `experiments/results/highprec_reliability.json`. Full write-up:
@@ -130,13 +130,13 @@ recomputed at 200 digits. Every float64 disagreement is therefore numerical.
 
    The fitted intercept recovers `log10(eps) = −15.95`, so the law is
    `error = eps · ρ` with no free parameter. Holding ρ fixed and moving cond(g)
-   by **fifteen orders of magnitude** changes the error by 9%. The old caveat
-   — "do not trust R beyond 1e-11 when cond(g) ≳ 1e3" — **is withdrawn**.
+   by **fifteen orders of magnitude** changes the error by 9%. The old caveat -
+"do not trust R beyond 1e-11 when cond(g) ≳ 1e3" - **is withdrawn**.
 
 **The boundary.** `8 · max(eps·ρ·kᵖ, input-rounding floor, special-function
 error)` held on **80 of 80** points for all three routes. Surviving digits are
 `16 − log10(ρ·k)`; past ρ ≈ 1e15 nothing survives, and no float64
-implementation can do better — the input-rounding floor alone is 2.0e-09 there.
+implementation can do better - the input-rounding floor alone is 2.0e-09 there.
 
 **The guard rail is computable and read-only.** `curvature_reliability(...)`
 returns R, ρ̂, the surviving-digit estimate and the Sherman–Morrison denominator
@@ -145,7 +145,7 @@ from the same O(k) pass, without changing R. ρ̂ is within 2× of the exact ρ 
 (worst over-promise 0.00 digits, minimum margin 0.39).
 
 **Unplanned bonus:** the O(k) route is also the *most accurate* route. Error
-grows as k^1.15 for `sm-closed` against k^2.05 for `dense-inverse` — a 60×
+grows as k^1.15 for `sm-closed` against k^2.05 for `dense-inverse` - a 60×
 accuracy advantage at k = 256. The literal six-index contraction is worst of
 all, accumulating as **k^7.67**.
 
@@ -154,7 +154,7 @@ all, accumulating as **k^7.67**.
 
 ---
 
-## Part 1.3 — special functions, measured against the oracle
+## Part 1.3 - special functions, measured against the oracle
 
 `python -m experiments.special_function_accuracy` →
 `experiments/results/special_function_accuracy.json`
@@ -175,14 +175,14 @@ terms of one sign, so their factor is 1 everywhere and adjusted equals raw.
 **One documented exception.** ψ has a root at x ≈ 1.4616321; there the
 recurrence sum and the asymptotic tail cancel 185×, and raw ulp error reaches
 118 at x = 1.5 while absolute error stays at 8.2e−16. That is under 1 ulp of
-the pre-cancellation magnitude — no recurrence-based ψ can do better without a
+the pre-cancellation magnitude - no recurrence-based ψ can do better without a
 root-centred expansion, and relative and ulp error are simply not meaningful
 measures of a function near its zero. ψ is not on the curvature path; it
 enters only `inv_digamma` and the Dirichlet MLE gate, whose tolerance is 1e−4.
 
 ---
 
-## Phase B — the experiment, prepared but not run
+## Phase B - the experiment, prepared but not run
 
 Everything here consumes real traces and generates none. Unit tests use
 hand-built fixtures with analytically known answers.
@@ -192,7 +192,7 @@ hand-built fixtures with analytically known answers.
 | `experiments/trace_schema.py` | router-trace contract; rejects a post-top-k capture (exactly `k − top_k` hard zeros is the signature) |
 | `experiments/quality_schema.py` | 3D-quality contract; rejects a failure label whose provenance is router-derived, and a manifest whose thresholds were not registered before the router analysis |
 | `experiments/router_stats.py` | §6 baselines (load, imbalance, entropy, max-prob, top-1/top-2 margin, routing variance) and §7 structure-aware statistics (covariance spectrum, λ_max, spectral entropy, effective rank, anisotropy, covariance/correlation drift, affine-invariant distance), plus the window → reference → drift-score pipeline for §9's per-layer/per-timestep references |
-| `experiments/evaluation.py` | ROC/PR AUC, sensitivity at fixed FPR with an achievable-FPR grid, Spearman/Pearson, cross-validated R², earliest-warning time with the "and stays there" rule, and the §3 object-level protocol: bootstrap CI, train/test split, k-fold, paired detector test — all resampling **objects**, with group-aware splitting so two seeds of one conditioning image cannot straddle a split |
+| `experiments/evaluation.py` | ROC/PR AUC, sensitivity at fixed FPR with an achievable-FPR grid, Spearman/Pearson, cross-validated R², earliest-warning time with the "and stays there" rule, and the §3 object-level protocol: bootstrap CI, train/test split, k-fold, paired detector test - all resampling **objects**, with group-aware splitting so two seeds of one conditioning image cannot straddle a split |
 | `docs/experiment_plan.md` | the experiment itself, step by step, calling only the functions above |
 
 Two design decisions worth stating, because both prevent a plausible-looking
@@ -212,19 +212,19 @@ wrong answer:
 Every row below needs real router traces from a real MoE 3D generator and a
 real 3D-quality measurement. The gate that supplies both failed, so nothing was
 measured. "Inconclusive" here means **not attempted**, which is a stronger
-statement than "attempted and ambiguous" — no experiment was run that could
+statement than "attempted and ambiguous" - no experiment was run that could
 have moved any of these rows, and no synthetic result is being offered as a
 stand-in.
 
 | Question | Result | Verdict |
 | --- | --- | --- |
-| Does real router structure vary with 3D quality? | not measured — no MoE 3D checkpoint, no router to hook | Inconclusive |
-| Does it add information beyond load? | not measured — see also the expert-choice caveat below | Inconclusive |
+| Does real router structure vary with 3D quality? | not measured - no MoE 3D checkpoint, no router to hook | Inconclusive |
+| Does it add information beyond load? | not measured - see also the expert-choice caveat below | Inconclusive |
 | Does it add information beyond entropy? | not measured | Inconclusive |
-| Does covariance structure predict final quality? | not measured — no 3D quality pipeline | Inconclusive |
-| Does it provide earlier warning? | not measured — the forecasting experiment needs per-timestep traces | Inconclusive |
-| Does any richer geometry beat covariance controls? | not measured on real data; **on synthetic data it did not** — scalar curvature lost to the affine-invariant covariance distance at every window over 5 seeds | Inconclusive (real) / No (synthetic) |
-| Is the signal stable across layers/checkpoints/categories? | not measured — one checkpoint is not available, let alone several | Inconclusive |
+| Does covariance structure predict final quality? | not measured - no 3D quality pipeline | Inconclusive |
+| Does it provide earlier warning? | not measured - the forecasting experiment needs per-timestep traces | Inconclusive |
+| Does any richer geometry beat covariance controls? | not measured on real data; **on synthetic data it did not** - scalar curvature lost to the affine-invariant covariance distance at every window over 5 seeds | Inconclusive (real) / No (synthetic) |
+| Is the signal stable across layers/checkpoints/categories? | not measured - one checkpoint is not available, let alone several | Inconclusive |
 | Is there a practical monitoring tool here? | not measured | Inconclusive |
 
 Two results that do carry forward, because they are mathematical rather than
@@ -239,7 +239,7 @@ empirical, and both **narrow** what a future benchmark should test:
 
 ---
 
-## Experiment 1: Easy Case — Gamma vs Gamma
+## Experiment 1: Easy Case - Gamma vs Gamma
 
 **File**: `experiments/demo_easy.py`
 **Setup**: Gamma(9,3) vs Gamma(1.5,0.5), batch_size=200
@@ -264,7 +264,7 @@ before 1.0.3 were −1.002497, −0.953274 and 0.049223):
 
 ---
 
-## Experiment 2: Hard Case — Matched Mean AND Variance
+## Experiment 2: Hard Case - Matched Mean AND Variance
 
 **File**: `experiments/demo_hard.py`
 **Setup**: Gamma(8,2) vs LogNormal(mu=1.327, sigma=0.343)
@@ -273,8 +273,8 @@ before 1.0.3 were −1.002497, −0.953274 and 0.049223):
 
 ### Why the control cannot be beaten in this family
 
-For Gamma, `R` depends on the shape α alone — rescaling the data is an
-isometry of the Fisher metric — and is strictly monotone in α. The MLE-skewness
+For Gamma, `R` depends on the shape α alone - rescaling the data is an
+isometry of the Fisher metric - and is strictly monotone in α. The MLE-skewness
 control `2/√α̂` is a function of the same α̂. So the IGAD score
 `|R(α_ref) − R(α̂)|` is a re-scaling of the control score
 `|2/√α̂ − 2/√α_ref|`: on either side of α_ref the two order batches identically,
@@ -282,7 +282,7 @@ and they can differ only in how `|·|` weighs one side against the other. IGAD
 cannot carry information the control lacks. `tests/test_gamma_reduction.py`
 pins all three facts (rate independence, monotonicity, identical ranking).
 
-### 2a. Results — 40 seeds, exact curvature
+### 2a. Results - 40 seeds, exact curvature
 
 `python -m experiments.demo_hard` → `experiments/results/hard_case_exact.json`.
 100 normal + 50 anomalous batches per seed. "IGAD (finite-diff)" is the route
@@ -333,7 +333,7 @@ and Wasserstein" do not survive.
 
 ---
 
-## Experiment 3: Gaussian 2D — Correlation-Only Anomaly
+## Experiment 3: Gaussian 2D - Correlation-Only Anomaly
 
 **File**: `experiments/demo_gaussian2d.py`
 **Setup**: N(0,Σ) rho=0.2 vs N(0,Σ) rho=0.8, batch_size=200
@@ -341,7 +341,7 @@ and Wasserstein" do not survive.
 - Variance detectors: BLIND (both var=1)
 - Only correlation differs: 0.2 vs 0.8
 
-Curvature diagnostics (finite differences — this demo has no exact route):
+Curvature diagnostics (finite differences - this demo has no exact route):
 - R(reference rho=0.2) = -2.000008
 - R(anomaly rho=0.8)   = -1.996700
 - |ΔR|                 = 0.003308
@@ -364,11 +364,11 @@ is zero for every batch. Mean and variance detectors are blind (AUC ≈ 0.50).
 
 ---
 
-## Experiment 4: Dirichlet — Curvature Landscape and Detection
+## Experiment 4: Dirichlet - Curvature Landscape and Detection
 
 **File**: `experiments/demo_dirichlet.py`. Re-run in 1.0.3 with the exact O(k)
-closed form `DirichletFamily.scalar_curvature_analytical` — the route
-`IGADDetector` uses — in place of finite differences. The finite-difference
+closed form `DirichletFamily.scalar_curvature_analytical` - the route
+`IGADDetector` uses - in place of finite differences. The finite-difference
 values published earlier, which also predate the 1.0.3 sign correction, are
 given in brackets.
 
@@ -459,10 +459,10 @@ IGAD up to 0.24 AUC.
 
 ---
 
-## The Falsifiable Claim — tested and refuted for Gamma
+## The Falsifiable Claim - tested and refuted for Gamma
 
-Until 1.0.3 this section read: *"IGAD's advantage over MLE-derived skewness —
-using the identical MLE fit but discarding the curvature tensor — confirms
+Until 1.0.3 this section read: *"IGAD's advantage over MLE-derived skewness -
+using the identical MLE fit but discarding the curvature tensor - confirms
 that the full contraction ‖T‖²_g extracts shape information not captured by
 any single moment, raw or MLE-fitted. This holds in the regime n=200–500 for
 cross-family detection."*

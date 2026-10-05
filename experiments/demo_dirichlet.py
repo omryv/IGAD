@@ -2,10 +2,10 @@
 experiments/demo_dirichlet.py
 
 Four-part Dirichlet experiment:
-  Part 1 — Curvature landscape: R(α) as α concentration varies along a path
-  Part 2 — Hard detection: Dirichlet(4,4,4) vs Dirichlet(1.5,4,6.5)
-  Part 3 — Sample-efficiency sweep: AUC vs n for IGAD, MMD, Wasserstein (FIXED Δα)
-  Part 4 — Failure-mode audit: operational envelope table
+  Part 1 - Curvature landscape: R(α) as α concentration varies along a path
+  Part 2 - Hard detection: Dirichlet(4,4,4) vs Dirichlet(1.5,4,6.5)
+  Part 3 - Sample-efficiency sweep: AUC vs n for IGAD, MMD, Wasserstein (FIXED Δα)
+  Part 4 - Failure-mode audit: operational envelope table
 """
 
 import os
@@ -68,12 +68,12 @@ def igad_score(batch: np.ndarray, R_ref: float) -> float:
 
 
 # ─────────────────────────────────────────────────────────────────────────────
-# Part 1 — Curvature landscape
+# Part 1 - Curvature landscape
 # ─────────────────────────────────────────────────────────────────────────────
 
 def part1_curvature_landscape():
     print("=" * 65)
-    print("Part 1 — Curvature Landscape R(α) along concentration path")
+    print("Part 1 - Curvature Landscape R(α) along concentration path")
     print("=" * 65)
     print("Path: α(t) = (4+t, 4, 4-t),  t ∈ [0, 3],  α₀=12 constant")
     print()
@@ -94,12 +94,12 @@ def part1_curvature_landscape():
 
 
 # ─────────────────────────────────────────────────────────────────────────────
-# Part 2 — Hard detection
+# Part 2 - Hard detection
 # ─────────────────────────────────────────────────────────────────────────────
 
 def part2_hard_detection():
     print("=" * 65)
-    print("Part 2 — Hard Detection: Dirichlet(4,4,4) vs Dirichlet(1.5,4,6.5)")
+    print("Part 2 - Hard Detection: Dirichlet(4,4,4) vs Dirichlet(1.5,4,6.5)")
     print("=" * 65)
 
     alpha_ref  = ALPHA_REF
@@ -190,12 +190,12 @@ def part2_hard_detection():
 
 
 # ─────────────────────────────────────────────────────────────────────────────
-# Part 3 — Sample-efficiency sweep (Constraint 2: Δα fixed for entire sweep)
+# Part 3 - Sample-efficiency sweep (Constraint 2: Δα fixed for entire sweep)
 # ─────────────────────────────────────────────────────────────────────────────
 
 def part3_sample_efficiency():
     print("=" * 65)
-    print("Part 3 — Sample-Efficiency Sweep (FIXED Δα)")
+    print("Part 3 - Sample-Efficiency Sweep (FIXED Δα)")
     print("=" * 65)
     print("α_ref  = %s  (sum=%.1f)" % (ALPHA_REF.tolist(),  ALPHA_REF.sum()))
     print("α_anom = %s  (sum=%.1f)" % (ALPHA_ANOM.tolist(), ALPHA_ANOM.sum()))
@@ -282,12 +282,12 @@ def part3_sample_efficiency():
 
 
 # ─────────────────────────────────────────────────────────────────────────────
-# Part 4 — Failure-mode audit
+# Part 4 - Failure-mode audit
 # ─────────────────────────────────────────────────────────────────────────────
 
 def part4_failure_mode_audit():
     print("=" * 65)
-    print("Part 4 — Failure-Mode Audit: IGAD Operational Envelope")
+    print("Part 4 - Failure-Mode Audit: IGAD Operational Envelope")
     print("=" * 65)
     print()
 

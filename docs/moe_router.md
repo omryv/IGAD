@@ -2,7 +2,7 @@
 
 Sparse Mixture-of-Experts backbones route each token through a softmax over
 `k` experts. Those router rows are simplex-valued, which is exactly
-`DirichletFamily`'s domain — the one place in a diffusion-transformer stack
+`DirichletFamily`'s domain - the one place in a diffusion-transformer stack
 where IGAD's assumptions are satisfied rather than assumed.
 
 This note records what happened when that idea was tested against the
@@ -17,14 +17,14 @@ detectors it would have to displace.
 | Image / text conditioning | Marginally | Positive-support stats via `GammaFamily` |
 | Noised latents | **No** | Gaussian by construction |
 | **Router weights** | **Yes** | Simplex-valued, `k >= 3`, non-constant `R` |
-| Latent tokens | **No — provably** | Gaussian manifold, `R = -d(d+1)^2/4` is constant |
+| Latent tokens | **No - provably** | Gaussian manifold, `R = -d(d+1)^2/4` is constant |
 | Decoded 3D output | Yes | Positive-support mesh stats via `GammaFamily` |
 
 Latent-token drift is the most tempting thing to monitor and the one IGAD
 cannot see at all: `R` does not depend on the Gaussian parameters, so
 `R_ref - R_local` is identically zero no matter how far the latents move
-(`operational_envelope.md`, Failure Mode 1). Anything scalar — loss curves,
-gradient norms, per-expert load as a single number — is a 1D family with
+(`operational_envelope.md`, Failure Mode 1). Anything scalar - loss curves,
+gradient norms, per-expert load as a single number - is a 1D family with
 `R = 0` (Failure Mode 2).
 
 ---
@@ -35,7 +35,7 @@ gradient norms, per-expert load as a single number — is a 1D family with
 
 Every condition holds mean expert load at exactly `1/k`. An auxiliary
 load-balancing loss is a first-moment constraint on that load, so it cannot
-separate any two conditions here — the whole comparison lives in its blind
+separate any two conditions here - the whole comparison lives in its blind
 spot. What varies is `alpha_0`, the router's per-token decisiveness: small
 `alpha_0` routes each token decisively, large `alpha_0` routes it mushily.
 
@@ -52,7 +52,7 @@ Four detectors, identical batches:
 | `Entropy` | `\|H_bar(batch) - H_bar(ref)\|` | `O(k)` per token, no MLE |
 | `MMD` | RBF MMD² vs reference pool | `O(n^2 k)` |
 
-`Entropy` is the incumbent — most MoE training stacks already log it.
+`Entropy` is the incumbent - most MoE training stacks already log it.
 `MLE-a0` is the control that decides the question, mirroring the
 MLE-skewness control in `demo_hard.py`: it pays for the *same* Dirichlet fit
 and then throws the curvature tensor away. Beating `Entropy` only shows that
@@ -98,7 +98,7 @@ alpha_hat_A = alpha_hat_B   =>   R(alpha_hat_A) = R(alpha_hat_B)
 ```
 
 Two populations that induce the same fitted Dirichlet are **exactly**
-indistinguishable to scalar curvature — not weakly separated, not separated
+indistinguishable to scalar curvature - not weakly separated, not separated
 with poor power, but identical in score. The same holds for every other
 statistic of the form `f(alpha_hat)`, `MLE-a0` included.
 
@@ -106,7 +106,7 @@ That is a limitation of the *representation*, not of the comparison. The
 Dirichlet MLE matches `E[log x]`, so it is enough for two populations to agree
 on that one sufficient statistic for curvature to be blind to every other way
 they differ. `experiments/demo_router_multimodal_control.py` builds exactly
-such a pair — a four-mode mixture and its own best-fit single Dirichlet — and
+such a pair - a four-mode mixture and its own best-fit single Dirichlet - and
 measures the consequence: IGAD and `MLE-a0` agree to within 0.0075 AUC at every
 window tested, because they are two functions of one number.
 
@@ -121,7 +121,7 @@ evaluated, and no amount of geometric machinery downstream can recover it.
 **The Dirichlet fit earns its place. The curvature tensor does not.**
 
 1. **IGAD beats the incumbent decisively.** Against `Entropy` the margin is
-   large and consistent — `+0.15` AUC at k=64/window=16, `+0.09` at
+   large and consistent - `+0.15` AUC at k=64/window=16, `+0.09` at
    k=8/window=64. Parametric monitoring of router distributions is worth
    doing.
 
@@ -145,7 +145,7 @@ evaluated, and no amount of geometric machinery downstream can recover it.
 
 The honest recommendation is a Dirichlet-MLE router monitor tracking
 `alpha_0_hat`. Curvature is worth keeping as a secondary channel only
-because the closed form made it nearly free — not because it was shown to
+because the closed form made it nearly free - not because it was shown to
 carry signal the concentration does not.
 
 ---
@@ -172,7 +172,7 @@ carry signal the concentration does not.
   and an estimate of the surviving digits from the same `O(k)` pass that
   produces `R`.
 - **`R` saturates and is non-monotonic above `alpha_i ~ 2`.** For k=32,
-  `alpha_0` from 64 to 512 — an eightfold change in decisiveness — maps into a
+  `alpha_0` from 64 to 512 - an eightfold change in decisiveness - maps into a
   ~3.5% band of `R`. Sparse routers (`alpha_i < 1`) sit in the steep,
   well-behaved region; mushy routers do not.
 
@@ -181,8 +181,8 @@ carry signal the concentration does not.
 ## Would a richer family rescue the geometry?
 
 The obvious response to the structural limitation is to stop projecting through
-a single Dirichlet and fit something that can represent directional covariance
-— a logistic-normal model, i.e. a Gaussian on the identifiable log-ratio
+a single Dirichlet and fit something that can represent directional covariance -
+a logistic-normal model, i.e. a Gaussian on the identifiable log-ratio
 coordinates `y_i = log(x_i / x_k)`.
 
 That family does preserve more. But before benchmarking it, ask what its
@@ -193,7 +193,7 @@ answers this numerically, and the answer closes the route:
    transitively on `(mu, Sigma)` and acts by isometries of the Fisher metric,
    so the manifold is homogeneous and every curvature invariant is
    parameter-independent. The closed form is
-   `R = -d(d+1)^2/4` — depending only on the data dimension, never on the
+   `R = -d(d+1)^2/4` - depending only on the data dimension, never on the
    parameters. Residual scatter across parameter points scales as `h^2` with
    the finite-difference step (ratios 3.92, 3.95, 2.88 for a doubled step),
    which is truncation error rather than parameter dependence. A detector built
@@ -212,13 +212,13 @@ answers this numerically, and the answer closes the route:
    ```
 
    to a relative error of 4.2e-7. The right-hand side is the affine-invariant
-   covariance distance — a standard fitted-parameter summary. AUC is invariant
+   covariance distance - a standard fitted-parameter summary. AUC is invariant
    under monotone transforms, so the "information-geometric" statistic and the
    "cheap control" produce *identical* rankings and identical AUC by
    construction.
 
 Together these say the geometry of this family decomposes entirely into a
-Mahalanobis term on the mean and an affine-invariant term on the covariance —
+Mahalanobis term on the mean and an affine-invariant term on the covariance -
 both already standard statistics. There is no residual for geometry to occupy,
 so the matched-control benchmark was not run: its outcome is fixed in advance.
 
@@ -248,7 +248,7 @@ against `igad` and scipy whenever numpy is installed, so the stdlib mirror
 cannot drift from the package unnoticed.
 
 **Provenance.** `demo_moe_router.py` is the one script here that requires numpy
-and has therefore not been executed — numpy could not be installed in the
+and has therefore not been executed - numpy could not be installed in the
 authoring environment (PyPI and the Ubuntu archives both returned 403). Its
 numbers came from the stdlib mirror that the `demo_router_*` scripts now make
 first-class. Nothing in this document has been through a GitHub Actions run;
