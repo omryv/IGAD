@@ -2,6 +2,14 @@
 
 All notable changes to IGAD are documented in this file.
 
+## Unreleased
+
+- The publish job skips a version PyPI already has (`skip-existing`). The
+  V1.0.3 release run failed only at its upload step, because a manual run
+  had published 1.0.3 a minute earlier; its tests had passed.
+- The README Tests badge counts only push runs on `main`, so release and
+  manual runs cannot colour it.
+
 ## 1.0.3 - Hard Case result withdrawn, curvature sign corrected, Apache-2.0
 
 The first release after 1.0.2. Its changes were drafted in this file as 1.0.3

@@ -3,7 +3,7 @@
 
 <p>
   <a href="https://github.com/omryv/IGAD/actions/workflows/test.yml">
-    <img src="https://github.com/omryv/IGAD/actions/workflows/test.yml/badge.svg?branch=main"
+    <img src="https://github.com/omryv/IGAD/actions/workflows/test.yml/badge.svg?branch=main&event=push"
          alt="Tests">
   </a>
   <a href="https://github.com/omryv/IGAD/actions/runs/37272023848">
