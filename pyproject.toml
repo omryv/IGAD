@@ -8,7 +8,8 @@ version = "1.0.4"
 description = "Information-Geometric Anomaly Detection via Fisher–Rao Scalar Curvature"
 readme = "README.md"
 requires-python = ">=3.10"
-license = "MIT"
+license = "Apache-2.0"
+license-files = ["LICENSE", "NOTICE"]
 keywords = ["anomaly detection", "information geometry", "Fisher-Rao", "machine learning"]
 authors = [
   { name = "Omry Damari", email = "omryv@pm.me" }

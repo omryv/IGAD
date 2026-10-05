@@ -49,6 +49,12 @@ the experiment scripts and the claims built on them were wrong.
 - Repository links (README, docs, `pyproject.toml` project URLs) point to
   `github.com/omryv/IGAD`, where the repository now lives.
 
+### Licence
+
+Relicensed from MIT to the Apache License 2.0 (`LICENSE`, `NOTICE`),
+copyright Omry Damari. Releases up to and including 1.0.3 remain available
+under the MIT License they were published with.
+
 ### Added
 
 - `tests/test_gamma_reduction.py`: pins that Gamma `R` is independent of the

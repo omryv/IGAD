@@ -81,7 +81,7 @@ Name: visigence-igad
 Version: 1.0.4
 Author: Omry Damari
 Author email: omryv@pm.me
-License: MIT
+License: Apache-2.0
 Python: >=3.10
 ```
 
@@ -501,4 +501,5 @@ Every documented limitation is enforced by a test that would fail if the limitat
 
 ## License
 
-MIT [LICENSE](LICENSE).
+Apache License 2.0 — see [LICENSE](LICENSE) and [NOTICE](NOTICE).
+Copyright 2026 Omry Damari. Releases up to and including 1.0.3 were published under the MIT License.

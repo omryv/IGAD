@@ -26,8 +26,8 @@ It should be cited by commit hash and release tag. Later repository changes do n
   <img src="https://img.shields.io/badge/python-3.10%20%7C%203.11%20%7C%203.12-3776ab?logo=python&logoColor=white"
        alt="Python 3.10 | 3.11 | 3.12">
 
-  <img src="https://img.shields.io/badge/license-MIT-blue"
-       alt="License: MIT">
+  <img src="https://img.shields.io/badge/license-Apache--2.0-blue"
+       alt="License: Apache-2.0">
 </p>
 
 ---
