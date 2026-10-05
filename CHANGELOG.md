@@ -2,6 +2,24 @@
 
 All notable changes to IGAD are documented in this file.
 
+## Unreleased — CI green
+
+- **Publish workflow restored to the pinned single-job form** that released
+  1.0.0–1.0.2. The two-job version on `main` used unpinned actions and never
+  started (`startup_failure` on the v2.0.0 and v1.0.4 releases). A manual
+  `workflow_dispatch` trigger is added, so 1.0.4, whose release is immutable,
+  can still be published to PyPI from `main`.
+- **Tests workflow upgrades setuptools** before `pip-audit`: the hosted
+  Python 3.10 and 3.11 images ship setuptools 79.0.1 (PYSEC-2026-3447).
+- **The two long-standing test failures fixed.**
+  `test_mle_agrees[alpha7]` asserted 1e-5 agreement on raw α at
+  concentration 50, where the 1e-4 sufficient-statistic gate both MLEs
+  enforce leaves α₀ determined only to ~1e-2; it now holds the direction
+  α/α₀ to 1e-6 and α₀ to the gate's guarantee.
+  `test_package_reliability_matches_the_stdlib_mirror[alpha8]` asserted
+  1e-9 on quantities that carry the `eps · ρ` cancellation error (1.5e-8 at
+  that point); its tolerance now follows that law. Suite: 480 passed.
+
 ## 1.0.4 — Hard Case result withdrawn
 
 ### Retracted: "IGAD beats the MLE-skewness control by +0.053 AUC"

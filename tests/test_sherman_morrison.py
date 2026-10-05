@@ -20,6 +20,7 @@ points where every possible implementation fails.
 """
 
 import math
+import sys
 
 import pytest
 
@@ -326,7 +327,12 @@ def test_package_reliability_matches_the_stdlib_mirror(alpha):
     theta = DirichletFamily.to_natural(np.array(alpha))
     pkg = curvature_reliability(*DirichletFamily.polygamma_inputs(theta))
     mirror = dir_curvature_reliability(*dir_polygamma_inputs(alpha))
-    for key in ("cancellation_ratio", "trusted_digits", "relative_error_bound",
-                "sm_denominator"):
-        assert pkg[key] == pytest.approx(mirror[key], rel=1e-9), key
-    assert pkg["R"] == pytest.approx(mirror["R"], rel=1e-9)
+    # R, and everything computed from it, carries the cancellation error
+    # eps * rho (docs/numerical_reliability.md), so two float64
+    # implementations can only be asked to agree to that, with a factor 8
+    # of headroom; sm_denominator does not pass through R.
+    rel = max(1e-9, 8 * sys.float_info.epsilon * mirror["cancellation_ratio"])
+    for key in ("cancellation_ratio", "trusted_digits", "relative_error_bound"):
+        assert pkg[key] == pytest.approx(mirror[key], rel=rel), key
+    assert pkg["sm_denominator"] == pytest.approx(mirror["sm_denominator"], rel=1e-9)
+    assert pkg["R"] == pytest.approx(mirror["R"], rel=rel)
