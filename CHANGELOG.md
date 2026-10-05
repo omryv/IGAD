@@ -2,13 +2,19 @@
 
 All notable changes to IGAD are documented in this file.
 
-## Unreleased — CI green
+## 1.0.3 — Hard Case result withdrawn, curvature sign corrected, Apache-2.0
+
+The first release after 1.0.2. Its changes were drafted in this file as 1.0.3
+and 1.0.4; neither was published to PyPI, so they ship together as 1.0.3.
+
+### CI
 
 - **Publish workflow restored to the pinned single-job form** that released
   1.0.0–1.0.2. The two-job version on `main` used unpinned actions and never
-  started (`startup_failure` on the v2.0.0 and v1.0.4 releases). A manual
-  `workflow_dispatch` trigger is added, so 1.0.4, whose release is immutable,
-  can still be published to PyPI from `main`.
+  started (`startup_failure` on the GitHub releases v2.0.0 and v1.0.4; the
+  latter was created before the version was settled as 1.0.3). A manual
+  `workflow_dispatch` trigger is added, so a release can be published from a
+  branch.
 - **Tests workflow upgrades setuptools** before `pip-audit`: the hosted
   Python 3.10 and 3.11 images ship setuptools 79.0.1 (PYSEC-2026-3447).
 - **The two long-standing test failures fixed.**
@@ -26,7 +32,6 @@ All notable changes to IGAD are documented in this file.
   badge. The repository's Actions policy now allows GitHub-authored actions
   and `pypa/gh-action-pypi-publish`, each pinned to a full commit SHA.
 
-## 1.0.4 — Hard Case result withdrawn
 
 ### Retracted: "IGAD beats the MLE-skewness control by +0.053 AUC"
 
@@ -89,7 +94,7 @@ byte-identical tree to the original. Hashes cited externally map as follows:
 ### Licence
 
 Relicensed from MIT to the Apache License 2.0 (`LICENSE`, `NOTICE`),
-copyright Omry Damari. Releases up to and including 1.0.3 remain available
+copyright Omry Damari. Releases up to and including 1.0.2 remain available
 under the MIT License they were published with.
 
 ### Added
@@ -98,8 +103,6 @@ under the MIT License they were published with.
   rate, strictly monotone in the shape, that the score is invariant to
   rescaling the batch, and that it ranks batches identically to the MLE
   skewness on either side of the reference.
-
-## 1.0.3 — Curvature sign correction, and the 1.0.2 detector restored
 
 ### Fixed: the sign of the scalar curvature
 
@@ -159,7 +162,7 @@ point-level detector:
 `_scalar_curvature` keeps the O(k) Dirichlet dispatch added after 1.0.2, so
 the closed-form route is still preferred where a family provides it.
 
-### Added
+### Added: ground-truth and end-to-end tests
 
 - `tests/test_curvature_ground_truth.py`: curvature against externally
   known values, including the sign.

@@ -95,7 +95,7 @@ The falsifiable claim was:
 
 > In matched mean/variance regimes, the curvature contraction `‖T‖²_g` can recover shape information that is not captured by MLE-derived skewness alone.
 
-**It is refuted for the Gamma family (1.0.4).** There `R` is a monotone function of the fitted shape α̂ alone, so the IGAD score is a re-scaling of the MLE skewness `2/√α̂`. Measured with the exact curvature the detector uses, IGAD scores 0.011–0.017 AUC below the MLE-skewness control at every n from 100 to 1000 (40 seeds). The earlier "+0.053 at n = 200–500" came from finite-difference error in the experiment script. See `RESULTS.md`, Experiment 2.
+**It is refuted for the Gamma family (1.0.3).** There `R` is a monotone function of the fitted shape α̂ alone, so the IGAD score is a re-scaling of the MLE skewness `2/√α̂`. Measured with the exact curvature the detector uses, IGAD scores 0.011–0.017 AUC below the MLE-skewness control at every n from 100 to 1000 (40 seeds). The earlier "+0.053 at n = 200–500" came from finite-difference error in the experiment script. See `RESULTS.md`, Experiment 2.
 
 ---
 

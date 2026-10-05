@@ -66,7 +66,7 @@ IGAD detects distributional shape shifts using scalar curvature deviation on the
 IGAD(batch) = |R(\theta_{ref}) - R(\theta_{local})|
 ````
 
-> **Correction (1.0.4) — the Hard Case result is withdrawn.** Earlier versions
+> **Correction (1.0.3) — the Hard Case result is withdrawn.** Earlier versions
 > of this README reported that IGAD beats a same-fit MLE-skewness control by
 > +0.053 AUC on Gamma vs LogNormal, and concluded that `‖T‖²_g` extracts shape
 > information no single moment captures. That result came from finite-difference
@@ -78,14 +78,14 @@ IGAD(batch) = |R(\theta_{ref}) - R(\theta_{local})|
 
 ---
 
-## Release 1.0.4
+## Release 1.0.3
 
-IGAD is packaged as `visigence-igad` version `1.0.4`. The import name is
+IGAD is packaged as `visigence-igad` version `1.0.3`. The import name is
 `igad`; the distribution name on PyPI is `visigence-igad`.
 
 ```text
 Name: visigence-igad
-Version: 1.0.4
+Version: 1.0.3
 Author: Omry Damari
 Author email: omryv@pm.me
 License: Apache-2.0
@@ -95,14 +95,14 @@ Python: >=3.10
 Build artifacts:
 
 ```text
-visigence_igad-1.0.4.tar.gz
-visigence_igad-1.0.4-py3-none-any.whl
+visigence_igad-1.0.3.tar.gz
+visigence_igad-1.0.3-py3-none-any.whl
 ```
 
 Install from the built wheel:
 
 ```bash
-python -m pip install dist/visigence_igad-1.0.4-py3-none-any.whl
+python -m pip install dist/visigence_igad-1.0.3-py3-none-any.whl
 ```
 
 Install from source for development:
@@ -125,7 +125,7 @@ python - <<'PY'
 import igad
 
 print(igad.__version__)
-assert igad.__version__ == "1.0.4"
+assert igad.__version__ == "1.0.3"
 PY
 ```
 
@@ -357,7 +357,7 @@ chance (0.49–0.58), as designed.
 
 #### What happened to the published +0.053
 
-Before 1.0.4 the experiment script computed curvature by finite differences,
+Before 1.0.3 the experiment script computed curvature by finite differences,
 not with the exact Fisher metric and cumulant tensor the detector uses. Near
 α = 8 that error (2–9 × 10⁻³, varying with the rate β) is 10–30× the true
 curvature difference between the two classes (3 × 10⁻⁴). On the original five
@@ -518,4 +518,4 @@ Every documented limitation is enforced by a test that would fail if the limitat
 ## License
 
 Apache License 2.0 — see [LICENSE](LICENSE) and [NOTICE](NOTICE).
-Copyright 2026 Omry Damari. Releases up to and including 1.0.3 were published under the MIT License.
+Copyright 2026 Omry Damari. Releases up to and including 1.0.2 were published under the MIT License.

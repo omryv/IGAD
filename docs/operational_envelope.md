@@ -10,7 +10,7 @@ shifts that cannot be resolved by mean or variance alone.
 
 **Evidence:** Dirichlet(4,4,4) vs Dirichlet(1.5,4,6.5), same α₀ = 12. The marginal
 means also shift (0.333 → 0.125 and 0.542), so this is not a shape-only anomaly. With the
-exact O(k) curvature (1.0.4), IGAD reaches AUC 0.993 at n = 20 and 1.000 from n = 100.
+exact O(k) curvature (1.0.3), IGAD reaches AUC 0.993 at n = 20 and 1.000 from n = 100.
 
 **No advantage over non-parametric methods was observed.** MMD and Wasserstein reach
 0.9998–1.000 at every n from 20 upward; IGAD ties them from n = 100 and is marginally
@@ -29,7 +29,7 @@ than the reference.
 shift (AUC 0.55–0.81 for n = 100–1000), but **scores below the same-fit MLE-skewness
 control at every n** (−0.011 to −0.017 AUC, 40 seeds, exact curvature). For Gamma, `R` is
 a monotone function of α̂ alone, so the curvature adds nothing to the MLE fit; raw sample
-skewness beats both from n = 200. The +0.053 published before 1.0.4 was finite-difference
+skewness beats both from n = 200. The +0.053 published before 1.0.3 was finite-difference
 error.
 
 ---

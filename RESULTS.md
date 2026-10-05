@@ -10,7 +10,7 @@ All results are reproducible via the scripts in `experiments/`.
 > tables were re-run after the correction and reproduce to four decimals.
 > See `CHANGELOG.md` and `docs/proof.md` section 3.
 
-> **Hard Case retracted (1.0.4).** The Gamma experiments previously computed
+> **Hard Case retracted (1.0.3).** The Gamma experiments previously computed
 > curvature by finite differences, whose error near α = 8 (2–9 × 10⁻³, and
 > dependent on the rate β) is 10–30× the true curvature difference between
 > the classes (3 × 10⁻⁴). With the exact Fisher metric and cumulant tensor —
@@ -254,7 +254,7 @@ empirical, and both **narrow** what a future benchmark should test:
 | Batch mean shift | 0.8150 |
 
 Curvature diagnostics (exact route; the finite-difference values published
-before 1.0.4 were −1.002497, −0.953274 and 0.049223):
+before 1.0.3 were −1.002497, −0.953274 and 0.049223):
 - R(reference) = -0.998563
 - R(anomaly)   = -0.953198
 - |ΔR|         = 0.045366
@@ -286,7 +286,7 @@ pins all three facts (rate independence, monotonicity, identical ranking).
 
 `python -m experiments.demo_hard` → `experiments/results/hard_case_exact.json`.
 100 normal + 50 anomalous batches per seed. "IGAD (finite-diff)" is the route
-this script used before 1.0.4, kept only to show where the published +0.053
+this script used before 1.0.3, kept only to show where the published +0.053
 came from.
 
 | n | IGAD (exact) | IGAD (finite-diff) | MLE skew [CONTROL] | Raw skew | Mean | Variance |
@@ -354,7 +354,7 @@ Curvature diagnostics (finite differences — this demo has no exact route):
 | Mean shift [BLIND] | 0.4699 | 0.0250 |
 | Variance shift [BLIND] | 0.4696 | 0.0452 |
 
-**Note (1.0.4).** The scalar curvature of this family is the constant −2:
+**Note (1.0.3).** The scalar curvature of this family is the constant −2:
 the covariance manifold is homogeneous, so every point is isometric to every
 other. The nonzero |ΔR| above is finite-difference error, which grows with ρ
 and with the scale of Σ (at ρ = 0.8 it is +0.0007, +0.0033 and +0.0131 for
@@ -366,7 +366,7 @@ is zero for every batch. Mean and variance detectors are blind (AUC ≈ 0.50).
 
 ## Experiment 4: Dirichlet — Curvature Landscape and Detection
 
-**File**: `experiments/demo_dirichlet.py`. Re-run in 1.0.4 with the exact O(k)
+**File**: `experiments/demo_dirichlet.py`. Re-run in 1.0.3 with the exact O(k)
 closed form `DirichletFamily.scalar_curvature_analytical` — the route
 `IGADDetector` uses — in place of finite differences. The finite-difference
 values published earlier, which also predate the 1.0.3 sign correction, are
@@ -461,7 +461,7 @@ IGAD up to 0.24 AUC.
 
 ## The Falsifiable Claim — tested and refuted for Gamma
 
-Until 1.0.4 this section read: *"IGAD's advantage over MLE-derived skewness —
+Until 1.0.3 this section read: *"IGAD's advantage over MLE-derived skewness —
 using the identical MLE fit but discarding the curvature tensor — confirms
 that the full contraction ‖T‖²_g extracts shape information not captured by
 any single moment, raw or MLE-fitted. This holds in the regime n=200–500 for

@@ -23,7 +23,7 @@ because the distributions also differ in variance.
 Reference: Gamma(8,2) | Anomaly: LogNormal(mu=1.327, sigma=0.343)
 - Identical mean (4.0) AND variance (2.0). Only skewness differs (0.707 vs 1.105)
 
-Regenerated in 1.0.4 with exact curvature; seed 42, n = 200.
+Regenerated in 1.0.3 with exact curvature; seed 42, n = 200.
 Left panel:   IGAD score — |R_ref - R_local|, exact curvature
 Middle panel: MLE skewness CONTROL — same MLE, no geometry
 Right panel:  Raw skewness shift
