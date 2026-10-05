@@ -6,9 +6,9 @@
     <img src="https://github.com/omryv/IGAD/actions/workflows/test.yml/badge.svg?branch=main"
          alt="Tests">
   </a>
-  <a href="https://github.com/omryv/IGAD/actions/runs/37270846347">
+  <a href="https://github.com/omryv/IGAD/actions/runs/37272023848">
     <img src="https://img.shields.io/badge/validated%20commit-3b5c822-b2f12a?logo=github&logoColor=white"
-         alt="Validated commit d7c2bdc">
+         alt="Validated commit 3b5c822">
   </a>
 </p>
 
@@ -18,7 +18,7 @@
 
 ---
 
-## Current research phase router structure vs 3D quality
+## Current research phase: router structure vs 3D quality
 
 The open question is whether the internal structure of an MoE router gives an
 early-warning signal for real 3D-generation quality degradation, beyond expert
@@ -35,7 +35,7 @@ directs it:
 | `python -m experiments.audit_environment` | measures all five gate conditions and exits non-zero |
 | [`docs/acquisition_checklist.md`](docs/acquisition_checklist.md) | what to acquire, which candidate models exist, where to hook, what to record, and the statistical protocol |
 | [`docs/experiment_plan.md`](docs/experiment_plan.md) | the experiment itself, specified step by step, calling only functions that are already written and tested |
-| `experiments/trace_schema.py`, `experiments/quality_schema.py` | tested record contracts one rejects a post-top-k capture, the other rejects a failure label derived from routing |
+| `experiments/trace_schema.py`, `experiments/quality_schema.py` | tested record contracts: one rejects a post-top-k capture, the other rejects a failure label derived from routing |
 | `experiments/router_stats.py`, `experiments/evaluation.py` | the baselines, the structure-aware statistics, and the object-level statistical protocol |
 | [`docs/sherman_morrison.md`](docs/sherman_morrison.md) | Dirichlet curvature reduced from O(k³) to **O(k)** — 105 s → 0.33 ms at k=1024 |
 | [`docs/numerical_reliability.md`](docs/numerical_reliability.md) | 120-digit arbitration; `error = eps · ρ`, the old cond(g) caveat withdrawn, and a read-only runtime diagnostic |
@@ -51,8 +51,8 @@ what needs external resources, and the single next action.
 IGAD is currently a verified research artifact.
 
 The current code is validated by GitHub Actions at commit
-[`d7c2bdc16d88a31ecb6b72e9ed0d5fdbcdfdc341`](https://github.com/omryv/IGAD/commit/d7c2bdc16d88a31ecb6b72e9ed0d5fdbcdfdc341)
-([run 37270846347](https://github.com/omryv/IGAD/actions/runs/37270846347)):
+[`3b5c822b2f12acc5178d9ad66196775fa9af880b`](https://github.com/omryv/IGAD/commit/3b5c822b2f12acc5178d9ad66196775fa9af880b)
+([run 37272023848](https://github.com/omryv/IGAD/actions/runs/37272023848)):
 480 tests passing on Python 3.10, 3.11 and 3.12, with a clean dependency audit.
 The original 1.0.0 baseline is commit
 [`6fbd779bc70b50f53238fd0cd469b7e8d9451a69`](https://github.com/omryv/IGAD/commit/6fbd779bc70b50f53238fd0cd469b7e8d9451a69)
@@ -471,8 +471,8 @@ be described as verified.
 | Field | Value |
 | --- | --- |
 | Workflow | [`Tests`](https://github.com/omryv/IGAD/actions/workflows/test.yml) (`.github/workflows/test.yml`) |
-| Commit | [`d7c2bdc16d88a31ecb6b72e9ed0d5fdbcdfdc341`](https://github.com/omryv/IGAD/commit/d7c2bdc16d88a31ecb6b72e9ed0d5fdbcdfdc341) |
-| Run | [37270846347](https://github.com/omryv/IGAD/actions/runs/37270846347), 2026-10-05 |
+| Commit | [`3b5c822b2f12acc5178d9ad66196775fa9af880b`](https://github.com/omryv/IGAD/commit/3b5c822b2f12acc5178d9ad66196775fa9af880b) |
+| Run | [37272023848](https://github.com/omryv/IGAD/actions/runs/37272023848), 2026-10-05 |
 | Python | 3.10, 3.11, 3.12 — all three jobs passed |
 | Tests | **480 passed**, 0 failed |
 | Dependency audit | `pip-audit`: no known vulnerabilities |
@@ -518,4 +518,4 @@ Every documented limitation is enforced by a test that would fail if the limitat
 ## License
 
 Apache License 2.0 - see [LICENSE](LICENSE) and [NOTICE](NOTICE).
-Copyright 2026 Omry Damari.
+Copyright 2026 Omry Damari. Releases up to and including 1.0.3 were published under the MIT License.
