@@ -19,6 +19,12 @@ All notable changes to IGAD are documented in this file.
   `test_package_reliability_matches_the_stdlib_mirror[alpha8]` asserted
   1e-9 on quantities that carry the `eps · ρ` cancellation error (1.5e-8 at
   that point); its tolerance now follows that law. Suite: 480 passed.
+- **CI is green on GitHub Actions**: commit `d7c2bdc`, run 37270846347, 480
+  tests passing on Python 3.10, 3.11 and 3.12 with a clean `pip-audit`. The
+  README and `docs/index.md` report this run in place of the stale
+  "CI not executing" notes, and the README header shows the live Tests
+  badge. The repository's Actions policy now allows GitHub-authored actions
+  and `pypa/gh-action-pypi-publish`, each pinned to a full commit SHA.
 
 ## 1.0.4 — Hard Case result withdrawn
 

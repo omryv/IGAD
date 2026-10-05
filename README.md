@@ -1,11 +1,14 @@
 # IGAD
-## Curvision
 **Information-Geometric Anomaly Detection**
 
-
-  <a href="https://github.com/omryv/IGAD/commit/6fbd779bc70b50f53238fd0cd469b7e8d9451a69">
-    <img src="https://img.shields.io/badge/verified%20commit-6fbd779-6e40c9?logo=github&logoColor=white"
-         alt="Verified commit 6fbd779">
+<p>
+  <a href="https://github.com/omryv/IGAD/actions/workflows/test.yml">
+    <img src="https://github.com/omryv/IGAD/actions/workflows/test.yml/badge.svg?branch=main"
+         alt="Tests">
+  </a>
+  <a href="https://github.com/omryv/IGAD/actions/runs/37270846347">
+    <img src="https://img.shields.io/badge/validated%20commit-d7c2bdc-6e40c9?logo=github&logoColor=white"
+         alt="Validated commit d7c2bdc">
   </a>
 </p>
 
@@ -47,9 +50,13 @@ what needs external resources, and the single next action.
 
 IGAD is currently a verified research artifact.
 
-The implementation baseline is pinned to commit
+The current code is validated by GitHub Actions at commit
+[`d7c2bdc16d88a31ecb6b72e9ed0d5fdbcdfdc341`](https://github.com/omryv/IGAD/commit/d7c2bdc16d88a31ecb6b72e9ed0d5fdbcdfdc341)
+([run 37270846347](https://github.com/omryv/IGAD/actions/runs/37270846347)):
+480 tests passing on Python 3.10, 3.11 and 3.12, with a clean dependency audit.
+The original 1.0.0 baseline is commit
 [`6fbd779bc70b50f53238fd0cd469b7e8d9451a69`](https://github.com/omryv/IGAD/commit/6fbd779bc70b50f53238fd0cd469b7e8d9451a69)
-and release `IGAD-Ver1.0.0`.
+(release `IGAD-Ver1.0.0`).
 
 This repository is public for reproducibility, verification, and independent review.  
 Future changes should be treated as new research iterations and must be validated by a new GitHub Actions run.
@@ -459,11 +466,20 @@ It classifies every test into three exclusive buckets — *verified locally*
 and writes `experiments/results/test_status.json`. Only the first bucket may
 be described as verified.
 
-CI is reported separately. Every GitHub Actions run on this repository,
-including runs on `main`, currently ends in 1–3 seconds with `runner_id: 0`
-and no executed steps: the jobs never receive a runner. That is **CI
-infrastructure unavailability**, not a code result in either direction, and
-it predates the current work.
+### Current CI result
+
+| Field | Value |
+| --- | --- |
+| Workflow | [`Tests`](https://github.com/omryv/IGAD/actions/workflows/test.yml) (`.github/workflows/test.yml`) |
+| Commit | [`d7c2bdc16d88a31ecb6b72e9ed0d5fdbcdfdc341`](https://github.com/omryv/IGAD/commit/d7c2bdc16d88a31ecb6b72e9ed0d5fdbcdfdc341) |
+| Run | [37270846347](https://github.com/omryv/IGAD/actions/runs/37270846347), 2026-10-05 |
+| Python | 3.10, 3.11, 3.12 — all three jobs passed |
+| Tests | **480 passed**, 0 failed |
+| Dependency audit | `pip-audit`: no known vulnerabilities |
+| Test reports | HTML and JSON artifacts attached to the run, one per Python version |
+
+Every push and pull request runs the same workflow; the badge at the top of
+this README shows the state of `main`.
 
 The block below is the historical record of the pinned `IGAD-Ver1.0.0`
 validation run, kept for the release citation. It is not a current status.

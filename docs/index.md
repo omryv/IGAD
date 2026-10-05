@@ -34,12 +34,12 @@ It should be cited by commit hash and release tag. Later repository changes do n
 
 ## Release Evidence
 
-**Current status: CI is not executing, and the figures below are historical.**
-Since 2026-05-08 every Actions run on this repository — `main` included —
-has ended within a few seconds with `runner_id: 0` and no executed steps.
-That is infrastructure unavailability rather than a code result, but it means
-no run since then has validated anything, and the badge above reports the
-state of the runner, not of the tests.
+**Current status: CI is running and green.** The current code is validated at
+commit [`d7c2bdc`](https://github.com/omryv/IGAD/commit/d7c2bdc16d88a31ecb6b72e9ed0d5fdbcdfdc341)
+by [run 37270846347](https://github.com/omryv/IGAD/actions/runs/37270846347):
+480 tests passing on Python 3.10, 3.11 and 3.12, with a clean dependency audit.
+Between 2026-05-08 and 2026-10-05 no Actions run on this repository executed;
+the figures below are the historical 1.0.0 record.
 
 What is verified, and where:
 
