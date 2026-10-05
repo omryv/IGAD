@@ -11,10 +11,10 @@ Two IGAD columns are reported:
   igad     -- curvature from the exact Fisher metric and cumulant tensor,
               the route IGADDetector uses. This is the shipped detector.
   igad_fd  -- curvature by finite differences of the log-partition, the
-              route this script used before 1.0.4. Kept only so the
+              route this script used before 1.0.3. Kept only so the
               published +0.053 can be traced to its source.
 
-What this experiment shows (1.0.4): for the Gamma family R depends on the
+What this experiment shows (1.0.3): for the Gamma family R depends on the
 shape alpha alone, and is strictly monotone in it (pinned by
 tests/test_gamma_reduction.py). The MLE-skewness control, 2/sqrt(alpha_hat),
 is a function of the same alpha_hat. The IGAD score is therefore a
@@ -61,7 +61,7 @@ def gamma_scalar_curvature(theta):
 
 
 def gamma_scalar_curvature_fd(theta):
-    """R by finite differences -- the pre-1.0.4 route of this script."""
+    """R by finite differences -- the pre-1.0.3 route of this script."""
     return scalar_curvature(GammaFamily.log_partition, theta)
 
 
@@ -81,7 +81,7 @@ def _scores_one_seed(seed, batch_size, n_normal=100, n_anomaly=50):
 
     Baselines:
       igad      — |R_ref - R_local|, exact curvature (the shipped detector)
-      igad_fd   — |R_ref - R_local|, finite-difference curvature (pre-1.0.4)
+      igad_fd   — |R_ref - R_local|, finite-difference curvature (pre-1.0.3)
       skew_mle  — |skew_mle(batch) - skew_ref|, skew_mle = 2/sqrt(alpha_mle)
                   *** KEY CONTROL: same MLE, no geometry ***
       skew_raw  — |scipy.stats.skew(batch) - skew_ref|
@@ -149,7 +149,7 @@ def run_hard_demo():
 
     methods = [
         ("IGAD (exact curvature)",       "igad"),
-        ("IGAD (finite-diff, pre-1.0.4)", "igad_fd"),
+        ("IGAD (finite-diff, pre-1.0.3)", "igad_fd"),
         ("MLE skewness  [CONTROL]",      "skew_mle"),
         ("Raw skewness",                 "skew_raw"),
         ("Mean shift",                   "mean"),

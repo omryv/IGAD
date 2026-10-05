@@ -5,7 +5,7 @@ Re-run the Gamma(8,2) vs LogNormal experiment from demo_hard.py with two
 additional baselines: MMD (RBF kernel, median heuristic) and Wasserstein (1D).
 
 Curvature uses the exact Fisher metric and cumulant tensor, as IGADDetector
-does (1.0.4); earlier versions used finite differences.
+does (1.0.3); earlier versions used finite differences.
 
     python -m experiments.demo_hard_extended
 """
