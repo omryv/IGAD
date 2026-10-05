@@ -12,13 +12,13 @@
   </a>
 </p>
 
-> *The anomaly is not only where the distribution lives — it is what shape it becomes.*
+> *The anomaly is not only where the distribution lives, it is what shape it becomes.*
 >
 > Omry Damari
 
 ---
 
-## Current research phase — router structure vs 3D quality
+## Current research phase router structure vs 3D quality
 
 The open question is whether the internal structure of an MoE router gives an
 early-warning signal for real 3D-generation quality degradation, beyond expert
@@ -35,7 +35,7 @@ directs it:
 | `python -m experiments.audit_environment` | measures all five gate conditions and exits non-zero |
 | [`docs/acquisition_checklist.md`](docs/acquisition_checklist.md) | what to acquire, which candidate models exist, where to hook, what to record, and the statistical protocol |
 | [`docs/experiment_plan.md`](docs/experiment_plan.md) | the experiment itself, specified step by step, calling only functions that are already written and tested |
-| `experiments/trace_schema.py`, `experiments/quality_schema.py` | tested record contracts — one rejects a post-top-k capture, the other rejects a failure label derived from routing |
+| `experiments/trace_schema.py`, `experiments/quality_schema.py` | tested record contracts one rejects a post-top-k capture, the other rejects a failure label derived from routing |
 | `experiments/router_stats.py`, `experiments/evaluation.py` | the baselines, the structure-aware statistics, and the object-level statistical protocol |
 | [`docs/sherman_morrison.md`](docs/sherman_morrison.md) | Dirichlet curvature reduced from O(k³) to **O(k)** — 105 s → 0.33 ms at k=1024 |
 | [`docs/numerical_reliability.md`](docs/numerical_reliability.md) | 120-digit arbitration; `error = eps · ρ`, the old cond(g) caveat withdrawn, and a read-only runtime diagnostic |
@@ -517,5 +517,5 @@ Every documented limitation is enforced by a test that would fail if the limitat
 
 ## License
 
-Apache License 2.0 — see [LICENSE](LICENSE) and [NOTICE](NOTICE).
-Copyright 2026 Omry Damari. Releases up to and including 1.0.3 were published under the MIT License.
+Apache License 2.0 - see [LICENSE](LICENSE) and [NOTICE](NOTICE).
+Copyright 2026 Omry Damari.
