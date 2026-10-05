@@ -7,7 +7,7 @@
          alt="Tests">
   </a>
   <a href="https://github.com/omryv/IGAD/actions/runs/37270846347">
-    <img src="https://img.shields.io/badge/validated%20commit-d7c2bdc-6e40c9?logo=github&logoColor=white"
+    <img src="https://img.shields.io/badge/validated%20commit-3b5c822-b2f12a?logo=github&logoColor=white"
          alt="Validated commit d7c2bdc">
   </a>
 </p>
