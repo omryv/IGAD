@@ -3,7 +3,7 @@
 **Information-Geometric Anomaly Detection**
 
 
-  <a href="https://github.com/Visigence/IGAD/commit/81dd1eb4540643083854232d9645f6add4150512">
+  <a href="https://github.com/omryv/IGAD/commit/81dd1eb4540643083854232d9645f6add4150512">
     <img src="https://img.shields.io/badge/verified%20commit-81dd1eb-6e40c9?logo=github&logoColor=white"
          alt="Verified commit 81dd1eb">
   </a>
@@ -48,7 +48,7 @@ what needs external resources, and the single next action.
 IGAD is currently a verified research artifact.
 
 The implementation baseline is pinned to commit
-[`81dd1eb4540643083854232d9645f6add4150512`](https://github.com/Visigence/IGAD/commit/81dd1eb4540643083854232d9645f6add4150512)
+[`81dd1eb4540643083854232d9645f6add4150512`](https://github.com/omryv/IGAD/commit/81dd1eb4540643083854232d9645f6add4150512)
 and release `IGAD-Ver1.0.0`.
 
 This repository is public for reproducibility, verification, and independent review.  
@@ -59,16 +59,26 @@ IGAD detects distributional shape shifts using scalar curvature deviation on the
 IGAD(batch) = |R(\theta_{ref}) - R(\theta_{local})|
 ````
 
+> **Correction (1.0.4) — the Hard Case result is withdrawn.** Earlier versions
+> of this README reported that IGAD beats a same-fit MLE-skewness control by
+> +0.053 AUC on Gamma vs LogNormal, and concluded that `‖T‖²_g` extracts shape
+> information no single moment captures. That result came from finite-difference
+> error in the experiment script. With the exact curvature the shipped detector
+> uses, IGAD scores **below** the control at every batch size, and it must: for
+> the Gamma family `R` is a monotone function of the fitted shape α̂ alone, so
+> the IGAD score is a re-scaling of the MLE skewness `2/√α̂`. Details:
+> [Experiment 2](#experiment-2--hard-case) and `RESULTS.md`.
+
 ---
 
-## Release 1.0.3
+## Release 1.0.4
 
-IGAD is packaged as `visigence-igad` version `1.0.3`. The import name is
+IGAD is packaged as `visigence-igad` version `1.0.4`. The import name is
 `igad`; the distribution name on PyPI is `visigence-igad`.
 
 ```text
 Name: visigence-igad
-Version: 1.0.3
+Version: 1.0.4
 Author: Omry Damari
 Author email: omryv@pm.me
 License: MIT
@@ -78,14 +88,14 @@ Python: >=3.10
 Build artifacts:
 
 ```text
-visigence_igad-1.0.3.tar.gz
-visigence_igad-1.0.3-py3-none-any.whl
+visigence_igad-1.0.4.tar.gz
+visigence_igad-1.0.4-py3-none-any.whl
 ```
 
 Install from the built wheel:
 
 ```bash
-python -m pip install dist/visigence_igad-1.0.3-py3-none-any.whl
+python -m pip install dist/visigence_igad-1.0.4-py3-none-any.whl
 ```
 
 Install from source for development:
@@ -108,7 +118,7 @@ python - <<'PY'
 import igad
 
 print(igad.__version__)
-assert igad.__version__ == "1.0.3"
+assert igad.__version__ == "1.0.4"
 PY
 ```
 
@@ -166,7 +176,7 @@ Every mathematical identity used here is an established result:
 | ---------------- | ------------------------------------------------------------------------------------------------------------------------ |
 | **Construction** | Using scalar curvature deviation as a batch-level anomaly score                                                          |
 | **Insight**      | Scalar curvature, governed by the full contraction `‖T‖²_g`, is structurally sensitive to shape shifts                   |
-| **Validation**   | A control experiment isolating geometry from MLE efficiency confirms that the curvature tensor itself contributes signal |
+| **Validation**   | A same-fit control experiment was built to isolate geometry from MLE efficiency. Run with exact curvature, it shows **no** geometric contribution for Gamma (see Experiment 2) |
 
 Full derivation with attribution: [`docs/proof.md`](docs/proof.md)
 
@@ -190,7 +200,7 @@ Sₘ      = gᵃᵇ Tₐᵦₘ
 ‖T‖²_g  = gⁱᵃ gʲᵇ gᵏᶜ Tᵢⱼₖ Tₐᵦᶜ
 ```
 
-The critical quantity is `‖T‖²_g`: a three-index contraction of the third cumulant tensor against the inverse metric. It gives a geometrically weighted measure of total skewness content. Unlike `scipy.stats.skew`, it uses the full parametric structure of the family.
+The critical quantity is `‖T‖²_g`: a three-index contraction of the third cumulant tensor against the inverse metric. It gives a geometrically weighted measure of total skewness content. Unlike `scipy.stats.skew`, it uses the full parametric structure of the family — which also means it is a function of the fitted parameters only. For a two-parameter scale family such as Gamma, `R` depends on the fitted shape alone, and so carries the same information as the MLE shape estimate.
 
 ---
 
@@ -206,6 +216,7 @@ igad/
 
 tests/
   test_curvature.py        Curvature and Gamma family validation
+  test_gamma_reduction.py  Gamma: R depends on alpha alone; IGAD ranks as MLE skewness
   test_dirichlet_family.py Dirichlet validation and sample efficiency
   test_sherman_morrison.py O(k) route vs dense routes vs 120-digit reference
   test_highprec.py         The high-precision reference, against identities
@@ -294,7 +305,7 @@ Skewness shift          0.9834
 Mean shift              0.8150
 ```
 
-IGAD achieves perfect separation. Variance baseline also reaches 1.0 because variance differs by 6×. Experiment 2 is the key result.
+IGAD achieves perfect separation. Variance baseline also reaches 1.0 because variance differs by 6×. Experiment 2 was designed to isolate the geometric contribution; it does not find one.
 
 ---
 
@@ -308,41 +319,45 @@ Anomaly   : LogNormal(μ=1.327,       mean=4.000  var=2.000  skew=1.105
             σ=0.343)
 ```
 
-A control baseline was constructed using the identical MLE fit as IGAD but discarding the curvature tensor:
+A control baseline uses the identical MLE fit as IGAD but discards the curvature tensor:
 
 ```text
 skew_MLE(batch) = 2 / √α_MLE
 score = |skew_MLE - skew_ref|
 ```
 
-#### Results — 5 seeds, n = 200
+**Why IGAD cannot beat this control.** For Gamma, `R` depends on the shape α
+alone (rescaling the data is an isometry of the Fisher metric) and is strictly
+monotone in it. `skew_MLE` is a function of the same α̂. So on either side of
+the reference, the IGAD score and the control rank batches identically; they
+differ only in how `|·|` weighs one side against the other.
+`tests/test_gamma_reduction.py` pins this.
+
+#### Results — 40 seeds, exact curvature (`python -m experiments.demo_hard`)
 
 ```text
-Method                        Mean AUC   ± Std
-----------------------------------------------
-IGAD (curvature)               0.6542    0.047
-MLE skewness [CONTROL]         0.6016    0.038
-Raw skewness                   0.6794    0.072
-Mean shift [BLIND]             0.5240    0.062
-Variance shift [BLIND]         0.5818    0.027
+n       IGAD     MLE-skew   Raw-skew   Gap (IGAD − MLE) ± SE
+-------------------------------------------------------------
+100     0.5513   0.5686     0.5959     −0.0172 ± 0.0012
+200     0.5981   0.6146     0.7016     −0.0165 ± 0.0009
+500     0.6876   0.7013     0.8760     −0.0136 ± 0.0006
+1000    0.8125   0.8232     0.9736     −0.0107 ± 0.0005
 ```
 
-**Gap: IGAD − MLE skewness = +0.053.**
+IGAD scores below the MLE-skewness control at every batch size, and model-free
+raw skewness beats it from n = 200 upward. Mean and variance tests stay near
+chance (0.49–0.58), as designed.
 
-This indicates that curvature geometry adds signal beyond MLE efficiency alone.
+#### What happened to the published +0.053
 
-#### Scaling with batch size
-
-```text
-n        IGAD      MLE-skew   Raw-skew   Gap (IGAD − MLE)
-----------------------------------------------------------
-100      0.5704    0.5764     0.5908     −0.006
-200      0.6838    0.6098     0.6514     +0.074
-500      0.6748    0.5846     0.9194     +0.090
-1000     0.7892    0.8214     0.9686     −0.032
-```
-
-IGAD beats the MLE control at n = 200 and n = 500. At n = 1000, model misspecification degrades the curvature signal, and model-free methods dominate.
+Before 1.0.4 the experiment script computed curvature by finite differences,
+not with the exact Fisher metric and cumulant tensor the detector uses. Near
+α = 8 that error (2–9 × 10⁻³, varying with the rate β) is 10–30× the true
+curvature difference between the two classes (3 × 10⁻⁴). On the original five
+seeds at n = 200, every baseline reproduces exactly and only IGAD changes:
+0.6542 with finite differences, **0.5785** with exact curvature, against the
+control's 0.6016. The single-seed scaling table that showed a +0.074 / +0.090
+advantage at n = 200 / 500 came from the same error.
 
 ---
 
@@ -359,17 +374,18 @@ All methods reached **AUC = 1.0** — not because of curvature, but because the 
 
 **Reason:** the Gaussian manifold has constant scalar curvature. IGAD is not applicable to Gaussian families.
 
+The nonzero `|ΔR|` values above are themselves finite-difference error: this family's scalar curvature is exactly −2 everywhere, so computed exactly every IGAD score here is zero.
+
 ---
 
 ### Experiment 4 — Dirichlet Family
 
-IGAD extends to **Dirichlet(α₁, …, αₖ)** with `k ≥ 3`, where pure shape variation is possible with fixed lower-order moments.
+IGAD extends to **Dirichlet(α₁, …, αₖ)** with `k ≥ 3`. Note that the mean vector and any one marginal variance determine α uniquely, so a Dirichlet has no "same mean and variance, different shape" alternative.
 
 * Fisher metric matches numerical Hessian.
 * Third cumulant tensor analytical form agrees with numerical derivatives.
 * Scalar curvature varies meaningfully with concentration and asymmetry.
-* IGAD detects Dirichlet shape shifts at n = 200 and beats random at n = 50.
-* AUC monotonically increases with n on well-specified data.
+* On Dirichlet(4,4,4) vs Dirichlet(1.5,4,6.5), with the exact O(k) curvature, IGAD reaches AUC 0.993 at n = 20 and 1.000 from n = 100, tying MMD and Wasserstein from n = 100. That anomaly also shifts the marginal means, and no same-fit control was run, so this does not show a geometric advantage.
 
 ---
 
@@ -382,10 +398,13 @@ IGAD extends to **Dirichlet(α₁, …, αₖ)** with `k ≥ 3`, where pure shap
 ║ Z-Score          ║      ✓        ║      ✗      ║        ✓          ║
 ║ Mahalanobis      ║      ✓        ║      ✗      ║        ~          ║
 ║ Isolation Forest ║      ✓        ║      ✗      ║        ✗          ║
-║ Skewness Test    ║      ✗        ║      ~      ║        ✗          ║
-║ IGAD             ║      ~        ║      ✓      ║        ✓          ║
+║ Skewness Test    ║      ✗        ║      ✓      ║        ~          ║
+║ IGAD             ║      ~        ║      ~      ║        ~          ║
 ╚══════════════════╩═══════════════╩═════════════╩═══════════════════╝
 ```
+
+On the Gamma hard case, raw sample skewness beats IGAD from n = 200 upward, and
+IGAD is a re-scaled MLE skewness that scores slightly below it.
 
 ---
 
@@ -396,7 +415,7 @@ IGAD extends to **Dirichlet(α₁, …, αₖ)** with `k ≥ 3`, where pure shap
 * Anomalies differ in distributional shape, not only location or scale.
 * The family has dimension `d ≥ 2`; 1D manifolds have `R = 0`.
 
-Potential applications:
+Potential applications (none has been tested on real data):
 
 * Predictive maintenance: vibration profile shape changes before amplitude changes.
 * Financial monitoring: transaction distribution structure shifts.
@@ -410,6 +429,7 @@ Potential applications:
 * Batch sizes are large and the model is approximate; raw shape statistics may dominate.
 * The family is 1D: Poisson, Exponential, Bernoulli.
 * The family is Gaussian; scalar curvature is constant.
+* The family is Gamma, or another two-parameter scale family: `R` depends on the fitted shape alone, so use the MLE shape estimate (or a likelihood-ratio test) directly.
 
 ---
 

@@ -4,7 +4,9 @@ End-to-end tests for IGADDetector.
 Verifies the canonical Hard Case from RESULTS.md:
 Gamma(alpha=8, beta=2) versus LogNormal with matched mean=4.0, var=2.0.
 The two distributions are indistinguishable to mean and variance tests
-but separable via Fisher-Rao scalar curvature.
+but separable via Fisher-Rao scalar curvature -- though for Gamma the
+curvature is a function of the fitted shape alone, so this is no better
+than the MLE skewness (see tests/test_gamma_reduction.py).
 
 Restored from release 1.0.2, which introduced the batch-level detector.
 These tests are what would have caught the regression to point-level

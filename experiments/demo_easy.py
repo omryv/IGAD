@@ -3,7 +3,7 @@ import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 from sklearn.metrics import roc_auc_score
-from igad.curvature import scalar_curvature
+from experiments.demo_hard import gamma_scalar_curvature
 from igad.families import GammaFamily
 
 
@@ -15,7 +15,7 @@ def run_demo(seed=42):
 
     alpha_ref, beta_ref = 9.0, 3.0
     theta_ref = GammaFamily.to_natural(alpha_ref, beta_ref)
-    R_ref = scalar_curvature(GammaFamily.log_partition, theta_ref)
+    R_ref = gamma_scalar_curvature(theta_ref)
     print("Reference: Gamma(9,3) mean=3.00 skew=0.667")
     print("  R_ref = %.6f" % R_ref)
 
@@ -30,7 +30,7 @@ def run_demo(seed=42):
     for b in range(n_batches_normal):
         batch = rng.gamma(alpha_ref, 1.0 / beta_ref, size=batch_size)
         theta_local = GammaFamily.mle(batch)
-        R_local = scalar_curvature(GammaFamily.log_partition, theta_local)
+        R_local = gamma_scalar_curvature(theta_local)
         scores.append(abs(R_ref - R_local))
         labels.append(0)
 
@@ -40,7 +40,7 @@ def run_demo(seed=42):
     for b in range(n_batches_anomaly):
         batch = rng.gamma(alpha_anom, 1.0 / beta_anom, size=batch_size)
         theta_local = GammaFamily.mle(batch)
-        R_local = scalar_curvature(GammaFamily.log_partition, theta_local)
+        R_local = gamma_scalar_curvature(theta_local)
         scores.append(abs(R_ref - R_local))
         labels.append(1)
 
@@ -101,7 +101,7 @@ def run_demo(seed=42):
     print("Curvature diagnostics:")
     print("  R(reference)       = %.6f" % R_ref)
     theta_anom = GammaFamily.to_natural(alpha_anom, beta_anom)
-    R_anom = scalar_curvature(GammaFamily.log_partition, theta_anom)
+    R_anom = gamma_scalar_curvature(theta_anom)
     print("  R(anomaly truth)   = %.6f" % R_anom)
     print("  |R_ref - R_anom|   = %.6f" % abs(R_ref - R_anom))
 

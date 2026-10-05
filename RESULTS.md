@@ -10,6 +10,18 @@ All results are reproducible via the scripts in `experiments/`.
 > tables were re-run after the correction and reproduce to four decimals.
 > See `CHANGELOG.md` and `docs/proof.md` section 3.
 
+> **Hard Case retracted (1.0.4).** The Gamma experiments previously computed
+> curvature by finite differences, whose error near α = 8 (2–9 × 10⁻³, and
+> dependent on the rate β) is 10–30× the true curvature difference between
+> the classes (3 × 10⁻⁴). With the exact Fisher metric and cumulant tensor —
+> the route `IGADDetector` uses — **IGAD scores below the MLE-skewness control
+> at every batch size.** The reason is structural: for Gamma, `R` depends on
+> α alone and is strictly monotone in it, so the IGAD score is a re-scaling of
+> the MLE skewness `2/√α̂` and cannot carry more information. The claim that
+> `‖T‖²_g` extracts shape information beyond MLE-fitted skewness is withdrawn.
+> The Dirichlet experiments are re-run with the exact O(k) route, which
+> improves IGAD there. Experiments 1–4 below show the corrected numbers.
+
 ---
 
 ## Current phase: does router structure predict 3D quality?
@@ -241,10 +253,11 @@ empirical, and both **narrow** what a future benchmark should test:
 | Batch skewness shift | 0.9834 |
 | Batch mean shift | 0.8150 |
 
-Curvature diagnostics:
-- R(reference) = -1.002497
-- R(anomaly)   = -0.953274
-- |ΔR|         = 0.049223
+Curvature diagnostics (exact route; the finite-difference values published
+before 1.0.4 were −1.002497, −0.953274 and 0.049223):
+- R(reference) = -0.998563
+- R(anomaly)   = -0.953198
+- |ΔR|         = 0.045366
 
 **Conclusion**: IGAD achieves perfect separation, but so does variance shift
 (variance differs by 6×). This experiment does not prove unique geometric value.
@@ -258,52 +271,65 @@ Curvature diagnostics:
 - Normal:  mean=4.000, var=2.000, skew=0.707
 - Anomaly: mean=4.000, var=2.000, skew=1.105
 
-### 2a. Control Baseline: MLE Skewness (5 seeds, batch_size=200)
+### Why the control cannot be beaten in this family
 
-| Method | s42 | s7 | s123 | s999 | s2024 |
-|--------|-----|----|------|------|-------|
-| IGAD (curvature) | 0.6838 | 0.6796 | 0.6994 | 0.6390 | 0.5694 |
-| MLE skewness [CONTROL] | 0.6098 | 0.6016 | 0.6096 | 0.6528 | 0.5342 |
-| Raw skewness | 0.6514 | 0.5792 | 0.6472 | 0.7856 | 0.7334 |
-| Mean shift | 0.5502 | 0.6336 | 0.4694 | 0.4914 | 0.4756 |
-| Variance shift | 0.5860 | 0.6094 | 0.5490 | 0.6112 | 0.5534 |
+For Gamma, `R` depends on the shape α alone — rescaling the data is an
+isometry of the Fisher metric — and is strictly monotone in α. The MLE-skewness
+control `2/√α̂` is a function of the same α̂. So the IGAD score
+`|R(α_ref) − R(α̂)|` is a re-scaling of the control score
+`|2/√α̂ − 2/√α_ref|`: on either side of α_ref the two order batches identically,
+and they can differ only in how `|·|` weighs one side against the other. IGAD
+cannot carry information the control lacks. `tests/test_gamma_reduction.py`
+pins all three facts (rate independence, monotonicity, identical ranking).
 
-| Method | Mean AUC | ± Std |
+### 2a. Results — 40 seeds, exact curvature
+
+`python -m experiments.demo_hard` → `experiments/results/hard_case_exact.json`.
+100 normal + 50 anomalous batches per seed. "IGAD (finite-diff)" is the route
+this script used before 1.0.4, kept only to show where the published +0.053
+came from.
+
+| n | IGAD (exact) | IGAD (finite-diff) | MLE skew [CONTROL] | Raw skew | Mean | Variance |
+|---|---|---|---|---|---|---|
+| 100 | 0.5513 | 0.5941 | 0.5686 | 0.5959 | 0.4904 | 0.5617 |
+| 200 | 0.5981 | 0.6395 | 0.6146 | 0.7016 | 0.5058 | 0.5771 |
+| 500 | 0.6876 | 0.7016 | 0.7013 | 0.8760 | 0.5164 | 0.5683 |
+| 1000 | 0.8125 | 0.7405 | 0.8232 | 0.9736 | 0.5044 | 0.5667 |
+
+Paired gap against the control, mean ± standard error over 40 seeds:
+
+| n | IGAD (exact) − control | IGAD (finite-diff) − control |
+|---|---|---|
+| 100 | −0.0172 ± 0.0012 | +0.0255 ± 0.0083 |
+| 200 | −0.0165 ± 0.0009 | +0.0249 ± 0.0085 |
+| 500 | −0.0136 ± 0.0006 | +0.0004 ± 0.0089 |
+| 1000 | −0.0107 ± 0.0005 | −0.0827 ± 0.0066 |
+
+**The shipped detector scores below the control at every n.** Raw sample
+skewness, which needs no model at all, beats IGAD from n = 200 upward.
+
+The finite-difference column is not geometry. Near α = 8 its error in `R` is
+2–9 × 10⁻³ and varies with the rate β, against a true class difference of
+3 × 10⁻⁴; the score it produced was mostly that error.
+
+### 2b. The published 5-seed numbers, re-run
+
+On the original seeds (42, 7, 123, 999, 2024), n = 200, the control and every
+other baseline reproduce exactly; only the IGAD row changes:
+
+| Method | Published (finite-diff) | Exact curvature |
 |--------|----------|-------|
-| IGAD (curvature) | 0.6542 | 0.0469 |
-| MLE skewness [CONTROL] | 0.6016 | 0.0382 |
-| Raw skewness | 0.6794 | 0.0722 |
-| Mean shift | 0.5240 | 0.0618 |
-| Variance shift | 0.5818 | 0.0266 |
+| IGAD (curvature) | 0.6542 ± 0.0469 | **0.5785 ± 0.0360** |
+| MLE skewness [CONTROL] | 0.6016 ± 0.0382 | 0.6016 ± 0.0382 |
+| MMD (RBF, median BW) | 0.5894 ± 0.0758 | 0.5894 ± 0.0758 |
+| Wasserstein (1D) | 0.5925 ± 0.0574 | 0.5925 ± 0.0574 |
+| Raw skewness | 0.6794 ± 0.0722 | 0.6794 ± 0.0722 |
+| Mean shift [BLIND] | 0.5240 ± 0.0618 | 0.5240 ± 0.0618 |
+| Variance shift [BLIND] | 0.5818 ± 0.0266 | 0.5818 ± 0.0266 |
 
-**Gap (IGAD − MLE skewness): +0.053**
-Curvature geometry adds signal beyond MLE efficiency alone.
-
-### 2b. Extended Comparison: MMD and Wasserstein
-
-| Method | Mean AUC | ± Std |
-|--------|----------|-------|
-| IGAD (curvature) | 0.6542 | 0.0469 |
-| MLE skewness [CONTROL] | 0.6016 | 0.0382 |
-| MMD (RBF, median BW) | 0.5894 | 0.0758 |
-| Wasserstein (1D) | 0.5925 | 0.0574 |
-| Raw skewness | 0.6794 | 0.0722 |
-| Mean shift [BLIND] | 0.5240 | 0.0618 |
-| Variance shift [BLIND] | 0.5818 | 0.0266 |
-
-IGAD beats MMD and Wasserstein in the matched mean+variance regime.
-
-### 2c. Scaling with Batch Size (seed=42)
-
-| n | IGAD | MLE-skew | Raw-skew | Gap |
-|---|------|----------|----------|-----|
-| 100 | 0.5704 | 0.5764 | 0.5908 | −0.006 |
-| 200 | 0.6838 | 0.6098 | 0.6514 | +0.074 |
-| 500 | 0.6748 | 0.5846 | 0.9194 | +0.090 |
-| 1000 | 0.7892 | 0.8214 | 0.9686 | −0.032 |
-
-Geometric advantage is strongest at n=200–500. At n=1000, model
-misspecification degrades the curvature signal and model-free methods dominate.
+(`python -m experiments.demo_hard_extended`.) With exact curvature IGAD is
+below the control, MMD and Wasserstein; the published "+0.053" and "beats MMD
+and Wasserstein" do not survive.
 
 ---
 
@@ -315,7 +341,7 @@ misspecification degrades the curvature signal and model-free methods dominate.
 - Variance detectors: BLIND (both var=1)
 - Only correlation differs: 0.2 vs 0.8
 
-Curvature diagnostics:
+Curvature diagnostics (finite differences — this demo has no exact route):
 - R(reference rho=0.2) = -2.000008
 - R(anomaly rho=0.8)   = -1.996700
 - |ΔR|                 = 0.003308
@@ -328,14 +354,23 @@ Curvature diagnostics:
 | Mean shift [BLIND] | 0.4699 | 0.0250 |
 | Variance shift [BLIND] | 0.4696 | 0.0452 |
 
-**Note**: Gap vs MLE-correlation = 0.000. MLE efficiency explains the
-advantage here. Mean and variance detectors are completely blind (AUC ≈ 0.50).
+**Note (1.0.4).** The scalar curvature of this family is the constant −2:
+the covariance manifold is homogeneous, so every point is isometric to every
+other. The nonzero |ΔR| above is finite-difference error, which grows with ρ
+and with the scale of Σ (at ρ = 0.8 it is +0.0007, +0.0033 and +0.0131 for
+σ² = 0.5, 1 and 2). IGAD's AUC of 1.0 here therefore comes from numerical
+error correlated with ρ, not from curvature; computed exactly, the IGAD score
+is zero for every batch. Mean and variance detectors are blind (AUC ≈ 0.50).
 
 ---
 
 ## Experiment 4: Dirichlet — Curvature Landscape and Detection
 
-**File**: `experiments/demo_dirichlet.py`
+**File**: `experiments/demo_dirichlet.py`. Re-run in 1.0.4 with the exact O(k)
+closed form `DirichletFamily.scalar_curvature_analytical` — the route
+`IGADDetector` uses — in place of finite differences. The finite-difference
+values published earlier, which also predate the 1.0.3 sign correction, are
+given in brackets.
 
 ### 4a. Curvature Landscape Along Concentration Path
 
@@ -343,38 +378,44 @@ Path: α(t) = (4+t, 4, 4−t), t ∈ [0,3], α₀=12 constant
 
 | t | α | R(α) |
 |---|---|------|
-| 0.00 | [4, 4, 4] | 1.513247 |
-| 1.00 | [5, 4, 3] | 1.511334 |
-| 2.00 | [6, 4, 2] | 1.504935 |
-| 3.00 | [7, 4, 1] | 1.471889 |
+| 0.00 | [4, 4, 4] | −1.510926  [1.513247] |
+| 1.00 | [5, 4, 3] | −1.510024  [1.511334] |
+| 2.00 | [6, 4, 2] | −1.504800  [1.504935] |
+| 3.00 | [7, 4, 1] | −1.472755  [1.471889] |
 
-R varies non-trivially along the path — this is what makes Dirichlet
-meaningful for IGAD.
+### 4b. Detection: Dirichlet(4,4,4) vs Dirichlet(1.5,4,6.5)
 
-### 4b. Hard Detection: Dirichlet(4,4,4) vs Dirichlet(1.5,4,6.5)
-
-- R(α_ref)  = 1.513247
-- R(α_anom) = 1.493184
-- |ΔR|      = 0.020063
+- R(α_ref)  = −1.510926  [1.513247]
+- R(α_anom) = −1.496177  [1.493184]
+- |ΔR|      = 0.014749   [0.020063]
 
 | Method | Mean AUC | ± Std |
 |--------|----------|-------|
-| IGAD (curvature) | 0.9628 | 0.0176 |
+| IGAD (curvature) | 1.0000 [0.9628] | 0.0000 |
 | MMD (RBF, median BW) | 1.0000 | 0.0000 |
 | Wasserstein (marginal) | 1.0000 | 0.0000 |
 | Skewness (1st comp.) | 0.9987 | 0.0006 |
+
+This is not a shape-only anomaly: the marginal means differ
+(0.333 → 0.125 and 0.542), so a mean detector would also separate it. No
+same-fit control was run here, and the Gamma reduction applies in spirit: for
+a Dirichlet, the mean vector and any one marginal variance determine α
+uniquely, so the family admits no "same mean and variance, different shape"
+alternative.
 
 ### 4c. Sample Efficiency Sweep (fixed Δα)
 
 | n | IGAD | MMD | Wasserstein |
 |---|------|-----|-------------|
-| 20 | 0.7540 | 0.9998 | 1.0000 |
-| 50 | 0.9074 | 1.0000 | 1.0000 |
-| 100 | 0.9302 | 1.0000 | 1.0000 |
-| 200 | 0.9822 | 1.0000 | 1.0000 |
-| 500 | 0.9878 | 1.0000 | 1.0000 |
+| 20 | 0.9930 [0.7540] | 0.9998 | 1.0000 |
+| 50 | 0.9982 [0.9074] | 1.0000 | 1.0000 |
+| 100 | 1.0000 [0.9302] | 1.0000 | 1.0000 |
+| 200 | 1.0000 [0.9822] | 1.0000 | 1.0000 |
+| 500 | 1.0000 [0.9878] | 1.0000 | 1.0000 |
 
-In this regime MMD and Wasserstein dominate. IGAD reaches 0.98+ at n=200.
+With exact curvature IGAD ties MMD and Wasserstein from n = 100 and is
+marginally behind below that. The finite-difference route had been costing
+IGAD up to 0.24 AUC.
 
 ---
 
@@ -382,10 +423,10 @@ In this regime MMD and Wasserstein dominate. IGAD reaches 0.98+ at n=200.
 
 | Scenario | IGAD | Reason |
 |----------|------|--------|
-| Dirichlet k≥3, small n | **WINS** | Curvature varies; model correct |
-| Dirichlet k≥3, n>500 | COMPETES | Non-parametric catches up |
-| Gamma, cross-family, n=200–500 | **WINS** | Beats MLE-skewness +0.053 |
-| Gaussian (any dim) | FAILS | R=constant (hyperbolic geometry) |
+| Dirichlet k≥3, n ≥ 100 | TIES | Matches MMD/Wasserstein on a mean-shifting anomaly; no same-fit control run |
+| Dirichlet k≥3, n < 100 | NEAR | 0.993–0.998 against MMD/Wasserstein 0.9998–1.0 |
+| Gamma, cross-family | LOSES | A re-scaled MLE skewness; scores below it at every n |
+| Gaussian (any dim) | FAILS | R=constant (homogeneous geometry) |
 | 1D families (Poisson, Exp) | FAILS | R≡0 identically |
 | Large n, misspecified model | LOSES | Model-free methods dominate |
 | 2-param family, within-family | WEAK | Mean+var determine all params |
@@ -397,11 +438,11 @@ In this regime MMD and Wasserstein dominate. IGAD reaches 0.98+ at n=200.
 | Regime | IGAD | Best Baseline | IGAD Wins? |
 |--------|------|---------------|------------|
 | Easy case (diff variance) | 1.0000 | Variance: 1.0000 | Tie |
-| Hard case n=200, vs MLE-skew | 0.6542 | MLE-skew: 0.6016 | **Yes (+0.053)** |
-| Hard case n=200, vs MMD | 0.6542 | MMD: 0.5894 | **Yes (+0.065)** |
-| Hard case n=500, vs MLE-skew | 0.6748 | MLE-skew: 0.5846 | **Yes (+0.090)** |
-| Gaussian correlation | 1.0000 | MLE-corr: 1.0000 | Tie |
-| Dirichlet n=200 | 0.9628 | MMD: 1.0000 | No |
+| Hard case n=200, vs MLE-skew (40 seeds) | 0.5981 | MLE-skew: 0.6146 | No (−0.017) |
+| Hard case n=200, vs raw skew (40 seeds) | 0.5981 | Raw skew: 0.7016 | No |
+| Hard case n=500, vs MLE-skew (40 seeds) | 0.6876 | MLE-skew: 0.7013 | No (−0.014) |
+| Gaussian correlation | 1.0000 | MLE-corr: 1.0000 | Tie (numerical artefact) |
+| Dirichlet n=200 | 1.0000 | MMD: 1.0000 | Tie |
 | Within-family n=500 | 0.6314 | Variance: 0.9988 | No |
 
 ---
@@ -413,13 +454,23 @@ In this regime MMD and Wasserstein dominate. IGAD reaches 0.98+ at n=200.
 3. **Gaussian geometry is constant**: R=constant, IGAD cannot detect Gaussian anomalies
 4. **2-parameter constraint**: Mean+variance determine parameters uniquely
 5. **Large n + misspecified model**: Model-free methods dominate at n>500
-6. **Computational cost**: O(d³) tensor contractions per evaluation
+6. **Computational cost**: O(d⁶) for the literal contraction, O(d⁴) pairwise, for a general family; O(k) for Dirichlet
+7. **Gamma reduces to MLE skewness**: R is a monotone function of α̂ alone, so IGAD adds nothing over `2/√α̂` and in practice scores slightly below it
 
 ---
 
-## The Falsifiable Claim
+## The Falsifiable Claim — tested and refuted for Gamma
 
-IGAD's advantage over MLE-derived skewness — using the identical MLE fit but
-discarding the curvature tensor — confirms that the full contraction ‖T‖²_g
-extracts shape information not captured by any single moment, raw or
-MLE-fitted. This holds in the regime n=200–500 for cross-family detection.
+Until 1.0.4 this section read: *"IGAD's advantage over MLE-derived skewness —
+using the identical MLE fit but discarding the curvature tensor — confirms
+that the full contraction ‖T‖²_g extracts shape information not captured by
+any single moment, raw or MLE-fitted. This holds in the regime n=200–500 for
+cross-family detection."*
+
+That claim is withdrawn. For the Gamma family the IGAD score is a monotone
+re-scaling of the MLE skewness on either side of the reference, so it cannot
+extract information the control lacks; measured with exact curvature over 40
+seeds it scores 0.011–0.017 AUC *below* the control at n = 100–1000. The
+reported advantage was finite-difference error. Whether curvature adds
+anything in a family where `R` is not a function of a single fitted statistic
+remains open and untested here.

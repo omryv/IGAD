@@ -10,15 +10,15 @@ This release is the verified baseline for IGAD-Ver1.0.0.
 
 It should be cited by commit hash and release tag. Later repository changes do not modify the verified result unless accompanied by a new pinned commit, release tag, and GitHub Actions validation run.
 <p align="center">
-  <a href="https://github.com/Visigence/IGAD/actions/workflows/test.yml">
-    <img src="https://github.com/Visigence/IGAD/actions/workflows/test.yml/badge.svg"
+  <a href="https://github.com/omryv/IGAD/actions/workflows/test.yml">
+    <img src="https://github.com/omryv/IGAD/actions/workflows/test.yml/badge.svg"
          alt="CI workflow status">
   </a>
 
   <img src="https://img.shields.io/badge/release-IGAD--Ver1.0.0-blue?logo=git&logoColor=white"
        alt="Release IGAD-Ver1.0.0">
 
-  <a href="https://github.com/Visigence/IGAD/commit/81dd1eb4540643083854232d9645f6add4150512">
+  <a href="https://github.com/omryv/IGAD/commit/81dd1eb4540643083854232d9645f6add4150512">
     <img src="https://img.shields.io/badge/verified%20commit-81dd1eb-6e40c9?logo=github&logoColor=white"
          alt="Verified commit 81dd1eb">
   </a>
@@ -57,10 +57,10 @@ provenance for release `IGAD-Ver1.0.0`, not as a statement about `main`:
 | Field | Value |
 |------|-------|
 | Release | `IGAD-Ver1.0.0` |
-| Pinned commit | [`81dd1eb4540643083854232d9645f6add4150512`](https://github.com/Visigence/IGAD/commit/81dd1eb4540643083854232d9645f6add4150512) |
+| Pinned commit | [`81dd1eb4540643083854232d9645f6add4150512`](https://github.com/omryv/IGAD/commit/81dd1eb4540643083854232d9645f6add4150512) |
 | Python versions | 3.10, 3.11, 3.12 |
 | Test result at that commit | 54/54 tests passed |
-| Run | [GitHub Actions](https://github.com/Visigence/IGAD/actions/runs/25236119831) |
+| Run | [GitHub Actions](https://github.com/omryv/IGAD/actions/runs/25236119831) |
 
 ---
 
@@ -90,11 +90,11 @@ pip install visigence-igad
 
 IGAD tests whether scalar curvature contains anomaly signal beyond ordinary moment comparisons.
 
-The falsifiable claim is:
+The falsifiable claim was:
 
 > In matched mean/variance regimes, the curvature contraction `‖T‖²_g` can recover shape information that is not captured by MLE-derived skewness alone.
 
-The current evidence supports this claim in the tested regime `n = 200–500`.
+**It is refuted for the Gamma family (1.0.4).** There `R` is a monotone function of the fitted shape α̂ alone, so the IGAD score is a re-scaling of the MLE skewness `2/√α̂`. Measured with the exact curvature the detector uses, IGAD scores 0.011–0.017 AUC below the MLE-skewness control at every n from 100 to 1000 (40 seeds). The earlier "+0.053 at n = 200–500" came from finite-difference error in the experiment script. See `RESULTS.md`, Experiment 2.
 
 ---
 
@@ -118,7 +118,7 @@ Gamma vs LogNormal with matched mean and matched variance.
 
 ![Experiment 2 — Hard Gamma vs LogNormal](figures/exp2_hard_gamma_vs_lognormal.png)
 
-This is the key test. The distributions share first and second moments, so the anomaly signal must come from higher-order shape structure.
+The distributions share first and second moments, so the anomaly signal must come from higher-order shape structure. With exact curvature, IGAD (AUC 0.598 at n = 200, 40 seeds) scores below the same-fit MLE-skewness control (0.615) and well below raw sample skewness (0.702).
 
 ---
 
@@ -128,7 +128,7 @@ Two-dimensional Gaussian structure with correlation shift.
 
 ![Experiment 3 — Gaussian 2D Correlation](figures/exp3_gaussian2d_correlation.png)
 
-This experiment checks whether the method detects geometric structure in a multivariate setting.
+This experiment checks whether the method detects geometric structure in a multivariate setting. It cannot: the family's scalar curvature is constant, and the separation shown comes from finite-difference error.
 
 ---
 
@@ -164,5 +164,5 @@ IGAD is not a universal anomaly detector.
 
 Source code, tests, workflows, and reproducibility scripts are available at:
 
-[github.com/Visigence/IGAD](https://github.com/Visigence/IGAD)
+[github.com/omryv/IGAD](https://github.com/omryv/IGAD)
 

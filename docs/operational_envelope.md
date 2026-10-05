@@ -1,6 +1,6 @@
 # IGAD Operational Envelope
 
-## When IGAD Wins
+## Where IGAD Detects — and How It Compares
 
 ### Condition 1: Correct exponential family, k >= 3 parameters, small-to-moderate n
 
@@ -8,15 +8,15 @@ When the reference distribution belongs to a correctly-specified exponential fam
 at least three parameters, IGAD exploits scalar curvature variation to detect concentration
 shifts that cannot be resolved by mean or variance alone.
 
-**Evidence:** Dirichlet(4,4,4) vs Dirichlet(1.5,4,6.5) — same α₀=12, same mean direction
-for the symmetric case, only the concentration profile shifts. IGAD AUC > 0.65 at n=200.
+**Evidence:** Dirichlet(4,4,4) vs Dirichlet(1.5,4,6.5), same α₀ = 12. The marginal
+means also shift (0.333 → 0.125 and 0.542), so this is not a shape-only anomaly. With the
+exact O(k) curvature (1.0.4), IGAD reaches AUC 0.993 at n = 20 and 1.000 from n = 100.
 
-The curvature advantage is most pronounced at small-to-moderate n (20–200 samples per batch)
-where non-parametric methods have insufficient power. At n > 500, MMD and Wasserstein
-catch up as their estimators reach their asymptotic regime.
-
-**Sample complexity:** IGAD achieves AUC > 0.7 at n ≈ 50–100 for the Dirichlet
-concentration shift; MMD requires n ≈ 200–300 for equivalent power.
+**No advantage over non-parametric methods was observed.** MMD and Wasserstein reach
+0.9998–1.000 at every n from 20 upward; IGAD ties them from n = 100 and is marginally
+behind below that. No same-fit control was run, and since the mean vector and one
+marginal variance determine a Dirichlet's α uniquely, a shift in α is always visible to
+low-order moments too.
 
 ### Condition 2: Cross-family detection (misspecified model, small n)
 
@@ -25,9 +25,12 @@ scored under a Gamma model), IGAD still detects anomalies because the MLE parame
 fit to the anomalous data lands at a point with systematically different curvature
 than the reference.
 
-**Evidence:** Gamma(8,2) vs LogNormal (matched mean AND variance). IGAD beats
-MLE-skewness control by +0.053 AUC (mean, 5 seeds, n=200). This confirms that the
-curvature geometry is doing real work, not just MLE efficiency.
+**Evidence:** Gamma(8,2) vs LogNormal (matched mean AND variance). IGAD does detect the
+shift (AUC 0.55–0.81 for n = 100–1000), but **scores below the same-fit MLE-skewness
+control at every n** (−0.011 to −0.017 AUC, 40 seeds, exact curvature). For Gamma, `R` is
+a monotone function of α̂ alone, so the curvature adds nothing to the MLE fit; raw sample
+skewness beats both from n = 200. The +0.053 published before 1.0.4 was finite-difference
+error.
 
 ---
 

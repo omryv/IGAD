@@ -2,6 +2,60 @@
 
 All notable changes to IGAD are documented in this file.
 
+## 1.0.4 — Hard Case result withdrawn
+
+### Retracted: "IGAD beats the MLE-skewness control by +0.053 AUC"
+
+The Hard Case (Gamma(8,2) vs LogNormal, matched mean and variance) was the
+evidence for the project's central claim: that `‖T‖²_g` extracts shape
+information no single moment captures, raw or MLE-fitted. That claim is
+withdrawn for the Gamma family.
+
+**Why it cannot hold.** For Gamma, `R` depends on the shape α alone and is
+strictly monotone in it. The control `2/√α̂` is a function of the same α̂, so
+the IGAD score is a re-scaling of the control: on either side of the reference
+the two order batches identically.
+
+**What the experiment actually showed.** `experiments/demo_hard.py` computed
+curvature by finite differences of the log-partition, not with the exact
+Fisher metric and cumulant tensor `IGADDetector` uses. Near α = 8 the
+finite-difference error (2–9 × 10⁻³, varying with the rate β) is 10–30× the
+true curvature difference between the classes (3 × 10⁻⁴). With exact curvature,
+over 40 seeds, IGAD scores 0.011–0.017 AUC **below** the control at every
+n from 100 to 1000; on the original five seeds, 0.5785 instead of the published
+0.6542, against the control's 0.6016.
+
+**The shipped detector is unchanged.** It always used the exact route; only
+the experiment scripts and the claims built on them were wrong.
+
+### Changed
+
+- `experiments/demo_hard.py`: exact curvature, 40 seeds at every batch size,
+  paired gaps with standard errors, results saved to
+  `experiments/results/hard_case_exact.json`. The finite-difference column is
+  kept, labelled, so the old number can be traced.
+- `demo_hard_extended.py`, `demo_hard1.py`, `demo_easy.py`: exact Gamma
+  curvature. `demo_dirichlet.py`: the exact O(k) closed form. With it IGAD
+  improves on Dirichlet (AUC 0.993 at n = 20, was 0.754) and ties MMD and
+  Wasserstein from n = 100; the published "WINS at small n" was not supported
+  either before or after.
+- `README.md`, `RESULTS.md`, `docs/index.md`, `docs/operational_envelope.md`,
+  `docs/figures/README.md`: claims corrected. Also corrected: the Dirichlet
+  rationale (mean and one marginal variance *do* determine α uniquely), the
+  Gaussian 2D separation (an artefact of finite-difference error; the true
+  `R` is constant), the stale-sign Dirichlet `R` values, and the cost figure
+  (O(d⁶) literal / O(d⁴) pairwise, not O(d³)).
+- Figures `exp1`, `exp2` and `exp4` regenerated.
+- Repository links (README, docs, `pyproject.toml` project URLs) point to
+  `github.com/omryv/IGAD`, where the repository now lives.
+
+### Added
+
+- `tests/test_gamma_reduction.py`: pins that Gamma `R` is independent of the
+  rate, strictly monotone in the shape, that the score is invariant to
+  rescaling the batch, and that it ranks batches identically to the MLE
+  skewness on either side of the reference.
+
 ## 1.0.3 — Curvature sign correction, and the 1.0.2 detector restored
 
 ### Fixed: the sign of the scalar curvature

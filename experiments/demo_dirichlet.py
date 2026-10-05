@@ -17,7 +17,6 @@ from sklearn.metrics import roc_auc_score
 from scipy.stats import wasserstein_distance
 from scipy.special import digamma, polygamma
 
-from igad.curvature import scalar_curvature
 from igad.families import DirichletFamily
 
 
@@ -64,7 +63,7 @@ def wasserstein_multi(X: np.ndarray, Y: np.ndarray) -> float:
 def igad_score(batch: np.ndarray, R_ref: float) -> float:
     """Compute |R_ref - R_local| for a Dirichlet batch."""
     theta_local = DirichletFamily.mle(batch)
-    R_local = scalar_curvature(DirichletFamily.log_partition, theta_local)
+    R_local = DirichletFamily.scalar_curvature_analytical(theta_local)
     return abs(R_ref - R_local)
 
 
@@ -85,7 +84,7 @@ def part1_curvature_landscape():
     for t in t_vals:
         alpha = np.array([4 + t, 4.0, 4 - t])
         theta = DirichletFamily.to_natural(alpha)
-        R = scalar_curvature(DirichletFamily.log_partition, theta)
+        R = DirichletFamily.scalar_curvature_analytical(theta)
         print("%-6.2f  %-22s  %10.6f" % (t, str(alpha.round(2)), R))
 
     print()
@@ -130,8 +129,8 @@ def part2_hard_detection():
     print()
 
     # Curvature
-    R_ref  = scalar_curvature(DirichletFamily.log_partition, DirichletFamily.to_natural(alpha_ref))
-    R_anom = scalar_curvature(DirichletFamily.log_partition, DirichletFamily.to_natural(alpha_anom))
+    R_ref  = DirichletFamily.scalar_curvature_analytical(DirichletFamily.to_natural(alpha_ref))
+    R_anom = DirichletFamily.scalar_curvature_analytical(DirichletFamily.to_natural(alpha_anom))
     print("Scalar curvature:")
     print("  R(α_ref)  = %.6f" % R_ref)
     print("  R(α_anom) = %.6f" % R_anom)
@@ -208,8 +207,7 @@ def part3_sample_efficiency():
     N_ANOMALY = 50
     SEED      = 42
 
-    R_ref = scalar_curvature(DirichletFamily.log_partition,
-                             DirichletFamily.to_natural(ALPHA_REF))
+    R_ref = DirichletFamily.scalar_curvature_analytical(DirichletFamily.to_natural(ALPHA_REF))
 
     print("%-6s  %8s  %8s  %8s" % ("n", "IGAD", "MMD", "Wasserstein"))
     print("-" * 38)
@@ -294,10 +292,8 @@ def part4_failure_mode_audit():
     print()
 
     # Compute curvatures for the pair
-    R_ref  = scalar_curvature(DirichletFamily.log_partition,
-                              DirichletFamily.to_natural(ALPHA_REF))
-    R_anom = scalar_curvature(DirichletFamily.log_partition,
-                              DirichletFamily.to_natural(ALPHA_ANOM))
+    R_ref  = DirichletFamily.scalar_curvature_analytical(DirichletFamily.to_natural(ALPHA_REF))
+    R_anom = DirichletFamily.scalar_curvature_analytical(DirichletFamily.to_natural(ALPHA_ANOM))
     print("Curvature verification for Dirichlet pair:")
     print("  R(α_ref=[4,4,4])        = %.6f" % R_ref)
     print("  R(α_anom=[1.5,4,6.5])   = %.6f" % R_anom)
@@ -306,9 +302,8 @@ def part4_failure_mode_audit():
     print()
 
     table = [
-        ("Dirichlet k>=3, small n",      "WINS    ", "Curvature varies; model correct"),
-        ("Dirichlet k>=3, n>500",         "COMPETES", "Non-parametric catches up"),
-        ("Gamma, cross-family, n=200",    "WINS    ", "Beats MLE-skewness control +0.053"),
+        ("Dirichlet k>=3, any n",        "LOSES   ", "MMD/Wasserstein ahead at every n"),
+        ("Gamma, cross-family",           "LOSES   ", "Re-scaled MLE skewness; below it"),
         ("Gaussian (any dim)",            "FAILS   ", "R=constant (hyperbolic geometry)"),
         ("1D families (Poisson, Exp)",    "FAILS   ", "R≡0 identically"),
         ("Large n, misspecified model",   "LOSES   ", "Model-free methods dominate"),

@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "visigence-igad"
-version = "1.0.3"
+version = "1.0.4"
 description = "Information-Geometric Anomaly Detection via Fisher–Rao Scalar Curvature"
 readme = "README.md"
 requires-python = ">=3.10"
@@ -41,9 +41,9 @@ dev = [
 ]
 
 [project.urls]
-Source = "https://github.com/Visigence/IGAD"
-"Bug Tracker" = "https://github.com/Visigence/IGAD/issues"
-"Validation Run" = "https://github.com/Visigence/IGAD/commit/81dd1eb4540643083854232d9645f6add4150512"
+Source = "https://github.com/omryv/IGAD"
+"Bug Tracker" = "https://github.com/omryv/IGAD/issues"
+"Validation Run" = "https://github.com/omryv/IGAD/commit/81dd1eb4540643083854232d9645f6add4150512"
 
 [tool.setuptools.packages.find]
 exclude = ["tests", "tests.*", "experiments", "experiments.*"]

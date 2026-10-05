@@ -3,7 +3,7 @@ import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 from sklearn.metrics import roc_auc_score
-from igad.curvature import scalar_curvature
+from experiments.demo_hard import gamma_scalar_curvature
 from igad.families import GammaFamily
 from scipy.stats import skew as sp_skew
 
@@ -54,7 +54,7 @@ def run_hard_demo(seed=42):
     print("  mean=%.3f, var=%.3f, skew=%.3f" % (ln_mean, ln_var, ln_skew))
 
     theta_ref = GammaFamily.to_natural(alpha_ref, beta_ref)
-    R_ref = scalar_curvature(GammaFamily.log_partition, theta_ref)
+    R_ref = gamma_scalar_curvature(theta_ref)
     print("  R_ref = %.6f" % R_ref)
 
     n_normal = 100
@@ -91,7 +91,7 @@ def run_hard_demo(seed=42):
             # IGAD: fit Gamma MLE, compute curvature
             b1_pos = b1[b1 > 0]
             theta_local = GammaFamily.mle(b1_pos)
-            R_local = scalar_curvature(GammaFamily.log_partition, theta_local)
+            R_local = gamma_scalar_curvature(theta_local)
             scores_igad.append(abs(R_ref - R_local))
 
             # Mean shift

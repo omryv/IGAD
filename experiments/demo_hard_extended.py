@@ -3,6 +3,11 @@ experiments/demo_hard_extended.py
 
 Re-run the Gamma(8,2) vs LogNormal experiment from demo_hard.py with two
 additional baselines: MMD (RBF kernel, median heuristic) and Wasserstein (1D).
+
+Curvature uses the exact Fisher metric and cumulant tensor, as IGADDetector
+does (1.0.4); earlier versions used finite differences.
+
+    python -m experiments.demo_hard_extended
 """
 
 import math
@@ -13,7 +18,7 @@ from sklearn.metrics import roc_auc_score
 from scipy.stats import skew as sp_skew
 from scipy.stats import wasserstein_distance
 
-from igad.curvature import scalar_curvature
+from experiments.demo_hard import gamma_scalar_curvature
 from igad.families import GammaFamily
 
 
@@ -73,7 +78,7 @@ def _scores_one_seed(seed, batch_size, n_normal=100, n_anomaly=50):
     rng_ref = np.random.default_rng(seed + 10000)  # independent RNG for reference pool
 
     theta_ref = GammaFamily.to_natural(ALPHA_REF, BETA_REF)
-    R_ref     = scalar_curvature(GammaFamily.log_partition, theta_ref)
+    R_ref     = gamma_scalar_curvature(theta_ref)
 
     # Fixed reference sample drawn ONCE per seed (size=500)
     ref_sample = rng_ref.gamma(ALPHA_REF, 1.0 / BETA_REF, size=REF_SAMPLE_SIZE)
@@ -99,7 +104,7 @@ def _scores_one_seed(seed, batch_size, n_normal=100, n_anomaly=50):
 
             # ── IGAD ──────────────────────────────────────────────────────
             theta_local = GammaFamily.mle(batch)
-            R_local     = scalar_curvature(GammaFamily.log_partition, theta_local)
+            R_local     = gamma_scalar_curvature(theta_local)
             igad_scores.append(abs(R_ref - R_local))
 
             # ── MLE skewness (CONTROL) ─────────────────────────────────────
@@ -180,10 +185,8 @@ def run_hard_extended():
     control_mu, control_sd = summary["skew_mle"]
     gap = igad_mu - control_mu
     print("Gap (IGAD − MLE skewness): %+.4f" % gap)
-    if gap > 0:
-        print("→ Curvature geometry adds signal BEYOND MLE efficiency alone.")
-    else:
-        print("→ MLE efficiency explains the advantage. Geometry adds nothing here.")
+    print("→ For Gamma the IGAD score is a re-scaling of the MLE skewness;")
+    print("  any gap is how |·| folds the same alpha_hat, not added information.")
     print()
 
 
