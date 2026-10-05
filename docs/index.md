@@ -18,9 +18,9 @@ It should be cited by commit hash and release tag. Later repository changes do n
   <img src="https://img.shields.io/badge/release-IGAD--Ver1.0.0-blue?logo=git&logoColor=white"
        alt="Release IGAD-Ver1.0.0">
 
-  <a href="https://github.com/omryv/IGAD/commit/81dd1eb4540643083854232d9645f6add4150512">
-    <img src="https://img.shields.io/badge/verified%20commit-81dd1eb-6e40c9?logo=github&logoColor=white"
-         alt="Verified commit 81dd1eb">
+  <a href="https://github.com/omryv/IGAD/commit/6fbd779bc70b50f53238fd0cd469b7e8d9451a69">
+    <img src="https://img.shields.io/badge/verified%20commit-6fbd779-6e40c9?logo=github&logoColor=white"
+         alt="Verified commit 6fbd779">
   </a>
 
   <img src="https://img.shields.io/badge/python-3.10%20%7C%203.11%20%7C%203.12-3776ab?logo=python&logoColor=white"
@@ -57,10 +57,11 @@ provenance for release `IGAD-Ver1.0.0`, not as a statement about `main`:
 | Field | Value |
 |------|-------|
 | Release | `IGAD-Ver1.0.0` |
-| Pinned commit | [`81dd1eb4540643083854232d9645f6add4150512`](https://github.com/omryv/IGAD/commit/81dd1eb4540643083854232d9645f6add4150512) |
+| Pinned commit | [`6fbd779bc70b50f53238fd0cd469b7e8d9451a69`](https://github.com/omryv/IGAD/commit/6fbd779bc70b50f53238fd0cd469b7e8d9451a69) |
 | Python versions | 3.10, 3.11, 3.12 |
 | Test result at that commit | 54/54 tests passed |
 | Run | [GitHub Actions](https://github.com/omryv/IGAD/actions/runs/25236119831) |
+| Original hash | `81dd1eb4540643083854232d9645f6add4150512` — the hash this commit had before the October 2026 history rewrite, and the one the Actions run, Zenodo record v1 and PyPI 1.0.2 cite. The file tree is byte-identical (tree `b4c5a4b`). |
 
 ---
 

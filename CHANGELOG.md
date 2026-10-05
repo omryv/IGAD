@@ -49,6 +49,19 @@ the experiment scripts and the claims built on them were wrong.
 - Repository links (README, docs, `pyproject.toml` project URLs) point to
   `github.com/omryv/IGAD`, where the repository now lives.
 
+### History rewritten
+
+Commit authorship and attribution trailers were normalised across the whole
+history, and every tag was moved to its rewritten commit. File contents are
+unchanged apart from one machine-local path in
+`experiments/results/test_status.json`; every rewritten commit and tag has a
+byte-identical tree to the original. Hashes cited externally map as follows:
+
+| Original | Rewritten | Cited by |
+| --- | --- | --- |
+| `81dd1eb` | `6fbd779` | validation run 25236119831, Zenodo v1, PyPI 1.0.2 |
+| `156160d` | `2b31d5f` | release tag `IGAD-VER-1.0.0`, Zenodo v1 |
+
 ### Licence
 
 Relicensed from MIT to the Apache License 2.0 (`LICENSE`, `NOTICE`),

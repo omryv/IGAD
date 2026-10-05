@@ -3,9 +3,9 @@
 **Information-Geometric Anomaly Detection**
 
 
-  <a href="https://github.com/omryv/IGAD/commit/81dd1eb4540643083854232d9645f6add4150512">
-    <img src="https://img.shields.io/badge/verified%20commit-81dd1eb-6e40c9?logo=github&logoColor=white"
-         alt="Verified commit 81dd1eb">
+  <a href="https://github.com/omryv/IGAD/commit/6fbd779bc70b50f53238fd0cd469b7e8d9451a69">
+    <img src="https://img.shields.io/badge/verified%20commit-6fbd779-6e40c9?logo=github&logoColor=white"
+         alt="Verified commit 6fbd779">
   </a>
 </p>
 
@@ -48,7 +48,7 @@ what needs external resources, and the single next action.
 IGAD is currently a verified research artifact.
 
 The implementation baseline is pinned to commit
-[`81dd1eb4540643083854232d9645f6add4150512`](https://github.com/omryv/IGAD/commit/81dd1eb4540643083854232d9645f6add4150512)
+[`6fbd779bc70b50f53238fd0cd469b7e8d9451a69`](https://github.com/omryv/IGAD/commit/6fbd779bc70b50f53238fd0cd469b7e8d9451a69)
 and release `IGAD-Ver1.0.0`.
 
 This repository is public for reproducibility, verification, and independent review.  
